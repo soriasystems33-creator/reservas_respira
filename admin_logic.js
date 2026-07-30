@@ -283,7 +283,7 @@ if(tab==='clients')window.renderClients();
 if(tab==='services_mgmt')window.renderServicesMgmt();
 if(tab==='employees_mgmt')window.renderEmployeesMgmt();
 if(tab==='gastos')window.renderExpenses();
-if(tab==='notifications')renderFridaNotifs();
+if(tab==='notifications')renderLocalNotifs();
 window.render()};
 window.backToMonth=()=>{specialistViewLevel='month';document.getElementById('view-calendar').classList.remove('hidden');document.getElementById('btn-back-to-month').classList.add('hidden');window.render()};
 window.showMonthView=()=>{specialistViewLevel='month';document.getElementById('view-global-day').classList.add('hidden');document.getElementById('view-calendar').classList.remove('hidden');window.render()};
@@ -1114,7 +1114,7 @@ console.log('Guardando config...',up);
 await setDoc(doc(db,'artifacts',AID,'public','data','settings','main'),up,{merge:true});
 alert(`✅ Configuración de ${configEntity.toUpperCase()} guardada.`);
 if(currentTab==='config'){window.renderStandardInputs();renderMonthGrid('config-calendar-body',true)}
-}catch(e){console.error('❌ Error guardando config:',e);alert('❌ ERROR al guardar configuración:\n\n'+e.message+'\n\nCódigo: '+e.code+'\n\nVe a Firebase Console → Firestore → Rules y pon:\nallow read, write: if true;')}};
+}catch(e){console.error('❌ Error guardando config:',e);alert('❌ ERROR al guardar configuración:\n\n'+e.message);}};
 window.openConfigDay=ds=>{
   selectedDayInModal=ds;
   const empEntry=config.specialDays?.[ds]?.[configEntity];
@@ -1809,35 +1809,35 @@ window.sendWhatsapp=(phone,name,date,time)=>{if(!phone)return;let p=phone.replac
 const msg=`Hola ${name}, te recordamos tu cita en UNIR el día ${date} a las ${time}. ¡Te esperamos!`;window.open(`https://wa.me/${p}?text=${encodeURIComponent(msg)}`,'_blank')};
 
 // ── NOTIFICACIONES DE ACTIVIDAD ──
-var g_fridaNotifs=[];
+var g_localNotifs=[];
 
 window.trackNotif=function(r,type){
     if(!r||!r.id)return;
-    var dup=g_fridaNotifs.some(function(n){return n.id===r.id&&n.type===type});
+    var dup=g_localNotifs.some(function(n){return n.id===r.id&&n.type===type});
     if(dup)return;
     var svc=getSvcByName(r.service);
-    g_fridaNotifs.unshift({id:r.id,name:r.clientName||r.name||'Cliente',date:r.date,time:r.time,service:r.service,employee:r.employee,type:type});
-    if(g_fridaNotifs.length>50)g_fridaNotifs.length=50;
-    saveFridaNotifs();
-    renderFridaNotifs();
+    g_localNotifs.unshift({id:r.id,name:r.clientName||r.name||'Cliente',date:r.date,time:r.time,service:r.service,employee:r.employee,type:type});
+    if(g_localNotifs.length>50)g_localNotifs.length=50;
+    saveLocalNotifs();
+    renderLocalNotifs();
 };
 
-function saveFridaNotifs(){
-    try{localStorage.setItem('frida_notifs',JSON.stringify(g_fridaNotifs))}catch(e){}
+function saveLocalNotifs(){
+    try{localStorage.setItem('magic_notifs',JSON.stringify(g_localNotifs))}catch(e){}
 }
-function loadFridaNotifs(){
-    try{var s=localStorage.getItem('frida_notifs');if(s)g_fridaNotifs=JSON.parse(s)}catch(e){}
+function loadLocalNotifs(){
+    try{var s=localStorage.getItem('magic_notifs');if(s)g_localNotifs=JSON.parse(s)}catch(e){}
 }
 
-function renderFridaNotifs(){
+function renderLocalNotifs(){
     var c=document.getElementById('view-notifications-content');
     if(!c)return;
-    if(g_fridaNotifs.length===0){
+    if(g_localNotifs.length===0){
         c.innerHTML='<div class="bg-white p-12 rounded-3xl border text-center"><i data-lucide="bell-off" class="w-12 h-12 text-slate-300 mx-auto mb-4"></i><p class="font-bold text-slate-400 uppercase text-sm">Sin notificaciones</p></div>';
         if(window.lucide)lucide.createIcons();
         return;
     }
-    c.innerHTML=g_fridaNotifs.map(function(r){
+    c.innerHTML=g_localNotifs.map(function(r){
         var dp=r.date?r.date.split('-'):[];
         var fd=dp.length===3?dp[2]+'/'+dp[1]+'/'+dp[0]:'-';
         var icon,bgCol,borderCol,label;
@@ -1852,22 +1852,22 @@ function renderFridaNotifs(){
             '<div class="flex items-center gap-2"><p class="font-extrabold text-sm text-slate-800 truncate">'+(r.name||'Cliente')+'</p><span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded '+bgCol+' text-white">'+label+'</span></div>'+
             '<p class="text-xs font-bold text-slate-500 mt-0.5">'+fd+' · '+r.time+' · '+r.service+(r.employee?' · '+r.employee:'')+'</p>'+
             '</div>'+
-            '<button onclick="event.stopPropagation();dismissMagicNotif(\''+r.id+'\',\''+r.type+'\')" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors shrink-0"><i data-lucide="x" class="w-4 h-4"></i></button>'+
+            '<button onclick="event.stopPropagation();dismissLocalNotif(\''+r.id+'\',\''+r.type+'\')" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors shrink-0"><i data-lucide="x" class="w-4 h-4"></i></button>'+
             '</div>';
     }).join('');
     if(window.lucide)lucide.createIcons();
 }
 
-window.dismissMagicNotif=function(id,type){
-    g_fridaNotifs=g_fridaNotifs.filter(function(n){return!(n.id===id&&n.type===type)});
-    saveFridaNotifs();
-    renderFridaNotifs();
+window.dismissLocalNotif=function(id,type){
+    g_localNotifs=g_localNotifs.filter(function(n){return!(n.id===id&&n.type===type)});
+    saveLocalNotifs();
+    renderLocalNotifs();
 };
 
 // Cargar notificaciones al iniciar
-loadFridaNotifs();
+loadLocalNotifs();
 
-// ---- FIREBASE INIT ----
+// ---- SUPABASE INIT ----
 const init=async()=>{
 setStatus('loading','Iniciando Supabase...');
 try{
@@ -1894,7 +1894,7 @@ setStatus('loading','Desconectado');
 }catch(e){
 console.error('❌ Init error:',e);
 setStatus('error','Error Fatal');
-alert('Error al iniciar Firebase: '+e.message);
+alert('Error al iniciar Supabase: '+e.message);
 }};
 window.doLogin=()=>{var email=document.getElementById('login-email').value.trim();var pass=document.getElementById('login-password').value;var errEl=document.getElementById('login-error');var btn=document.getElementById('login-btn');if(!email||!pass){errEl.textContent='Introduce correo y contraseña';errEl.classList.remove('hidden');return}
 errEl.classList.add('hidden');btn.disabled=true;btn.textContent='Entrando...';signInWithEmailAndPassword(auth,email,pass).then(function(){btn.textContent='Iniciar Sesión';btn.disabled=false}).catch(function(e){var m=e.code||'';if(m.includes('too-many-requests')){errEl.textContent='⚠️ Bloqueado por actividad inusual. Espera 10-15 min o restablece tu contraseña.'}else if(m.includes('wrong-password')||m.includes('user-not-found')||m.includes('invalid-credential')){errEl.textContent='Usuario o contraseña incorrectos'}else{errEl.textContent='Error: '+e.message};errEl.classList.remove('hidden');btn.textContent='Iniciar Sesión';btn.disabled=false})};

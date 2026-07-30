@@ -16,8 +16,12 @@ function _camelToSnake(obj) {
   var out = {};
   for (var k in obj) {
     if (!obj.hasOwnProperty(k)) continue;
-    var snakeKey = k.replace(/[A-Z]/g, function(m, i) { return '_' + m.toLowerCase(); });
-    out[snakeKey] = _camelToSnake(obj[k]);
+    if (k === 'createdAt' || k === 'updatedAt') {
+      out[k] = obj[k];
+    } else {
+      var snakeKey = k.replace(/[A-Z]/g, function(m, i) { return '_' + m.toLowerCase(); });
+      out[snakeKey] = _camelToSnake(obj[k]);
+    }
   }
   return out;
 }
@@ -29,8 +33,12 @@ function _snakeToCamel(obj) {
   var out = {};
   for (var k in obj) {
     if (!obj.hasOwnProperty(k)) continue;
-    var camelKey = k.replace(/_([a-z])/g, function(m, c) { return c.toUpperCase(); });
-    out[camelKey] = _snakeToCamel(obj[k]);
+    if (k === 'createdAt' || k === 'updatedAt') {
+      out[k] = obj[k];
+    } else {
+      var camelKey = k.replace(/_([a-z])/g, function(m, c) { return c.toUpperCase(); });
+      out[camelKey] = _snakeToCamel(obj[k]);
+    }
   }
   return out;
 }

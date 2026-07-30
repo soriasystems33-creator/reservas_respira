@@ -1,7 +1,7 @@
 {
-  "name": "Magic Studio by Katy",
+  "name": "Magic Studio Vicen",
   "short_name": "Magic Studio",
-  "description": "Panel de gestión de citas para Magic Studio Nails",
+  "description": "Panel de gestión de citas para Magic Studio Vicen",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
