@@ -8,6 +8,7 @@ CREATE TABLE appointments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   client_name TEXT NOT NULL,
   client_phone TEXT DEFAULT '',
+  client_email TEXT DEFAULT '',
   services JSONB DEFAULT '[]'::jsonb,
   service TEXT DEFAULT '',
   employee TEXT DEFAULT 'Todas',
