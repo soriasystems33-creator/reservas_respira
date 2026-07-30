@@ -25,6 +25,8 @@ const t2m=t=>{if(!t||typeof t!=='string')return 0;const p=t.split(':').map(Numbe
 const m2t=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
 const esc=s=>typeof s!=='string'?s:s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const statusColors={'pending':'bg-yellow-100 border-yellow-300 text-yellow-800','confirmed':'bg-blue-100 border-blue-300 text-blue-800','completed':'bg-green-100 border-green-300 text-green-800','cancelled':'bg-red-100 border-red-300 text-red-800 opacity-60'};
+const WEBHOOK_URL="https://n8nyt.soriasystems.site/webhook/73794b5a-65e9-494f-bd50-9c461b78d93e";
+const notifyWebhook=(event,data)=>{if(!WEBHOOK_URL)return;try{fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event,...data})})}catch(e){console.error('[webhook]',e)}};
 const setStatus=(s,t)=>{const d=document.getElementById('status-dot');if(d)d.className=`w-2.5 h-2.5 rounded-full ${s==='ok'?'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]':s==='loading'?'bg-yellow-400 animate-pulse':'bg-red-500'}`;const l=document.getElementById('status-text');if(l)l.innerText=t};
 
 
@@ -1786,9 +1788,10 @@ try{var isEdit=!!editingId;let res;if(isEdit){await updateDoc(doc(db,'artifacts'
 else{data.createdAt=new Date().toISOString();if(isCancelled) data.cancelledAt = new Date().toISOString();res=await addDoc(collection(db,'artifacts',AID,'public','data','appointments'),data);data.id=res.id;}
 window.closeModal();
     window.trackNotif(data, 'new');
+    notifyWebhook(isEdit?'modification':'new',data);
 }catch(e){alert("Error: "+e.message)}};
 window.deleteAptFromModal=async(id=null)=>{var tid=id||editingId;if(!tid)return;if(!confirm("¿Eliminar esta cita?"))return;
-try{var apt=appointments.find(function(a){return a.id===tid});if(apt){window.trackNotif({...apt,id:tid,status:'cancelled'},'cancelled');}
+try{var apt=appointments.find(function(a){return a.id===tid});if(apt){window.trackNotif({...apt,id:tid,status:'cancelled'},'cancelled');notifyWebhook('cancellation',{...apt,id:tid});}
 await deleteDoc(doc(db,'artifacts',AID,'public','data','appointments',tid));window.closeModal()}catch(e){alert("Error: "+e.message)}};
 window.cleanPhone=function(el){
     var v=el.value.trim();
@@ -2617,7 +2620,7 @@ window.tpvCharge=async()=>{
         price:total,updatedAt:now.toISOString()
       });
       const apt = appointments.find(a => a.id === tpvLinkedAptId);
-      if(apt) { window.trackNotif({...apt, isPaid:true, status:'completed', id:tpvLinkedAptId, ticketRef:ticketNum}, 'completed'); }
+      if(apt) { window.trackNotif({...apt, isPaid:true, status:'completed', id:tpvLinkedAptId, ticketRef:ticketNum}, 'completed'); notifyWebhook('completed',{...apt,isPaid:true,status:'completed',id:tpvLinkedAptId,ticketRef:ticketNum}); }
     }catch(e){console.error('Error actualizando cita:',e);}
   }
 
