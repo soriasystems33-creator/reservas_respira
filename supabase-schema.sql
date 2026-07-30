@@ -97,6 +97,29 @@ CREATE TABLE blocks (
 );
 
 -- ============================================================
+-- ROW LEVEL SECURITY (RLS) — Permisos para uso con anon key
+-- ============================================================
+-- El panel usa la anon key, así que permitimos acceso completo
+-- a todas las tablas para usuarios anónimos.
+
+ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE services ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
+ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blocks ENABLE ROW LEVEL SECURITY;
+
+-- Políticas: permitir todo (SELECT, INSERT, UPDATE, DELETE) para anónimos
+CREATE POLICY "Allow all for anon" ON appointments FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for anon" ON settings FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for anon" ON services FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for anon" ON categories FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for anon" ON employees FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for anon" ON expenses FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for anon" ON blocks FOR ALL TO anon USING (true) WITH CHECK (true);
+
+-- ============================================================
 -- ÍNDICES RECOMENDADOS
 -- ============================================================
 CREATE INDEX idx_appointments_date ON appointments(date);
