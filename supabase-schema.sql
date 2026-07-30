@@ -156,3 +156,16 @@ CREATE TRIGGER trg_categories_updated_at
 CREATE TRIGGER trg_employees_updated_at
   BEFORE UPDATE ON employees
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- ACTIVAR TIEMPO REAL (SUPABASE REALTIME)
+-- ============================================================
+-- Agrega las tablas a la publicación de replicación para habilitar
+-- actualizaciones en tiempo real de forma automática.
+ALTER PUBLICATION supabase_realtime ADD TABLE appointments;
+ALTER PUBLICATION supabase_realtime ADD TABLE settings;
+ALTER PUBLICATION supabase_realtime ADD TABLE services;
+ALTER PUBLICATION supabase_realtime ADD TABLE categories;
+ALTER PUBLICATION supabase_realtime ADD TABLE employees;
+ALTER PUBLICATION supabase_realtime ADD TABLE expenses;
+ALTER PUBLICATION supabase_realtime ADD TABLE blocks;
