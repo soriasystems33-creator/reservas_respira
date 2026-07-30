@@ -2407,7 +2407,331 @@ document.getElementById('exp-photo-input')?.addEventListener('change',e=>{
 document.getElementById('btn-save-config')?.addEventListener('click',()=>{console.log('btn-save-config clicked');window.saveConfig()});
 document.getElementById('btn-apply-day')?.addEventListener('click',()=>{console.log('btn-apply-day clicked');window.saveConfigDay()});
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║                  TPV — PUNTO DE VENTA                       ║
+// ╚══════════════════════════════════════════════════════════════╝
+var tpvLines=[];          // [{name,price,qty}]
+var tpvPayMethod='cash';  // 'cash' | 'card'
+var tpvLinkedAptId=null;  // id cita vinculada
+var lastTicketData=null;  // último ticket generado
 
+const fmt=n=>n.toFixed(2).replace('.',',');
+
+// ── Abrir / Cerrar ─────────────────────────────────────────────
+window.openTPV=()=>{window.closeSidebar();
+  tpvLines=[];tpvLinkedAptId=null;tpvPayMethod='cash';
+  window.setTab('tpv');
+  // fecha en cabecera
+  const now=new Date();
+  const dl=document.getElementById('tpv-date-label');
+  if(dl)dl.innerText=now.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  // Reset UI
+  const sel=document.getElementById('tpv-apt-select');
+  if(sel){sel.innerHTML='<option value="">— Cobro manual sin cita —</option>';
+    const today=getLD(new Date());
+    const todayApts=appointments.filter(a=>a.date===today&&a.status!=='cancelled'&&!a.isPaid);
+    todayApts.sort((a,b)=>a.time.localeCompare(b.time)).forEach(a=>{
+      const op=document.createElement('option');op.value=a.id;
+      op.textContent=`${a.time} · ${a.clientName||a.name||'?'} · ${a.service||'?'}`;
+      sel.appendChild(op);
+    });
+  }
+  document.getElementById('tpv-client-name').value='';
+  document.getElementById('tpv-client-phone').value='';
+  document.getElementById('tpv-search').value='';
+  document.getElementById('tpv-change-row').classList.add('hidden');
+  document.getElementById('tpv-cash-given').value='';
+  tpvSetPayment('cash');
+  tpvRenderCategories();
+  tpvRenderServices();
+  tpvRenderLines();
+  if(window.lucide)lucide.createIcons();
+};
+
+window.closeTPV=()=>{
+  window.setTab('calendar_all');
+};
+
+// ── Vincular cita seleccionada ──────────────────────────────────
+window.tpvLinkAppointment=()=>{
+  const sel=document.getElementById('tpv-apt-select');
+  tpvLinkedAptId=sel.value||null;
+  if(tpvLinkedAptId){
+    const apt=appointments.find(a=>a.id===tpvLinkedAptId);
+    if(apt){
+      document.getElementById('tpv-client-name').value=apt.clientName||apt.name||'';
+      document.getElementById('tpv-client-phone').value=apt.clientPhone||apt.phone||'';
+      // Añadir el servicio de la cita si no está ya en el ticket
+      if(apt.service&&!tpvLines.find(l=>l.name===apt.service)){
+        tpvLines.push({name:apt.service,price:apt.price||0,qty:1});
+        tpvRenderLines();
+      }
+    }
+  }
+};
+
+// ── Categorías filtro ───────────────────────────────────────────
+var tpvActiveCat='';
+window.tpvRenderCategories=()=>{
+  const c=document.getElementById('tpv-cats');if(!c)return;
+  const cats=['Todos',...categoriesDB.map(x=>x.name)];
+  c.innerHTML=cats.map(cat=>{
+    const active=(cat==='Todos'&&tpvActiveCat==='')||(cat===tpvActiveCat);
+    return `<button onclick="window.tpvFilterCat('${cat==='Todos'?'':cat}')"
+      class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all"
+      style="${active?`background:var(--blue-deep);color:white`:`background:var(--cream-dark);color:var(--brown-mid)`}"
+    >${cat}</button>`;
+  }).join('');
+};
+window.tpvFilterCat=cat=>{tpvActiveCat=cat;tpvRenderCategories();tpvRenderServices()};
+
+// ── Grid de servicios ───────────────────────────────────────────
+window.tpvRenderServices=()=>{
+  const grid=document.getElementById('tpv-services-grid');if(!grid)return;
+  const q=(document.getElementById('tpv-search')?.value||'').toLowerCase().trim();
+  let svcs=servicesDB;
+  if(tpvActiveCat)svcs=svcs.filter(s=>s.category===tpvActiveCat);
+  if(q)svcs=svcs.filter(s=>(s.name||'').toLowerCase().includes(q)||(s.category||'').toLowerCase().includes(q));
+  if(svcs.length===0){grid.innerHTML='<div class="col-span-full py-10 text-center text-xs font-bold uppercase opacity-40" style="color:var(--brown-mid)">Sin servicios</div>';return;}
+  grid.innerHTML=svcs.map(s=>`
+    <button onclick="window.tpvAddService('${s.id}')"
+      class="rounded-xl p-3 md:p-3 text-left shadow-sm border border-transparent hover:shadow-md active:scale-95 transition-all flex flex-col gap-0.5"
+      style="background:white;box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+      <span class="text-[8px] md:text-[10px] font-bold uppercase tracking-widest opacity-60" style="color:var(--brown-mid)">${esc(s.category||'')}</span>
+      <span class="font-black text-[10px] md:text-xs lg:text-sm uppercase leading-tight" style="color:var(--brown)">${esc(s.name)}</span>
+      <span class="text-[11px] md:text-sm lg:text-base font-black mt-auto pt-0.5" style="color:var(--blue-deep)">${fmt(s.price||0)} €</span>
+      <span class="text-[8px] md:text-[10px] font-bold tracking-widest opacity-50" style="color:var(--brown-mid)">${s.duration||0} MIN</span>
+    </button>`).join('');
+};
+
+// ── Añadir servicio al ticket ───────────────────────────────────
+window.tpvAddService=id=>{
+  const svc=getSvcById(id);if(!svc)return;
+  const existing=tpvLines.find(l=>l.name===svc.name);
+  if(existing){existing.qty++;} else {tpvLines.push({name:svc.name,price:svc.price||0,qty:1});}
+  tpvRenderLines();
+};
+
+// ── Render líneas del ticket ────────────────────────────────────
+window.tpvRenderLines=()=>{
+  const lc=document.getElementById('tpv-lines');
+  const empty=document.getElementById('tpv-empty');
+  if(!lc)return;
+  if(tpvLines.length===0){lc.innerHTML='';if(empty)empty.classList.remove('hidden');tpvUpdateTotals();return;}
+  if(empty)empty.classList.add('hidden');
+  lc.innerHTML=tpvLines.map((l,i)=>`
+    <div class="flex items-center gap-3 md:gap-4 bg-white rounded-2xl md:rounded-3xl px-4 py-3 md:px-5 md:py-4 shadow-sm border" style="border-color:var(--brown-light)">
+      <div class="flex-grow min-w-0">
+        <p class="font-black text-[11px] md:text-sm uppercase truncate" style="color:var(--brown)">${esc(l.name)}</p>
+        <div class="flex items-center gap-2 md:gap-3 mt-1 md:mt-2">
+            <input type="number" step="0.01" value="${l.price}" onchange="window.tpvUpdatePrice(${i}, this.value)" 
+                class="w-16 md:w-24 p-1.5 md:p-2 border rounded-lg md:rounded-xl text-[10px] md:text-sm font-bold outline-none text-center" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+            <span class="text-[10px] md:text-xs font-bold opacity-60" style="color:var(--brown-mid)">€ × ${l.qty} = <strong class="text-xs md:text-sm text-slate-800">${fmt(l.price*l.qty)} €</strong></span>
+        </div>
+      </div>
+      <div class="flex items-center gap-1 md:gap-2 shrink-0 bg-slate-50 p-1 md:p-1.5 rounded-xl border" style="border-color:var(--brown-light)">
+        <button onclick="window.tpvQty(${i},-1)" class="w-7 h-7 md:w-9 md:h-9 rounded-lg font-black text-sm md:text-lg flex items-center justify-center hover:bg-slate-200 transition-colors" style="background:var(--cream-dark);color:var(--brown)">−</button>
+        <span class="w-6 md:w-8 text-center font-black text-xs md:text-base">${l.qty}</span>
+        <button onclick="window.tpvQty(${i},1)" class="w-7 h-7 md:w-9 md:h-9 rounded-lg font-black text-sm md:text-lg flex items-center justify-center hover:bg-slate-200 transition-colors" style="background:var(--cream-dark);color:var(--brown)">+</button>
+        <div class="w-px h-6 md:h-8 mx-1 bg-slate-200"></div>
+        <button onclick="window.tpvRemove(${i})" class="w-7 h-7 md:w-9 md:h-9 rounded-lg flex items-center justify-center hover:bg-red-100 transition-colors" style="background:#fff1f2;color:#e05c6a">
+          <i data-lucide="x" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
+        </button>
+      </div>
+    </div>`).join('');
+  tpvUpdateTotals();
+  if(window.lucide)lucide.createIcons();
+};
+
+window.tpvUpdatePrice = (i, newPrice) => {
+    if(!tpvLines[i]) return;
+    tpvLines[i].price = parseFloat(newPrice) || 0;
+    tpvRenderLines();
+};
+
+window.tpvQty=(i,delta)=>{
+  if(!tpvLines[i])return;
+  tpvLines[i].qty+=delta;
+  if(tpvLines[i].qty<=0)tpvLines.splice(i,1);
+  tpvRenderLines();
+};
+window.tpvRemove=i=>{tpvLines.splice(i,1);tpvRenderLines();};
+
+// ── Totales con IVA incluido ────────────────────────────────────
+window.tpvUpdateTotals=()=>{
+  const total=tpvLines.reduce((s,l)=>s+l.price*l.qty,0);
+  const iva=total-(total/1.21);   // IVA incluido en precio
+  const st=document.getElementById('tpv-subtotal');
+  const si=document.getElementById('tpv-iva');
+  const st2=document.getElementById('tpv-total');
+  const btn=document.getElementById('tpv-charge-btn-label');
+  if(st)st.innerText=fmt(total)+' €';
+  if(si)si.innerText=fmt(iva)+' €';
+  if(st2)st2.innerText=fmt(total)+' €';
+  if(btn)btn.innerText=`Cobrar ${fmt(total)} €`;
+  // Actualizar cambio si efectivo
+  if(tpvPayMethod==='cash')window.tpvCalcChange();
+};
+
+// ── Método de pago ──────────────────────────────────────────────
+window.tpvSetPayment=method=>{
+  tpvPayMethod=method;
+  const gold='var(--gold)',blue='var(--blue-deep)';
+  const bc=document.getElementById('btn-pay-cash');
+  const bk=document.getElementById('btn-pay-card');
+  const cr=document.getElementById('tpv-change-row');
+  if(bc)bc.style.cssText=method==='cash'
+    ?`background:var(--gold);color:white;border-color:var(--gold);flex:1;padding:1rem;border-radius:1rem;border-width:2px;font-weight:900;font-size:14px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:all .2s;box-shadow:0 4px 14px rgba(212,175,55,0.4)`
+    :`border-color:var(--gold);color:var(--gold);flex:1;padding:1rem;border-radius:1rem;border-width:2px;font-weight:900;font-size:14px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:all .2s;background:white`;
+  if(bk)bk.style.cssText=method==='card'
+    ?`background:var(--blue-deep);color:white;border-color:var(--blue-deep);flex:1;padding:1rem;border-radius:1rem;border-width:2px;font-weight:900;font-size:14px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:all .2s;box-shadow:0 4px 14px rgba(44,62,80,0.4)`
+    :`border-color:var(--blue-deep);color:var(--blue-deep);flex:1;padding:1rem;border-radius:1rem;border-width:2px;font-weight:900;font-size:14px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:0.5rem;transition:all .2s;background:white`;
+  if(cr)cr.classList.toggle('hidden',method!=='cash');
+  window.tpvCalcChange();
+};
+
+window.tpvCalcChange=()=>{
+  const total=tpvLines.reduce((s,l)=>s+l.price*l.qty,0);
+  const given=parseFloat(document.getElementById('tpv-cash-given')?.value)||0;
+  const disp=document.getElementById('tpv-change-display');
+  if(disp)disp.innerText=`Cambio: ${fmt(Math.max(0,given-total))} €`;
+};
+
+// ── COBRAR ──────────────────────────────────────────────────────
+window.tpvCharge=async()=>{
+  if(tpvLines.length===0)return alert('Añade al menos un servicio.');
+  const total=tpvLines.reduce((s,l)=>s+l.price*l.qty,0);
+  const iva=total-(total/1.21);
+  const clientName=document.getElementById('tpv-client-name').value.trim();
+  const clientPhone=document.getElementById('tpv-client-phone').value.replace(/^\+34/,'').replace(/[\s\-\(\)\.]/g,'');
+  const now=new Date();
+  const dateStr=getLD(now);
+  const timeStr=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const ticketNum='TKT-'+dateStr.replace(/-/g,'')+'-'+Math.floor(Math.random()*10000).toString().padStart(4,'0');
+
+  // 1. Si hay cita vinculada → marcarla como pagada y completada
+  if(tpvLinkedAptId){
+    try{
+      await updateDoc(doc(db,'artifacts',AID,'public','data','appointments',tpvLinkedAptId),{
+        isPaid:true,status:'completed',
+        price:total,updatedAt:now.toISOString()
+      });
+      const apt = appointments.find(a => a.id === tpvLinkedAptId);
+      if(apt) { window.trackNotif({...apt, isPaid:true, status:'completed', id:tpvLinkedAptId, ticketRef:ticketNum}, 'completed'); }
+    }catch(e){console.error('Error actualizando cita:',e);}
+  }
+
+  // 2. Guardar cada línea en contabilidad
+  try{
+    for(const line of tpvLines){
+      const lineTotal=line.price*line.qty;
+      const lineIva=lineTotal-(lineTotal/1.21);
+      await addDoc(collection(db,'artifacts',AID,'public','data','appointments'),{
+        clientName:clientName||'Cobro TPV',clientPhone:clientPhone||'',
+        service:line.name,employee:'TPV',
+        date:dateStr,time:timeStr,duration:0,
+        price:lineTotal,isPaid:true,status:'completed',
+        payMethod:tpvPayMethod,ticketRef:ticketNum,
+        ivaAmount:parseFloat(lineIva.toFixed(2)),
+        ivaRate:21,
+        createdAt:now.toISOString(),updatedAt:now.toISOString(),
+        _tpvEntry:true
+      });
+    }
+  }catch(e){console.error('Error guardando contabilidad:',e);}
+
+  // 3. Generar ticket y mostrarlo
+  lastTicketData={ticketNum,clientName,clientPhone,lines:tpvLines,total,iva,payMethod:tpvPayMethod,dateStr,timeStr,now};
+  window.tpvShowTicket(lastTicketData);
+};
+
+// ── Mostrar ticket ──────────────────────────────────────────────
+window.tpvShowTicket=(d)=>{
+  const linesHtml=d.lines.map(l=>`
+    <div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed #e0d8d5">
+      <span>${esc(l.name)} × ${l.qty}</span>
+      <span>${fmt(l.price*l.qty)} €</span>
+    </div>`).join('');
+  const tc=document.getElementById('ticket-content');
+  if(tc)tc.innerHTML=`
+    <div style="text-align:center;padding-bottom:12px;border-bottom:2px solid #e0d8d5">
+      <p style="font-size:18px;font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:700;color:#2e2826">UNIR</p>
+    </div>
+    <div style="font-size:9px;color:#7a6b67;padding:8px 0;border-bottom:1px dashed #e0d8d5">
+      <div style="display:flex;justify-content:space-between"><span>Ticket:</span><strong>${d.ticketNum}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>Fecha:</span><span>${d.dateStr}</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Hora:</span><span>${d.timeStr}</span></div>
+      ${d.clientName?`<div style="display:flex;justify-content:space-between"><span>Cliente:</span><span>${esc(d.clientName)}</span></div>`:''}
+    </div>
+    <div style="padding:8px 0;border-bottom:2px solid #e0d8d5;font-size:9px">
+      ${linesHtml}
+    </div>
+    <div style="padding:8px 0;font-size:9px;color:#7a6b67">
+      <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span>${fmt(d.total)} €</span></div>
+      <div style="display:flex;justify-content:space-between"><span>IVA incluido (21%)</span><span>${fmt(d.iva)} €</span></div>
+      <div style="display:flex;justify-content:space-between;padding-top:6px;border-top:1px dashed #e0d8d5;font-size:13px;font-weight:900;color:#2e2826">
+        <span>TOTAL</span><span>${fmt(d.total)} €</span>
+      </div>
+      <div style="text-align:right;font-size:9px;margin-top:4px;color:#7a6b67">${d.payMethod==='cash'?'💵 Efectivo':'💳 Tarjeta'}</div>
+    </div>
+    <div style="text-align:center;padding-top:10px;font-size:9px;color:#7a6b67;border-top:1px dashed #e0d8d5">
+      <p>Gracias por tu visita 💛</p>
+      <p style="font-size:8px;margin-top:2px">Los precios incluyen el 21% de IVA</p>
+      <p style="font-size:8px">Este documento sirve como justificante de pago</p>
+      <p style="font-size:8px">Este documento sirve como justificante de pago</p>
+    </div>`;
+  const tm=document.getElementById('ticket-modal');
+  if(tm)tm.style.display='flex';
+  if(window.lucide)lucide.createIcons();
+};
+
+// ── WhatsApp ────────────────────────────────────────────────────
+window.tpvSendWhatsapp=()=>{
+  if(!lastTicketData)return;
+  let phone=lastTicketData.clientPhone||document.getElementById('tpv-client-phone')?.value||'';
+  phone=phone.replace(/\D/g,'');
+  if(!phone||phone.length<9){
+    phone=prompt('Introduce el teléfono de la clienta (sin prefijo, 9 dígitos):','');
+    if(!phone)return;
+    phone=phone.replace(/\D/g,'');
+  }
+  if(!phone.startsWith('34')&&phone.length===9)phone='34'+phone;
+  const d=lastTicketData;
+  const lines=d.lines.map(l=>`  • ${l.name} × ${l.qty}  →  ${fmt(l.price*l.qty)} €`).join('\n');
+  const msg=
+`🌸 *UNIR* 🌸
+─────────────────────
+🧾 Ticket: ${d.ticketNum}
+📅 ${d.dateStr} · ${d.timeStr}
+${d.clientName?`👤 ${d.clientName}\n`:''}
+*Servicios:*
+${lines}
+
+─────────────────────
+💰 *TOTAL: ${fmt(d.total)} €* (IVA 21% incluido)
+${d.payMethod==='cash'?'💵 Pagado en efectivo':'💳 Pagado con tarjeta'}
+
+¡Gracias por tu visita! 💛`;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
+};
+
+// ── Imprimir ────────────────────────────────────────────────────
+window.tpvPrintTicket=()=>{
+  const content=document.getElementById('ticket-content');
+  if(!content)return;
+  const win=window.open('','_blank','width=400,height=600');
+  win.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>Ticket UNIR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box;font-family:'Nunito',monospace;font-size:11px}
+      body{padding:12px;max-width:300px;margin:0 auto;background:white}
+      @media print{body{margin:0}}
+    </style>
+  </head><body>${content.innerHTML}<script>window.onload=()=>{window.print();setTimeout(()=>window.close(),500)}<\/script></body></html>`);
+  win.document.close();
+};
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║              EXPORTACIÓN EXCEL PARA GESTOR                  ║
