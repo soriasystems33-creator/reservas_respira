@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="UNIR Gestión">
-    <meta name="theme-color" content="#5b8f7a">
+    <meta name="theme-color" content="#7c3aed">
     <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,11 +35,12 @@
     <style>
         :root{
             --cream:#faf7f4; --cream-dark:#f0ebe6;
-            --blue:#c8dde6; --blue-mid:#8fb8ca; --blue-deep:#5b8fa0;
+            --blue:#ede9fe; --blue-mid:#a78bfa; --blue-deep:#7c3aed;
+            --sidebar-bg:#f3e8fd;
             --rose:#d4a0a7; --rose-light:#f5e8ea;
             --brown:#2e2826; --brown-mid:#7a6b67; --brown-light:#e0d8d5;
             --gold:#c9a96e;
-            --sidebar-bg:#daeaef;
+            --sidebar-bg:#f3e8fd;
         }
         *{font-family:'Nunito',sans-serif;}
         h1,h2,h3,.font-serif{font-family:'Cormorant Garamond',serif;}
@@ -702,7 +703,7 @@
             <h3 id="employee-modal-title" class="font-serif italic font-semibold text-xl" style="color:var(--brown)">Nueva Empleada</h3>
             <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Nombre</label><input type="text" id="emp-name" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
             <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Especialidad</label><select id="emp-specialty" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></select></div>
-            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Color identificativo</label><input type="color" id="emp-color" value="#8fb8ca" class="w-full h-10 border rounded-xl cursor-pointer" style="border-color:var(--brown-light)"></div>
+            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Color identificativo</label><input type="color" id="emp-color" value="#a78bfa" class="w-full h-10 border rounded-xl cursor-pointer" style="border-color:var(--brown-light)"></div>
             <div class="flex gap-3 pt-4" style="border-top:1px solid var(--brown-light)">
                 <button onclick="document.getElementById('employee-modal').classList.add('hidden')" class="flex-1 py-3 border rounded-2xl font-semibold uppercase text-xs" style="color:var(--brown-mid);border-color:var(--brown-light)">Cancelar</button>
                 <button onclick="window.saveEmployee()" class="flex-1 py-3 rounded-2xl shadow-md font-semibold uppercase text-xs text-white" style="background:var(--blue-deep)">Guardar</button>

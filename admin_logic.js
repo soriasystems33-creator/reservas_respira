@@ -305,7 +305,7 @@ try{
     const container=document.getElementById('timeline-container');
     if(!container)return;
 
-    const empColor=emp.color||'#5b8f7a';
+    const empColor=emp.color||'#7c3aed';
     const dc=getDailyConfig(ds,emp.name);
 
     // Horario del día
@@ -525,7 +525,7 @@ const dayApts=appointments
 
 // ── SINGLE EMPLOYEE — Google Calendar style ───────────────────────────────
 if(empFilter){
-  const emp=employeesDB.find(e=>e.name===empFilter)||{name:empFilter,color:'#5b8f7a'};
+  const emp=employeesDB.find(e=>e.name===empFilter)||{name:empFilter,color:'#7c3aed'};
   const dc=getDailyConfig(ds,emp.name);
   const openStr=dc.type==='closed'?'09:00':(dc.start||config.start||'09:00');
   const closeStr=dc.type==='closed'?'20:00':(dc.end||config.end||'20:00');
@@ -533,7 +533,7 @@ if(empFilter){
   const endH=Math.ceil(parseInt(closeStr.split(':')[0],10)+(parseInt(closeStr.split(':')[1]||'0',10)>0?1:0));
   const PX=64; // px per hour
   const totalPx=(endH-startH)*PX;
-  const empColor=emp.color||'#5b8f7a';
+  const empColor=emp.color||'#7c3aed';
   const empApts=dayApts.filter(function(a){return empInApt(a,emp.name)});
   const empBlocks=window.loadBlocksForDate(ds,emp.name);
   const empOverride = config.specialDays?.[ds]?.[emp.id] || config.specialDays?.[ds]?.[emp.name];
@@ -749,7 +749,7 @@ window.renderMultiEmpTimeline = (ds, dayApts, container) => {
   employeesDB.forEach(emp => {
     html += `<div style="flex:1;text-align:center;border-left:1px solid #e0d8d5">
       <div style="display:inline-flex;align-items:center;gap:6px">
-        <div style="width:10px;height:10px;border-radius:50%;background:${emp.color||'#5b8f7a'}"></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:${emp.color||'#7c3aed'}"></div>
         <span style="font-size:12px;font-weight:800;color:#2e2826;text-transform:uppercase">${esc(emp.name)}</span>
       </div>
     </div>`;
@@ -805,7 +805,7 @@ window.renderMultiEmpTimeline = (ds, dayApts, container) => {
       const topPx=(aptM-sm2)/60*PX;
       const hPx=Math.max(dur/60*PX-2,20);
       let bg,bord;
-      const empColor = emp.color || '#5b8f7a';
+      const empColor = emp.color || '#7c3aed';
       if(apt.status==='cancelled'){bg='#fef2f2';bord='#ef4444';}
       else if(apt.status==='completed'){bg='#f0fdf4';bord='#22c55e';}
       else if(apt.status==='confirmed'){bg=empColor+'20';bord=empColor;}
