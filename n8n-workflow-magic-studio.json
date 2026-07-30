@@ -1,0 +1,540 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "getAll",
+        "projectId": "crm-lqf-2026",
+        "collection": "=artifacts/magic-studio-default/public/data/appointments",
+        "returnAll": true
+      },
+      "id": "1d94d471-0b96-4d46-b672-33c6b84826e6",
+      "name": "Firestore - Obtener Citas (Ayer)2",
+      "type": "n8n-nodes-base.googleFirebaseCloudFirestore",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        2704
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "ovzhJx6VZgJHFXIf",
+          "name": "Katy Firebase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.clientEmail }}",
+        "subject": "✨ ¿Qué tal tu experiencia en Magic Studio?",
+        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div style=\"max-width:600px;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">by Katy</p>\n        </div>\n        <div style=\"padding:45px 40px;text-align:center;\">\n            <div style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Av de Mariano Vicén, 7 · 42003 Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 40 03 98</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a1a;\">¡Hola, {{ $json.clientName }}!</h2>\n            <p style=\"font-size:16px;line-height:1.7;color:#44403c;margin-bottom:15px;\">Esperamos que disfrutaras de tu <strong style=\"color:#1a1a1a;\">{{ $json.service }}</strong>.</p>\n            <p style=\"font-size:15px;line-height:1.7;color:#78716c;margin-bottom:35px;\">¿Te tomas un minuto para valorarnos?</p>\n            <div style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:20px;padding:40px 30px;margin-bottom:35px;\">\n                <p style=\"margin:0 0 20px 0;font-size:15px;color:#1a1a1a;font-weight:600;\">¿Cómo fue tu experiencia?</p>\n                <div style=\"font-size:24px;color:#c9a96e;margin-bottom:30px;letter-spacing:8px;\">★ ★ ★ ★ ★</div>\n                <a href=\"https://g.page/r/CZ2KyrZFA9xwEBM/review\" style=\"display:inline-block;padding:15px 40px;background:#1a1a1a;color:#c9a96e;text-decoration:none;border-radius:50px;font-weight:bold;font-size:13px;text-transform:uppercase;letter-spacing:1px;border:1px solid #c9a96e;\">Dejar mi reseña</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://magic-nails-reservas.vercel.app\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio by Katy</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Av de Mariano Vicén, 7 · 42003 Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 40 03 98</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "0ab9cfc6-2310-4e38-beac-d0f281f55b0a",
+      "name": "Email - Pedir Reseña2",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        2688
+      ],
+      "webhookId": "b66f78b3-8e5c-4d64-bba7-ae3fec4e6794",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6jQSY3sPZd4AHnwE",
+          "name": "Katy Recordatorios"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 12
+            }
+          ]
+        }
+      },
+      "id": "825c069b-5478-437f-8baf-d19c3e8ff096",
+      "name": "Cada día a las 12:2",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -496,
+        2704
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.date }}",
+              "value2": "={{ $now.minus({days: 1}).toISODate() }}"
+            }
+          ]
+        }
+      },
+      "id": "12fb24c2-4225-4b1c-b78b-f219be6623f7",
+      "name": "Filtrar: Citas de Ayer2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        2704
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "a800272b-84dc-4eb1-8fde-a5f784799df3",
+      "name": "Cada mañana a las 8:3",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -496,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "73794b5a-65e9-494f-bd50-9c461b78d93e",
+        "options": {}
+      },
+      "id": "f07fe23c-f66b-4c9d-9fa3-9534aaa9f0b9",
+      "name": "Webhook - Eventos2",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -512,
+        2448
+      ],
+      "webhookId": "73794b5a-65e9-494f-bd50-9c461b78d93e"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.item.json.body || $input.item.json;\nreturn { json: { ...raw } };"
+      },
+      "id": "ae870132-20db-4772-8d3d-02b7d0724376",
+      "name": "Normalizar Payload2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        2448
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event }}",
+              "value2": "completed"
+            }
+          ]
+        }
+      },
+      "id": "6b1d2fc0-f532-402f-b08f-4e4b76c0bcb2",
+      "name": "¿Es pago completado?2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        2272
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.clientEmail }}",
+        "subject": "🧾 Factura - Magic Studio",
+        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body style=\"margin:0;padding:0;background:#f3f4f6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div style=\"max-width:520px;margin:30px auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 25px 40px -12px rgba(0,0,0,0.15);\">\n        <div style=\"background:#1a1a1a;padding:32px;text-align:center;border-bottom:3px solid #c9a96e;\">\n            <p style=\"color:#c9a96e;margin:0;font-size:22px;font-weight:700;font-family:Georgia,serif;letter-spacing:3px;text-transform:uppercase;\">Magic Studio</p>\n            <p style=\"color:#a1a1aa;margin:6px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:4px;\">by Katy</p>\n        </div>\n        <div style=\"padding:36px;\">\n            <div style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Av de Mariano Vicén, 7 · 42003 Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 40 03 98</p>\n            </div>\n            <div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;\">\n                <h2 style=\"font-size:18px;font-weight:800;color:#1a1a1a;margin:0;\">FACTURA</h2>\n                <span style=\"font-size:10px;color:#78716c;font-weight:600;background:#f3f4f6;padding:4px 12px;border-radius:20px;\">{{ $json.date }}</span>\n            </div>\n            <div style=\"border-bottom:2px dashed #e5e7eb;padding-bottom:16px;margin-bottom:16px;\">\n                <p style=\"margin:0;font-size:14px;font-weight:700;color:#1a1a1a;\">{{ $json.clientName }}</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#78716c;\">{{ $json.clientPhone }}</p>\n            </div>\n            <table style=\"width:100%;border-collapse:collapse;font-size:13px;\">\n                <tr style=\"background:#f9fafb;\">\n                    <th style=\"text-align:left;padding:10px 0;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#78716c;border-bottom:1px solid #e5e7eb;\">Concepto</th>\n                    <th style=\"text-align:center;padding:10px 0;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#78716c;border-bottom:1px solid #e5e7eb;\">Especialista</th>\n                    <th style=\"text-align:right;padding:10px 0;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#78716c;border-bottom:1px solid #e5e7eb;\">Importe</th>\n                </tr>\n                <tr>\n                    <td style=\"padding:14px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#1a1a1a;\">{{ $json.service }}</td>\n                    <td style=\"padding:14px 0;border-bottom:1px solid #f3f4f6;text-align:center;color:#78716c;\">{{ $json.employee }}</td>\n                    <td style=\"padding:14px 0;border-bottom:1px solid #f3f4f6;text-align:right;font-weight:700;color:#1a1a1a;\">{{ $json.price }}€</td>\n                </tr>\n            </table>\n            <div style=\"margin-top:16px;padding-top:16px;border-top:2px solid #1a1a1a;display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:#1a1a1a;\">\n                <span>TOTAL</span>\n                <span>{{ $json.price }}€</span>\n            </div>\n            <div style=\"margin-top:8px;text-align:right;font-size:10px;color:#22c55e;font-weight:700;\">✓ Pagado</div>\n            <div style=\"margin-top:28px;padding-top:16px;border-top:1px solid #e5e7eb;text-align:center;\">\n                <a href=\"https://magic-nails-reservas.vercel.app\" style=\"display:inline-block;padding:12px 28px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;\">Reservar de nuevo</a>\n                <div style=\"font-size:10px;color:#a8a29e;line-height:1.6;\">\n                <p style=\"margin:0;\">Magic Studio by Katy · Av de Mariano Vicén, 7 · 42003 Soria</p>\n                <p style=\"margin:2px 0 0;font-size:10px;color:#a8a29e;\">📞 623 40 03 98</p>\n                <p style=\"margin:2px 0 0;\">{{ $json.date }} · {{ $json.time }}</p>\n            </div>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "b251a70b-51b4-4876-9b1c-d56a6083aafc",
+      "name": "Email - Factura2",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        2208
+      ],
+      "webhookId": "d070e2fd-dbef-4975-bdf2-0213c319423d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6jQSY3sPZd4AHnwE",
+          "name": "Katy Recordatorios"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event }}",
+              "value2": "new"
+            }
+          ]
+        }
+      },
+      "id": "596d64fc-290c-4d79-9129-7759a878e8ba",
+      "name": "¿Es nueva?2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        160,
+        2400
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.clientEmail }}",
+        "subject": "✨ Confirmación de tu cita en Magic Studio",
+        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div style=\"max-width:600px;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">by Katy</p>\n        </div>\n        <div style=\"padding:45px 40px;\">\n            <div style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Av de Mariano Vicén, 7 · 42003 Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 40 03 98</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a1a;text-align:center;\">¡Hola, {{ $json.clientName }}!</h2>\n            <p style=\"font-size:16px;line-height:1.7;color:#44403c;text-align:center;margin-bottom:30px;\">Tu cita para <strong style=\"color:#1a1a1a;\">{{ $json.service }}</strong> ha sido confirmada. ¡Te esperamos!</p>\n            <div style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:20px;padding:30px;margin-bottom:35px;\">\n                <p style=\"margin:0 0 15px 0;font-size:11px;color:#c9a96e;font-weight:700;text-transform:uppercase;letter-spacing:2px;text-align:center;\">Detalles de tu cita</p>\n                <table style=\"width:100%;border-collapse:collapse;font-size:15px;\">\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Fecha</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.date }}</td></tr>\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Hora</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:700;color:#c9a96e;font-size:18px;\">{{ $json.time }}h</td></tr>\n                    <tr><td style=\"padding:10px 0;color:#78716c;\">Especialista</td><td style=\"padding:10px 0;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.employee }}</td></tr>\n                </table>\n            </div>\n            <p style=\"font-size:14px;color:#78716c;margin-bottom:10px;text-align:center;\">Importe: <strong style=\"color:#1a1a1a;\">{{ $json.price }}€</strong> (pago en estudio)</p>\n            <div style=\"border-top:1px solid #f5f5f4;padding-top:30px;text-align:center;\">\n                <p style=\"font-size:13px;color:#78716c;margin-bottom:20px;\">¿Necesitas cambios o cancelar?</p>\n                <a href=\"https://magic-nails-reservas.vercel.app/modificar?id={{ $json.id }}\" style=\"display:inline-block;padding:14px 28px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:4px;\">Modificar</a>\n                <a href=\"https://magic-nails-reservas.vercel.app/cancelar?id={{ $json.id }}&cancel=1\" style=\"display:inline-block;padding:13px 27px;background:transparent;color:#ef4444;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #ef4444;margin:4px;\">Cancelar</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://magic-nails-reservas.vercel.app\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio by Katy</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Av de Mariano Vicén, 7 · 42003 Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 40 03 98</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "01f2633f-b878-425e-87a9-de51832e1ec5",
+      "name": "Email - Confirmación Nueva2",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        2336
+      ],
+      "webhookId": "7e64ddf5-3067-4c8c-acc9-dbc794092898",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6jQSY3sPZd4AHnwE",
+          "name": "Katy Recordatorios"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event }}",
+              "value2": "cancellation"
+            }
+          ]
+        }
+      },
+      "id": "2cd51300-21b0-44f2-8b6f-c6eea5781a1a",
+      "name": "¿Es cancelación?2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        384,
+        2512
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.clientEmail }}",
+        "subject": "❌ Cita cancelada - Magic Studio",
+        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div style=\"max-width:600px;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">by Katy</p>\n        </div>\n        <div style=\"padding:45px 40px;\">\n            <div style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Av de Mariano Vicén, 7 · 42003 Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 40 03 98</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a1a;text-align:center;\">Cita cancelada, {{ $json.clientName }}</h2>\n            <p style=\"font-size:16px;line-height:1.7;color:#44403c;text-align:center;margin-bottom:30px;\">Hemos procesado la cancelación de tu cita:</p>\n            <div style=\"background:#fff5f5;border:1px solid #fecaca;border-left:4px solid #ef4444;border-radius:20px;padding:30px;margin-bottom:35px;\">\n                <table style=\"width:100%;border-collapse:collapse;font-size:15px;\">\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Servicio</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.service }}</td></tr>\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Fecha</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.date }}</td></tr>\n                    <tr><td style=\"padding:10px 0;color:#78716c;\">Hora</td><td style=\"padding:10px 0;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.time }}h</td></tr>\n                </table>\n            </div>\n            <p style=\"font-size:14px;color:#78716c;text-align:center;\">Si deseas una nueva cita, escríbenos por WhatsApp al 623 40 03 98.</p>\n            <div style=\"text-align:center;margin-top:25px;\">\n                <a href=\"https://magic-nails-reservas.vercel.app\" style=\"display:inline-block;padding:14px 32px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:12px;text-transform:uppercase;letter-spacing:1px;\">Reservar de nuevo</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://magic-nails-reservas.vercel.app\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio by Katy</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Av de Mariano Vicén, 7 · 42003 Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 40 03 98</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "418a361b-fac6-4e83-89d1-29b80cc3b71d",
+      "name": "Email - Cancelación2",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        2576
+      ],
+      "webhookId": "495e80cc-29fa-4937-a288-05ebe31a2291",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6jQSY3sPZd4AHnwE",
+          "name": "Katy Recordatorios"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event }}",
+              "value2": "modification"
+            }
+          ]
+        }
+      },
+      "id": "49fa0314-c5f7-4e25-9931-69daaefff1a3",
+      "name": "¿Es modificación?2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        608,
+        2416
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.clientEmail }}",
+        "subject": "✏️ Tu cita en Magic Studio ha sido actualizada",
+        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div style=\"max-width:600px;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">by Katy</p>\n        </div>\n        <div style=\"padding:45px 40px;\">\n            <div style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Av de Mariano Vicén, 7 · 42003 Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 40 03 98</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a1a;text-align:center;\">Tu cita ha sido actualizada</h2>\n            <p style=\"font-size:16px;line-height:1.7;color:#44403c;text-align:center;margin-bottom:30px;\">Hola, <strong>{{ $json.clientName }}</strong>. Los datos de tu cita han cambiado:</p>\n            <div style=\"background:#fffbeb;border:1px solid #c9a96e;border-left:4px solid #f59e0b;border-radius:20px;padding:30px;margin-bottom:35px;\">\n                <table style=\"width:100%;border-collapse:collapse;font-size:15px;\">\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Servicio</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.service }}</td></tr>\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Fecha</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.date }}</td></tr>\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Hora</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:700;color:#f59e0b;font-size:18px;\">{{ $json.time }}h</td></tr>\n                    <tr><td style=\"padding:10px 0;color:#78716c;\">Especialista</td><td style=\"padding:10px 0;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.employee }}</td></tr>\n                </table>\n            </div>\n            <div style=\"border-top:1px solid #f5f5f4;padding-top:30px;text-align:center;\">\n                <p style=\"font-size:13px;color:#78716c;margin-bottom:20px;\">¿Necesitas cambios o cancelar?</p>\n                <a href=\"https://magic-nails-reservas.vercel.app/modificar?id={{ $json.id }}\" style=\"display:inline-block;padding:14px 28px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:4px;\">Modificar</a>\n                <a href=\"https://magic-nails-reservas.vercel.app/cancelar?id={{ $json.id }}&cancel=1\" style=\"display:inline-block;padding:13px 27px;background:transparent;color:#ef4444;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #ef4444;margin:4px;\">Cancelar</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://magic-nails-reservas.vercel.app\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio by Katy</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Av de Mariano Vicén, 7 · 42003 Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 40 03 98</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "f1bfa7f3-5b00-415c-af26-9db4daabc077",
+      "name": "Email - Modificación2",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        2352
+      ],
+      "webhookId": "7ac4c9f1-8425-4aa3-84ef-ae8083c7ae60",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6jQSY3sPZd4AHnwE",
+          "name": "Katy Recordatorios"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "getAll",
+        "projectId": "crm-lqf-2026",
+        "collection": "=artifacts/magic-studio-default/public/data/appointments",
+        "returnAll": true
+      },
+      "id": "283939b4-493e-4bd8-af8e-8dbd7fca31e7",
+      "name": "Firestore - Obtener Citas2",
+      "type": "n8n-nodes-base.googleFirebaseCloudFirestore",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        2928
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "ovzhJx6VZgJHFXIf",
+          "name": "Katy Firebase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst offset = now.getTimezoneOffset();\nconst madridOffset = 120; // CEST (UTC+2)\nconst diff = offset + madridOffset;\nconst local = new Date(now.getTime() + diff * 60000);\nlocal.setDate(local.getDate() + 1);\nconst dateStr = local.getFullYear() + '-' +\n  String(local.getMonth() + 1).padStart(2, '0') + '-' +\n  String(local.getDate()).padStart(2, '0');\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  const id = apt._id || apt.id;\n  if (!id) return;\n  apt.id = id;\n  if (!apt.clientEmail) return;\n  if (apt.status === 'cancelled' || apt.status === 'noshow') return;\n  if (apt.date !== dateStr) return;\n  result.push({ json: apt });\n});\nreturn result;"
+      },
+      "id": "62adeebf-141c-452c-8ad6-a224a1ec52b9",
+      "name": "Filtrar Citas de Mañana2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.clientEmail }}",
+        "subject": "✨ Recordatorio: Tu cita de mañana en Magic Studio",
+        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div style=\"max-width:600px;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">by Katy</p>\n        </div>\n        <div style=\"padding:45px 40px;\">\n            <div style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Av de Mariano Vicén, 7 · 42003 Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 40 03 98</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:15px;color:#1a1a1a;text-align:center;\">¡Mañana te esperamos!</h2>\n            <p style=\"font-size:15px;line-height:1.6;color:#44403c;text-align:center;margin-bottom:30px;\">Hola <strong>{{ $json.clientName }}</strong>, te recordamos tu cita:</p>\n            <div style=\"background:#1a1a1a;border-radius:20px;padding:30px;margin-bottom:35px;color:#fff;\">\n                <p style=\"margin:0 0 20px 0;font-size:10px;color:#c9a96e;font-weight:700;text-transform:uppercase;letter-spacing:2px;text-align:center;\">Confirmación de Horario</p>\n                <table style=\"width:100%;border-collapse:collapse;font-size:15px;\">\n                    <tr><td style=\"padding:10px 0;color:#a1a1aa;\">Tratamiento</td><td style=\"padding:10px 0;text-align:right;font-weight:600;color:#fff;\">{{ $json.service }}</td></tr>\n                    <tr><td style=\"padding:10px 0;color:#a1a1aa;\">Hora</td><td style=\"padding:10px 0;text-align:right;font-weight:700;color:#c9a96e;font-size:18px;\">{{ $json.time }}h</td></tr>\n                </table>\n            </div>\n            <div style=\"text-align:center;\">\n                <a href=\"https://magic-nails-reservas.vercel.app\" style=\"display:inline-block;padding:12px 25px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:4px;\">Reservar cita</a>\n                <a href=\"https://magic-nails-reservas.vercel.app/modificar?id={{ $json.id }}\" style=\"display:inline-block;padding:14px 28px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:4px;\">Modificar</a>\n                <a href=\"https://magic-nails-reservas.vercel.app/cancelar?id={{ $json.id }}&cancel=1\" style=\"display:inline-block;padding:11px 25px;background:transparent;color:#ef4444;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #ef4444;margin:4px;\">Anular</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://magic-nails-reservas.vercel.app\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio by Katy</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Av de Mariano Vicén, 7 · 42003 Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 40 03 98</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "b8485c94-a2ae-4f52-8ef4-b46d1523fa79",
+      "name": "Email - Recordatorio2",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        176,
+        2928
+      ],
+      "webhookId": "337122c7-abca-4175-9d17-300164205c97",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6jQSY3sPZd4AHnwE",
+          "name": "Katy Recordatorios"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Firestore - Obtener Citas (Ayer)2": {
+      "main": [
+        [
+          {
+            "node": "Filtrar: Citas de Ayer2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cada día a las 12:2": {
+      "main": [
+        [
+          {
+            "node": "Firestore - Obtener Citas (Ayer)2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar: Citas de Ayer2": {
+      "main": [
+        [
+          {
+            "node": "Email - Pedir Reseña2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cada mañana a las 8:3": {
+      "main": [
+        [
+          {
+            "node": "Firestore - Obtener Citas2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Eventos2": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Payload2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Payload2": {
+      "main": [
+        [
+          {
+            "node": "¿Es pago completado?2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es pago completado?2": {
+      "main": [
+        [
+          {
+            "node": "Email - Factura2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "¿Es nueva?2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es nueva?2": {
+      "main": [
+        [
+          {
+            "node": "Email - Confirmación Nueva2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "¿Es cancelación?2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es cancelación?2": {
+      "main": [
+        [
+          {
+            "node": "Email - Cancelación2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "¿Es modificación?2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es modificación?2": {
+      "main": [
+        [
+          {
+            "node": "Email - Modificación2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firestore - Obtener Citas2": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Citas de Mañana2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Citas de Mañana2": {
+      "main": [
+        [
+          {
+            "node": "Email - Recordatorio2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1f20af6484e867d032857a1d4b47feed5a47287b3ff16a2cb91c5cd653183432"
+  }
+}

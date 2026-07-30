@@ -9,6 +9,32 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 var supabase, db, auth;
 
+// ── HELPER: convertir camelCase a snake_case ──
+function _camelToSnake(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(_camelToSnake);
+  var out = {};
+  for (var k in obj) {
+    if (!obj.hasOwnProperty(k)) continue;
+    var snakeKey = k.replace(/[A-Z]/g, function(m, i) { return '_' + m.toLowerCase(); });
+    out[snakeKey] = _camelToSnake(obj[k]);
+  }
+  return out;
+}
+
+// ── HELPER: convertir snake_case a camelCase ──
+function _snakeToCamel(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(_snakeToCamel);
+  var out = {};
+  for (var k in obj) {
+    if (!obj.hasOwnProperty(k)) continue;
+    var camelKey = k.replace(/_([a-z])/g, function(m, c) { return c.toUpperCase(); });
+    out[camelKey] = _snakeToCamel(obj[k]);
+  }
+  return out;
+}
+
 // ── HELPER: extraer tabla e ID de la ruta al estilo Firebase ──
 function _extractFromPath(parts) {
   return {
@@ -63,20 +89,20 @@ function doc(db) {
 }
 
 function addDoc(ref, data) {
-  return supabase.from(ref.table).insert(data).select().single().then(function(r) {
+  return supabase.from(ref.table).insert(_camelToSnake(data)).select().single().then(function(r) {
     if (r.error) throw r.error;
-    return r.data;
+    return _snakeToCamel(r.data);
   });
 }
 
 function setDoc(ref, data, opts) {
-  return supabase.from(ref.table).upsert({ ...data, id: ref.id }).then(function(r) {
+  return supabase.from(ref.table).upsert({ ..._camelToSnake(data), id: ref.id }).then(function(r) {
     if (r.error) throw r.error;
   });
 }
 
 function updateDoc(ref, data) {
-  return supabase.from(ref.table).update(data).eq('id', ref.id).then(function(r) {
+  return supabase.from(ref.table).update(_camelToSnake(data)).eq('id', ref.id).then(function(r) {
     if (r.error) throw r.error;
   });
 }
@@ -100,7 +126,8 @@ function onSnapshot(ref, cb) {
         if (r.error) { console.error('[supabase]', r.error); return; }
         cb({
           docs: (r.data || []).map(function(d) {
-            return { id: d.id, data: function() { return d; }, exists: true };
+            var camel = _snakeToCamel(d);
+            return { id: d.id, data: function() { return camel; }, exists: true };
           })
         });
       });
@@ -112,8 +139,9 @@ function onSnapshot(ref, cb) {
           return;
         }
         var snapData = r.data || null;
+        var camelData = snapData ? _snakeToCamel(snapData) : null;
         cb({
-          data: function() { return snapData; },
+          data: function() { return camelData; },
           exists: !!snapData
         });
       });
