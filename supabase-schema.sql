@@ -110,14 +110,14 @@ ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE blocks ENABLE ROW LEVEL SECURITY;
 
--- Políticas: permitir todo (SELECT, INSERT, UPDATE, DELETE) para anónimos
-CREATE POLICY "Allow all for anon" ON appointments FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for anon" ON settings FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for anon" ON services FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for anon" ON categories FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for anon" ON employees FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for anon" ON expenses FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all for anon" ON blocks FOR ALL TO anon USING (true) WITH CHECK (true);
+-- Políticas: permitir todo (SELECT, INSERT, UPDATE, DELETE) para todo público (anon y authenticated)
+CREATE POLICY "Allow all for public" ON appointments FOR ALL TO public USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for public" ON settings FOR ALL TO public USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for public" ON services FOR ALL TO public USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for public" ON categories FOR ALL TO public USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for public" ON employees FOR ALL TO public USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for public" ON expenses FOR ALL TO public USING (true) WITH CHECK (true);
+CREATE POLICY "Allow all for public" ON blocks FOR ALL TO public USING (true) WITH CHECK (true);
 
 -- ============================================================
 -- ÍNDICES RECOMENDADOS
