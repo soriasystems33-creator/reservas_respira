@@ -45,7 +45,7 @@ function _extractFromPath(parts) {
 
 // ── MISMAS FUNCIONES GLOBALES QUE EL SDK COMPAT DE FIREBASE ──
 function initializeApp(cfg) {
-  supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { autoRefreshToken: true, persistSession: true },
     realtime: { heartbeatIntervalMs: 30000 }
   });
