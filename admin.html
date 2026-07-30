@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Gestión — Magic Studio by Katy</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/magic.jpg" type="image/png">
+    <link rel="apple-touch-icon" href="/magic.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="UNIR Gestión">
+    <meta name="theme-color" content="#5b8f7a">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Silenciar aviso de Tailwind
+        if (window.console) {
+            const oldLog = console.log;
+            console.log = (...args) => {
+                if (typeof args[0] === 'string' && args[0].includes('tailwindcss.com')) return;
+                oldLog(...args);
+            };
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root{
+            --cream:#faf7f4; --cream-dark:#f0ebe6;
+            --blue:#c8dde6; --blue-mid:#8fb8ca; --blue-deep:#5b8fa0;
+            --rose:#d4a0a7; --rose-light:#f5e8ea;
+            --brown:#2e2826; --brown-mid:#7a6b67; --brown-light:#e0d8d5;
+            --gold:#c9a96e;
+            --sidebar-bg:#daeaef;
+        }
+        *{font-family:'Nunito',sans-serif;}
+        h1,h2,h3,.font-serif{font-family:'Cormorant Garamond',serif;}
+
+        /* ─ Scrollbar ─────────────────────────────────── */
+        .custom-scroll::-webkit-scrollbar{width:5px;height:5px}
+        .custom-scroll::-webkit-scrollbar-track{background:var(--cream-dark)}
+        .custom-scroll::-webkit-scrollbar-thumb{background:var(--brown-light);border-radius:4px}
+        .custom-scroll::-webkit-scrollbar-thumb:hover{background:var(--brown-mid)}
+
+        /* ─ Calendar ──────────────────────────────────── */
+        .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--brown-light);border:1px solid var(--brown-light)}
+        .calendar-day{background:white;min-height:110px;padding:8px;transition:all .2s;cursor:pointer;position:relative}
+        .calendar-day:hover{background:var(--cream)}
+        .calendar-day.today{background:#f0f7fa;box-shadow:inset 0 0 0 2px var(--blue-mid)}
+        .calendar-day.closed{background:#f1f1f1;opacity:.6;cursor:not-allowed;}
+        .calendar-day.closed::after{content:'CERRADO';position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:9px;font-weight:900;color:#ef4444;letter-spacing:1px;}
+        .calendar-day.custom-hours{border:2px solid var(--blue-deep);background:#f0f6fa}
+
+        /* ─ Time slots ────────────────────────────────── */
+        .time-btn{border:1px solid var(--brown-light);padding:8px 4px;border-radius:10px;font-size:11px;font-weight:700;text-align:center;transition:all .2s;font-family:'Nunito',sans-serif}
+        .time-btn:hover:not(.occupied){border-color:var(--blue-mid);background:var(--cream)}
+        .time-btn.selected{background:var(--blue-deep);color:white;border-color:var(--blue-deep)}
+        .time-btn.occupied{background:var(--cream-dark);color:var(--brown-light);cursor:not-allowed;text-decoration:line-through;border-style:dashed}
+
+        /* ─ Timeline ──────────────────────────────────── */
+        .timeline-apt{position:absolute;left:4px;right:4px;border-radius:8px;padding:6px 10px;font-size:10px;font-weight:700;overflow:hidden;z-index:20;display:flex;flex-direction:column;justify-content:start;cursor:pointer;box-shadow:0 2px 8px rgba(46,40,38,.08);border-left-width:4px;transition:transform .15s}
+        .timeline-apt:hover{transform:scale(1.01);z-index:30}
+        .hour-row{height:60px;border-top:1px solid var(--cream-dark);position:relative}
+        .hour-label{position:absolute;top:-10px;left:-50px;width:40px;text-align:right;color:var(--brown-mid);font-size:10px;font-weight:600}
+
+        /* ─ Config tabs ───────────────────────────────── */
+        .config-selected{border-color:var(--blue-deep)!important;background-color:var(--blue-deep)!important;color:white!important}
+
+        /* ─ Sidebar nav active ────────────────────────── */
+        .nav-active{background:white!important;color:var(--blue-deep)!important;font-weight:800;box-shadow:0 2px 12px rgba(91,143,160,.15)}
+
+        /* ─ Mobile Sidebar ───────────────────────────── */
+        #sidebar-overlay{display:none}
+        @media(max-width:767px){
+            #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:60}
+            #sidebar-overlay.open{display:block}
+            #sidebar{position:fixed;top:0;left:0;bottom:0;width:280px;z-index:70;transform:translateX(-100%);transition:transform .3s ease;overflow-y:auto;border-radius:0 20px 20px 0;box-shadow:4px 0 30px rgba(0,0,0,.15)}
+            #sidebar.open{transform:translateX(0)}
+            #hamburger-btn{display:flex!important}
+            .floating-bell-mobile{right:70px!important;top:10px!important}
+            #conn-status{top:10px!important;right:130px!important;font-size:8px!important;padding:3px 8px!important}
+        }
+
+        /* ─ Mobile ────────────────────────────────────── */
+        @media(max-width:640px){
+            .calendar-grid{display:flex;flex-direction:column;gap:8px;background:transparent;border:none}
+            .calendar-day{min-height:auto;padding:12px;border-radius:12px;border:1px solid var(--brown-light);border-left:4px solid var(--blue-mid)}
+            .calendar-day span{font-size:14px}
+            .hour-label{left:-35px;width:30px;font-size:9px}
+            #view-calendar>div:first-child{display:none}
+            #view-title{font-size:1.5rem!important}
+            #nav-controls{flex-wrap:wrap;gap:6px!important}
+            #nav-controls button{font-size:9px!important;padding:6px 10px!important}
+            #nav-controls .ml-4{margin-left:0!important}
+            .modal-mobile{max-width:100%!important;border-radius:0!important;max-height:100vh!important;height:100vh!important;width:100%!important}
+            .modal-mobile-inner{height:100%!important;border-radius:0!important}
+            .modal-mobile-body{flex-grow:1;overflow-y:auto;}
+            .table-mobile{font-size:9px!important}
+            .table-mobile th,.table-mobile td{padding:6px 4px!important}
+            #client-detail-panel{position:fixed;inset:0;z-Index:50;border-radius:0!important}
+            /* ── Main padding ── */
+            main{padding:12px!important}
+            #view-title{font-size:1.3rem!important}
+            /* ── Botones touch-friendly ── */
+            button,.btn-like{min-height:44px!important}
+            .sidebar-btn{min-height:48px!important;font-size:12px!important}
+            /* ── Tabla citas → tarjetas ── */
+            #view-appointments table,#view-appointments thead,#view-appointments tbody,#view-appointments th,#view-appointments td,#view-appointments tr{display:block!important}
+            #view-appointments thead{display:none!important}
+            #view-appointments tr{background:white;border-radius:16px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--brown-light);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+            #view-appointments tr{padding:8px 10px!important;margin-bottom:6px!important}
+            #view-appointments td{padding:2px 0!important;font-size:10px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;border:none!important;gap:0!important}
+            #view-appointments td::before{content:attr(data-label);font-size:7px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.3px!important;color:var(--brown-mid)!important;opacity:.7!important;margin:0!important;flex-shrink:0!important}
+            #view-appointments td .font-bold.text-slate-800{font-size:11px!important}
+            #view-appointments td .font-black.uppercase.text-blue-900{font-size:10px!important}
+            #view-appointments td[data-label="Acciones"]{padding-top:4px!important;margin-top:4px!important;border-top:1px solid var(--brown-light)!important;flex-direction:row!important;justify-content:flex-end!important;gap:4px!important}
+            #view-appointments td[data-label="Acciones"]::before{display:none!important}
+            #view-appointments td[data-label="Acciones"] button{padding:6px 10px!important;min-height:36px!important}
+            #view-appointments td[data-label="Acciones"] button svg{width:14px!important;height:14px!important}
+            #view-appointments td[data-label="Pagado"]{flex-direction:row!important;justify-content:space-between!important}
+            #view-appointments td[data-label="Pagado"] span{font-size:9px!important;padding:2px 8px!important}
+            #view-appointments td .text-\[10px\].font-mono{font-size:9px!important}
+            #view-appointments .highlight-new{background:#fefce8!important;border-left:3px solid #facc15!important}
+            /* ── TPV view mobile ── */
+
+            /* ── Modales generales ── */
+            #day-modal>div,#modal>div,#service-modal>div,#category-modal>div,#employee-modal>div,#config-day-modal>div,#ticket-modal>div{max-width:100%!important;width:100%!important;border-radius:0!important;max-height:100vh!important;height:100vh!important}
+            #day-modal,#modal,#service-modal,#category-modal,#employee-modal,#config-day-modal,#ticket-modal{padding:0!important;align-items:stretch!important}
+            #day-modal>div>div:last-child,#modal>div>div:last-child{flex-grow:1!important;overflow-y:auto!important}
+            /* ── Vista clientes ── */
+            #view-clients .grid{grid-template-columns:1fr!important}
+            #clients-list{max-height:40vh!important}
+            #client-detail-panel{position:fixed;inset:0;z-index:50;border-radius:0!important;overflow-y:auto!important;padding:12px!important}
+            /* ── Vista contabilidad ── */
+            #acc-kpi-cards{grid-template-columns:1fr 1fr!important;gap:8px!important}
+            #view-billing .bg-white.p-8{padding:16px!important}
+            /* ── Vista gastos ── */
+            #view-gastos .bg-white.p-6{padding:16px!important}
+            #view-gastos .grid-cols-1.gap-4>.flex.gap-3{flex-direction:column!important}
+            #view-gastos .flex.gap-3>div{width:100%!important}
+            /* ── Servicios/Empleados ── */
+            #view-services_mgmt .flex.justify-between,#view-employees_mgmt .flex.justify-between{flex-direction:column!important;align-items:stretch!important;gap:8px!important}
+            #view-services_mgmt .flex.justify-between button,#view-employees_mgmt .flex.justify-between button{width:100%!important;justify-content:center!important}
+            /* ── Config ── */
+            #view-config .bg-white.p-8{padding:16px!important}
+            #standard-inputs-container{grid-template-columns:1fr!important}
+            #config-calendar-body .calendar-grid{display:flex!important;flex-direction:column!important;gap:4px!important}
+            #config-calendar-body .calendar-day{min-height:auto!important;padding:8px!important}
+            /* ── Notificaciones ── */
+            #view-notifications-content .flex.items-start{gap:8px!important}
+            /* ── Timeline especialista ── */
+            #view-specialist-day{height:calc(100vh - 100px)!important}
+
+            /* ── viewAppointment modal (JS) ── */
+            .view-apt-modal{max-width:100%!important;width:100%!important;border-radius:0!important;height:100vh!important;max-height:100vh!important;margin:0!important}
+            /* ── Listado citas contador ── */
+            #view-appointments .flex-wrap .ml-auto{margin-left:0!important}
+            /* ── Billing export button ── */
+            #view-billing .flex-wrap button{width:100%!important;justify-content:center!important}
+            /* ── Modal día - min-height ── */
+            #day-modal-columns{min-height:auto!important}
+            #day-modal-columns{grid-template-columns:1fr!important}
+            #day-modal-columns>div{min-height:auto!important}
+            #day-modal-columns .overflow-y-auto{max-height:none!important;overflow-y:visible!important}
+            /* ── Show more clickable area ── */
+            select,input{font-size:16px!important} /* prevent iOS zoom */
+        }
+        /* ─ Notif Cards Animation ──────────────────────────── */
+        @keyframes slideDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes pulse-notif { 0%,100% { box-shadow:0 0 0 0 rgba(59,130,246,.4); } 50% { box-shadow:0 0 0 12px rgba(59,130,246,0); } }
+        .notif-new { animation:slideDown .35s ease,pulse-notif 1.5s ease 3; }
+
+        /* ─ Animations ────────────────────────────────── */
+        @keyframes badge-dancing {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2) rotate(5deg); }
+        }
+        .badge-dancing {
+            animation: badge-dancing 0.6s infinite;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ─ Bell Ring Animation ───────────────────────── */
+        @keyframes ring {
+          0% { transform: rotate(0); }
+          10% { transform: rotate(15deg); }
+          20% { transform: rotate(-15deg); }
+          30% { transform: rotate(10deg); }
+          40% { transform: rotate(-10deg); }
+          50% { transform: rotate(5deg); }
+          60% { transform: rotate(-5deg); }
+          70% { transform: rotate(0); }
+          100% { transform: rotate(0); }
+        }
+        .animate-ring {
+          animation: ring 2s infinite;
+        }
+
+        /* ─ Highlight New Appointment ────────────────── */
+        @keyframes highlight-fade {
+          0% { background-color: #fef08a; } /* yellow-200 */
+          100% { background-color: transparent; }
+        }
+        .highlight-new {
+          animation: highlight-fade 3s ease-out forwards;
+        }
+
+    </style>
+</head>
+<body style="background:var(--cream);color:var(--brown);font-family:'Nunito',sans-serif" class="text-sm font-medium">
+    <!-- LOGIN SCREEN -->
+<div id="login-screen" class="fixed inset-0 z-[200] flex items-center justify-center" style="background:var(--sidebar-bg)">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-10 mx-4 border" style="border-color:var(--brown-light)">
+        <div class="text-center mb-8">
+            <img src="magic.jpg" alt="Magic Studio by Katy" class="h-16 w-auto mx-auto mb-3 rounded-xl" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <div style="display:none"><h1 class="font-serif text-3xl italic font-semibold" style="color:var(--brown)">Magic Studio by Katy</h1></div>
+
+            <p class="text-xs font-medium mt-6" style="color:var(--brown-mid)">Acceso al Panel de Control</p>
+        </div>
+        <div id="login-error" class="hidden mb-4 p-3 rounded-xl text-xs font-bold text-center" style="background:#fff1f2;color:#e05c6a;border:1px solid #fecdd3"></div>
+        <div class="space-y-4">
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Correo electrónico</label>
+                <input type="email" id="login-email" value="magicnailskaty@gmail.com" class="w-full p-3 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Contraseña</label>
+                <input type="password" id="login-password" class="w-full p-3 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)" onkeydown="if(event.key==='Enter')window.doLogin()">
+            </div>
+            <button id="login-btn" onclick="window.doLogin()" class="w-full py-3 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-md active:scale-95 transition-all text-white disabled:opacity-50 disabled:cursor-not-allowed" style="background:var(--blue-deep)">Iniciar Sesión</button>
+            <button onclick="window.resetPassword()" class="w-full text-center text-[10px] font-bold underline mt-3 transition-colors" style="color:var(--brown-mid)">¿Olvidaste tu contraseña?</button>
+        </div>
+    </div>
+</div>
+
+<div class="min-h-screen flex flex-col md:flex-row relative hidden" id="app-container">
+        <!-- Sidebar overlay (mobile) -->
+        <div id="sidebar-overlay" onclick="window.toggleSidebar()"></div>
+        <!-- Hamburger Button (mobile) -->
+        <button id="hamburger-btn" onclick="window.toggleSidebar()" class="hidden fixed top-3 left-3 z-[65] p-2.5 bg-white rounded-xl shadow-lg border active:scale-95 transition-all" style="border-color:var(--brown-light);color:var(--brown-mid)"><i data-lucide="menu" class="w-5 h-5"></i></button>
+        <!-- Campana de Notificación Flotante -->
+        <div id="floating-bell" class="fixed top-3 right-40 z-[100] hidden cursor-pointer animate-ring" onclick="window.handleBellClick()">
+            <div class="relative bg-white p-3 rounded-full shadow-2xl border-2 border-red-500 flex items-center justify-center">
+                <i data-lucide="bell" class="w-6 h-6 text-red-500"></i>
+                <span id="bell-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center shadow-lg border-2 border-white">0</span>
+            </div>
+        </div>
+
+        <div id="conn-status" class="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white shadow-sm border text-[10px] font-bold uppercase z-50" style="border-color:var(--brown-light);color:var(--brown-mid)">
+            <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+            <span id="status-text">Cargando...</span>
+        </div>
+
+        <aside id="sidebar" class="w-full md:w-64 flex flex-col shrink-0 shadow-xl p-6" style="background:var(--sidebar-bg)">
+            <div class="mb-8 pb-6" style="border-bottom:1px solid var(--brown-light)">
+                <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col items-center mb-2" style="border:1px solid var(--brown-light)">
+                    <img src="magic.jpg" alt="Magic Studio by Katy"
+                         class="h-14 w-auto object-contain mb-2 rounded-xl"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                    <div style="display:none">
+                        <h1 class="font-serif text-2xl italic font-semibold" style="color:var(--brown)">Magic Studio by Katy</h1>
+                    </div>
+
+                </div>
+                <p class="text-[9px] font-bold uppercase tracking-widest text-center mt-2 opacity-60" style="color:var(--brown-mid)">Panel de Control</p>
+            </div>
+            <nav class="space-y-1.5 flex-grow">
+                <div class="text-[9px] font-bold uppercase mb-2 px-3 tracking-widest opacity-50" style="color:var(--brown-mid)">Global</div>
+                <button onclick="window.setTab('calendar_all')" id="tab-calendar_all" class="w-full text-left p-3 rounded-xl bg-white flex items-center gap-3 transition-all font-bold hover:scale-[1.01]" style="color:var(--blue-deep);box-shadow:0 2px 8px rgba(91,143,160,.12)"><i data-lucide="layout-dashboard" class="w-4 h-4"></i> Agenda Global</button>
+                <button onclick="window.setTab('appointments')" id="tab-appointments" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center justify-between transition-all font-medium" style="color:var(--brown)">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="list" class="w-4 h-4 opacity-60"></i> Listado Citas
+                    </div>
+                    <span id="web-noti-badge" class="hidden bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">0</span>
+                </button>
+                <button onclick="window.setTab('notifications')" id="tab-notifications" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="bell" class="w-4 h-4" style="color:var(--rose)"></i> Notificaciones</button>
+                <button onclick="window.setTab('clients')" id="tab-clients" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="users" class="w-4 h-4" style="color:var(--rose)"></i> Clientes</button>
+                <button onclick="window.openTPV()" id="tab-tpv" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="shopping-cart" class="w-4 h-4" style="color:var(--gold)"></i> TPV · Cobro</button>
+                <button onclick="window.setTab('billing')" id="tab-billing" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="bar-chart-3" class="w-4 h-4 opacity-60"></i> Contabilidad</button>
+                <button onclick="window.setTab('gastos')" id="tab-gastos" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="receipt" class="w-4 h-4" style="color:#e05c6a"></i> Gastos</button>
+
+                <div id="sidebar-employees" class="text-[9px] font-bold uppercase mt-5 mb-2 px-3 tracking-widest opacity-50" style="color:var(--brown-mid)">Especialistas</div>
+                <div id="sidebar-employee-buttons"></div>
+
+                <div class="text-[9px] font-bold uppercase mt-5 mb-2 px-3 tracking-widest opacity-50" style="color:var(--brown-mid)">Sistema</div>
+                <button onclick="window.setTab('services_mgmt')" id="tab-services_mgmt" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="sparkles" class="w-4 h-4" style="color:var(--gold)"></i> Servicios</button>
+                <button onclick="window.setTab('employees_mgmt')" id="tab-employees_mgmt" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="user-cog" class="w-4 h-4" style="color:var(--blue-deep)"></i> Empleados</button>
+                <button onclick="window.setTab('config')" id="tab-config" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="settings" class="w-4 h-4 opacity-60"></i> Configuración</button>
+                <button onclick="window.doLogout()" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium mt-4" style="color:#e05c6a"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar Sesión</button>
+            </nav>
+        </aside>
+
+        <main class="flex-grow p-4 md:p-8 overflow-y-auto">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div class="flex items-center gap-3">
+                    <button id="btn-back-to-month" onclick="window.backToMonth()" class="hidden p-2 bg-white border rounded-xl hover:opacity-80 transition-opacity" style="border-color:var(--brown-light)"><i data-lucide="arrow-left" class="w-5 h-5" style="color:var(--brown-mid)"></i></button>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 id="view-title" class="font-serif text-3xl italic font-semibold tracking-tight" style="color:var(--brown)">Agenda Global</h2>
+                            <button id="btn-info-closures" onclick="window.openClosuresInfoModal()" class="p-1.5 rounded-full hover:bg-slate-200/50 transition-all flex items-center justify-center text-slate-400 hover:text-slate-600 outline-none" title="Información sobre cierres y bloqueos">
+                                <i data-lucide="info" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <p id="view-subtitle" class="text-xs font-medium" style="color:var(--brown-mid)">Gestión de Magic Nails</p>
+                    </div>
+                </div>
+                <div id="nav-controls" class="flex items-center gap-3 w-full sm:w-auto">
+                    <button onclick="window.changeDate(-1)" class="p-2 rounded-lg border bg-white hover:opacity-80 transition-opacity" style="border-color:var(--brown-light)"><i data-lucide="chevron-left" class="w-5 h-5" style="color:var(--brown-mid)"></i></button>
+                    <span id="current-view-label" class="text-base font-bold min-w-[150px] text-center capitalize" style="color:var(--brown)">Hoy</span>
+                    <button onclick="window.changeDate(1)" class="p-2 rounded-lg border bg-white hover:opacity-80 transition-opacity" style="border-color:var(--brown-light)"><i data-lucide="chevron-right" class="w-5 h-5" style="color:var(--brown-mid)"></i></button>
+                    <button id="btn-toggle-config-mode" onclick="window.toggleEmpConfigMode()" class="hidden ml-4 px-5 py-2.5 rounded-xl font-semibold items-center gap-2 shadow-md active:scale-95 transition-all text-xs uppercase tracking-widest text-orange-700 bg-orange-100 border border-orange-200"><i data-lucide="settings" class="w-4 h-4"></i> Configurar Varios Días</button>
+                    <button onclick="window.openModal()" class="ml-4 px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-md active:scale-95 transition-all text-xs uppercase tracking-widest text-white" style="background:var(--blue-deep)"><i data-lucide="plus" class="w-4 h-4"></i> Nueva Cita</button>
+                </div>
+            </div>
+
+            <!-- VISTA CALENDARIO MES -->
+            <div id="view-calendar" class="space-y-4">
+                <div class="grid grid-cols-7 text-center text-[10px] font-bold uppercase mb-2 tracking-widest" style="color:var(--brown-mid)">
+                    <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+                </div>
+                <div id="calendar-body" class="calendar-grid rounded-2xl overflow-hidden shadow-sm" style="border:1px solid var(--brown-light)"></div>
+            </div>
+
+            <!-- VISTA DÍA GLOBAL -->
+            <div id="view-global-day" class="hidden flex-col h-full">
+                <div class="flex justify-between items-center mb-4 px-2">
+                    <span class="text-xs font-semibold uppercase px-3 py-1 rounded-lg" style="background:var(--cream-dark);color:var(--brown-mid)">Vista Diaria</span>
+                    <button onclick="window.showMonthView()" class="text-xs font-semibold px-3 py-2 rounded-xl transition-all border flex items-center gap-2" style="color:var(--blue-deep);border-color:var(--blue);background:white"><i data-lucide="calendar" class="w-4 h-4"></i> Ver Mes Completo</button>
+                </div>
+                <div class="flex-grow overflow-y-auto custom-scroll rounded-3xl border p-4" style="background:white;border-color:var(--brown-light)">
+                    <div id="global-day-columns" class="grid gap-6 relative min-h-[900px]"></div>
+                </div>
+            </div>
+
+            <!-- VISTA TIMELINE ESPECIALISTA — Google Calendar style -->
+            <div id="view-specialist-day" class="hidden rounded-3xl shadow-sm border" style="background:white;border-color:var(--brown-light);height:calc(100vh - 220px);overflow-y:auto">
+                <div id="timeline-container" class="p-6" style="min-width:320px"></div>
+            </div>
+
+            <!-- VISTA LISTADO CITAS -->
+            <div id="view-appointments" class="hidden space-y-4">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border flex flex-wrap items-center gap-4" style="border-color:var(--brown-light)">
+                    <div class="flex items-center gap-2 p-1 rounded-xl" style="background:var(--cream-dark)">
+                        <i data-lucide="filter" class="w-4 h-4 ml-2" style="color:var(--brown-mid)"></i>
+                        <select id="list-month" onchange="window.renderList()" class="bg-transparent font-semibold text-xs p-2 outline-none cursor-pointer" style="color:var(--brown)">
+                            <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option><option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option><option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option><option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+                        </select>
+                        <div class="w-px h-4" style="background:var(--brown-light)"></div>
+                        <select id="list-year" onchange="window.renderList()" class="bg-transparent font-semibold text-xs p-2 outline-none cursor-pointer" style="color:var(--brown)">
+                            <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
+                        </select>
+                    </div>
+                    <span id="list-count-badge" class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase" style="background:var(--blue);color:var(--blue-deep)">0 Citas</span>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border overflow-hidden overflow-x-auto" style="border-color:var(--brown-light)">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead style="background:var(--cream-dark);border-bottom:1px solid var(--brown-light)">
+                            <tr>
+                                <th class="p-4 text-xs font-bold uppercase" style="color:var(--brown-mid)">Cliente</th>
+                                <th class="p-4 text-xs font-bold uppercase" style="color:var(--brown-mid)">Servicio / Estado</th>
+                                <th class="p-4 text-xs font-bold uppercase" style="color:var(--brown-mid)">Especialista</th>
+                                <th class="p-4 text-xs font-bold uppercase" style="color:var(--brown-mid)">Fecha/Hora</th>
+                                <th class="p-4 text-xs font-bold uppercase text-center" style="color:var(--brown-mid)">Pagado</th>
+                                <th class="p-4 text-xs font-bold uppercase text-center" style="color:var(--brown-mid)">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VISTA CLIENTES -->
+            <div id="view-clients" class="hidden space-y-6">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border" style="border-color:var(--brown-light)">
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-3 top-3 w-5 h-5" style="color:var(--brown-light)"></i>
+                        <input type="text" id="client-search" onkeyup="window.renderClients()" placeholder="Buscar cliente por nombre o teléfono..." class="w-full pl-10 p-2.5 border rounded-xl font-medium outline-none" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+                    <div class="bg-white rounded-3xl border shadow-sm overflow-hidden flex flex-col lg:col-span-1" style="border-color:var(--brown-light)">
+                        <div class="p-4 border-b font-bold text-xs uppercase" style="background:var(--cream-dark);color:var(--brown-mid);border-color:var(--brown-light)">Clientes</div>
+                        <div id="clients-list" class="flex-grow overflow-y-auto custom-scroll p-2 space-y-2"></div>
+                    </div>
+                    <div id="client-empty-state" class="bg-white rounded-3xl border shadow-sm p-12 flex flex-col items-center justify-center text-center lg:col-span-2" style="border-color:var(--brown-light);color:var(--brown-light)">
+                        <i data-lucide="user-search" class="w-16 h-16 mb-4 opacity-40"></i>
+                        <p class="font-semibold uppercase text-sm">Lista de clientes</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISTA CONTABILIDAD -->
+            <div id="view-billing" class="hidden space-y-8 pb-12">
+                <div class="bg-white p-4 rounded-2xl border shadow-sm w-fit flex flex-wrap items-center gap-4" style="border-color:var(--brown-light)">
+                    <div class="flex items-center gap-2"><i data-lucide="calendar-search" class="w-4 h-4" style="color:var(--brown-mid)"></i><label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Reporte:</label></div>
+                    <select id="acc-month" onchange="window.renderAccounting()" class="font-semibold border rounded-lg p-1 px-3 outline-none" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+                        <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option><option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option><option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option><option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+                    </select>
+                    <select id="acc-year" onchange="window.renderAccounting()" class="font-semibold border rounded-lg p-1 px-3 outline-none" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+                        <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
+                    </select>
+                    <button onclick="window.exportToExcel()" class="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs uppercase text-white shadow-md active:scale-95 transition-all" style="background:#1d6f42">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Exportar Excel
+                    </button>
+                </div>
+                <div id="acc-kpi-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <div class="bg-white p-8 rounded-3xl border shadow-sm" style="border-color:var(--brown-light)">
+                    <h4 class="font-serif italic font-semibold text-lg mb-6 flex items-center gap-2" style="color:var(--brown)"><i data-lucide="trending-up" class="w-5 h-5" style="color:var(--blue-deep)"></i> Evolución Diaria</h4>
+                    <div class="h-64 w-full"><canvas id="incomeChart"></canvas></div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-3xl border p-6 shadow-sm" style="border-color:var(--brown-light)"><h4 class="font-serif italic font-semibold text-lg mb-6 flex items-center gap-2" style="color:var(--brown)"><i data-lucide="award" class="w-5 h-5" style="color:var(--gold)"></i> Servicios más Rentables</h4><div id="acc-services-list" class="space-y-6"></div></div>
+                    <div class="bg-white rounded-3xl border p-6 shadow-sm" style="border-color:var(--brown-light)"><h4 class="font-serif italic font-semibold text-lg mb-6 flex items-center gap-2" style="color:var(--brown)"><i data-lucide="crown" class="w-5 h-5" style="color:var(--gold)"></i> Top 5 Mejores Clientes</h4><div id="acc-top-clients" class="space-y-4"></div></div>
+                </div>
+            </div>
+
+            <!-- VISTA GASTOS -->
+            <div id="view-gastos" class="hidden space-y-6 pb-12">
+
+              <!-- Formulario añadir gasto -->
+              <div class="bg-white rounded-3xl border shadow-sm p-6" style="border-color:var(--brown-light)">
+                <h3 class="font-serif italic font-semibold text-xl mb-5 flex items-center gap-2" style="color:var(--brown)">
+                  <i data-lucide="plus-circle" class="w-5 h-5" style="color:var(--gold)"></i> Añadir Gasto
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div class="space-y-1 lg:col-span-2">
+                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Concepto *</label>
+                    <input type="text" id="exp-concept" placeholder="Ej: Alquiler local, Producto X..." class="w-full p-2.5 border rounded-xl outline-none font-medium text-xs" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Categoría</label>
+                    <select id="exp-category" class="w-full p-2.5 border rounded-xl font-medium text-xs" style="background:white;border-color:var(--brown-light);color:var(--brown)">
+                      <option>Alquiler</option>
+                      <option>Material / Productos</option>
+                      <option>Suministros</option>
+                      <option>Publicidad</option>
+                      <option>Mantenimiento</option>
+                      <option>Formación</option>
+                      <option>Seguros</option>
+                      <option>Gestoría</option>
+                      <option>Otros</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Importe Total (€) *</label>
+                    <input type="number" id="exp-total" min="0" step="0.01" placeholder="0.00" oninput="window.expCalc()" class="w-full p-2.5 border rounded-xl outline-none font-medium text-xs" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">IVA aplicado</label>
+                    <select id="exp-iva-rate" onchange="window.expCalc()" class="w-full p-2.5 border rounded-xl font-medium text-xs" style="background:white;border-color:var(--brown-light);color:var(--brown)">
+                      <option value="21">21%</option>
+                      <option value="10">10%</option>
+                      <option value="4">4%</option>
+                      <option value="0">Exento / 0%</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1 lg:col-span-3">
+                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Desglose automático (IVA incluido)</label>
+                    <div class="flex gap-3">
+                      <div class="flex-grow rounded-xl p-2.5 border text-xs font-black flex flex-col gap-0.5" style="background:#f0fdf4;border-color:#bbf7d0">
+                        <span class="text-[8px] font-bold uppercase opacity-60" style="color:#166534">Base imponible</span>
+                        <span id="exp-base-display" style="color:#166534">— €</span>
+                      </div>
+                      <div class="w-28 rounded-xl p-2.5 border text-xs font-black flex flex-col gap-0.5" style="background:#fefce8;border-color:#fde68a">
+                        <span class="text-[8px] font-bold uppercase opacity-60" style="color:#92400e">IVA</span>
+                        <span id="exp-iva-display" style="color:#92400e">— €</span>
+                      </div>
+                      <div class="w-28 rounded-xl p-2.5 border text-xs font-black flex flex-col gap-0.5" style="background:#eff6ff;border-color:#bfdbfe">
+                        <span class="text-[8px] font-bold uppercase opacity-60" style="color:#1e40af">Total</span>
+                        <span id="exp-total-display" style="color:#1e40af">— €</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Fecha</label>
+                    <input type="date" id="exp-date" class="w-full p-2.5 border rounded-xl outline-none font-medium text-xs" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Foto Factura</label>
+                    <button onclick="document.getElementById('exp-photo-input').click()" class="w-full p-2.5 border-2 border-dashed rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-2 transition-all hover:opacity-80" style="border-color:var(--brown-light);color:var(--brown-mid)">
+                      <i data-lucide="camera" class="w-4 h-4"></i>
+                      <span id="exp-photo-label">Cámara / Galería</span>
+                    </button>
+                  </div>
+                  <div class="flex items-end">
+                    <button onclick="window.saveExpense()" class="w-full py-3 rounded-2xl font-black text-sm uppercase text-white shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2" style="background:var(--blue-deep)">
+                      <i data-lucide="plus" class="w-4 h-4"></i> Guardar Gasto
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Filtro mes + lista -->
+              <div class="bg-white p-4 rounded-2xl border shadow-sm flex flex-wrap items-center gap-4" style="border-color:var(--brown-light)">
+                <div class="flex items-center gap-2"><i data-lucide="filter" class="w-4 h-4" style="color:var(--brown-mid)"></i><label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Mes:</label></div>
+                <select id="exp-filter-month" onchange="window.renderExpenses()" class="font-semibold border rounded-lg p-1 px-3 outline-none text-xs" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+                  <option value="0">Enero</option><option value="1">Febrero</option><option value="2">Marzo</option><option value="3">Abril</option><option value="4">Mayo</option><option value="5">Junio</option><option value="6">Julio</option><option value="7">Agosto</option><option value="8">Septiembre</option><option value="9">Octubre</option><option value="10">Noviembre</option><option value="11">Diciembre</option>
+                </select>
+                <select id="exp-filter-year" onchange="window.renderExpenses()" class="font-semibold border rounded-lg p-1 px-3 outline-none text-xs" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+                  <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
+                </select>
+                <span id="exp-total-badge" class="ml-auto px-4 py-1.5 rounded-xl text-xs font-black" style="background:#fef2f2;color:#e05c6a">Total: 0,00 €</span>
+              </div>
+
+              <div id="expenses-list" class="space-y-3"></div>
+            </div>
+
+            <!-- VISTA GESTIÓN SERVICIOS -->
+            <div id="view-services_mgmt" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-serif italic font-semibold text-2xl" style="color:var(--brown)">Gestión de Servicios</h3>
+                    <div class="flex gap-3">
+                        <button onclick="window.openCategoryModal()" class="text-white px-4 py-2 rounded-xl font-semibold text-xs uppercase flex items-center gap-2 shadow-md" style="background:var(--brown)"><i data-lucide="folder-plus" class="w-4 h-4"></i> Nueva Categoría</button>
+                        <button onclick="window.openServiceModal()" class="text-white px-4 py-2 rounded-xl font-semibold text-xs uppercase flex items-center gap-2 shadow-md" style="background:var(--blue-deep)"><i data-lucide="plus" class="w-4 h-4"></i> Nuevo Servicio</button>
+                    </div>
+                </div>
+                <div id="services-mgmt-list" class="space-y-6"></div>
+            </div>
+
+            <!-- VISTA GESTIÓN EMPLEADOS -->
+            <div id="view-employees_mgmt" class="hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-serif italic font-semibold text-2xl" style="color:var(--brown)">Gestión de Empleadas</h3>
+                    <button onclick="window.openEmployeeModal()" class="text-white px-4 py-2 rounded-xl font-semibold text-xs uppercase flex items-center gap-2 shadow-md" style="background:var(--blue-deep)"><i data-lucide="user-plus" class="w-4 h-4"></i> Nueva Empleada</button>
+                </div>
+                <div id="employees-mgmt-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <!-- VISTA NOTIFICACIONES -->
+            <div id="view-notifications" class="hidden space-y-4">
+                <div class="flex items-start gap-3">
+                    <i data-lucide="bell" class="w-6 h-6 mt-0.5" style="color:var(--blue-deep)"></i>
+                    <div>
+                        <h2 class="font-serif text-3xl italic font-semibold tracking-tight" style="color:var(--brown)">Notificaciones</h2>
+                        <p class="text-xs font-medium" style="color:var(--brown-mid)">Nuevas, modificaciones y cancelaciones</p>
+                    </div>
+                </div>
+                <div id="view-notifications-content" class="space-y-3"></div>
+            </div>
+
+            <!-- VISTA CONFIG -->
+            <div id="view-config" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-3xl shadow-sm border" style="border-color:var(--brown-light)">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 pb-6" style="border-bottom:1px solid var(--brown-light)">
+                        <h3 class="font-serif italic font-semibold text-2xl" style="color:var(--brown)">Ajustes de Horarios</h3>
+                        <div id="config-entity-tabs" class="flex p-1 rounded-xl border gap-1" style="background:var(--cream-dark);border-color:var(--brown-light)"></div>
+                    </div>
+                    <div id="global-config-section" class="space-y-6">
+                        <div id="standard-inputs-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                        <div id="employee-closure-warning" class="hidden p-4 bg-orange-50 border-2 border-orange-200 text-orange-900 text-xs font-bold rounded-2xl flex items-center gap-3">
+                            <i data-lucide="info" class="w-5 h-5 text-orange-500 shrink-0"></i>
+                            <span>Para configurar días festivos o cierres de horas específicos de esta empleada, ve al apartado de <strong>Especialistas / Empleados</strong> en el menú.</span>
+                        </div>
+                        <div class="flex justify-end pt-4" style="border-top:1px solid var(--cream-dark)">
+                            <button id="btn-save-config" class="text-white px-8 py-3 rounded-2xl font-semibold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all" style="background:var(--blue-deep)">Guardar Configuración</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="config-calendar-section" class="bg-white p-8 rounded-3xl shadow-sm border" style="border-color:var(--brown-light)">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-serif italic font-semibold text-xl flex items-center gap-3" style="color:var(--brown)"><i data-lucide="calendar-check" class="w-5 h-5"></i> Gestor de Cierres y Días Especiales (Global)</h3>
+                    </div>
+                    <div id="config-calendar-body" class="calendar-grid rounded-2xl overflow-hidden" style="border:1px solid var(--brown-light)"></div>
+                </div>
+
+            </div>
+
+
+        </main>
+    </div>
+
+    <!-- MODAL DÍA -->
+    <div id="day-modal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-2 z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-3xl h-[92vh] flex flex-col shadow-2xl overflow-hidden modal-mobile" style="border:1px solid var(--brown-light)">
+            <div class="p-6 border-b flex justify-between items-center bg-white z-20 shadow-sm" style="border-color:var(--brown-light)">
+                <div>
+                    <h3 id="day-modal-title" class="font-serif italic font-semibold text-3xl" style="color:var(--brown)">Agenda</h3>
+                    <p class="text-xs font-medium uppercase tracking-widest mt-1" style="color:var(--brown-mid)">Vista detallada del día</p>
+                </div>
+                <button onclick="window.closeDayModal()" class="p-2 rounded-full transition-colors" style="background:var(--cream-dark);color:var(--brown-mid)"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="flex-grow overflow-y-auto custom-scroll p-4" style="background:var(--cream)">
+                <div id="day-modal-columns" class="grid gap-6 relative min-h-[600px]"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CITA -->
+    <div id="modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-2 z-[60] backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-3xl max-h-[95vh] flex flex-col shadow-2xl overflow-hidden modal-mobile" style="border:1px solid var(--brown-light)">
+            <div class="p-5 border-b flex justify-between items-center shrink-0" style="background:var(--cream);border-color:var(--brown-light)">
+                <h3 id="modal-title" class="font-bold text-lg" style="color:var(--brown)">Registrar Cita</h3>
+                <button onclick="window.closeModal()" class="p-2 rounded-full hover:bg-slate-200 transition-colors" style="color:var(--brown-mid)"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="flex-grow overflow-y-auto p-5 space-y-4 custom-scroll">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Nombre Cliente</label><input type="text" id="m-name" list="clients-datalist" oninput="window.handleClientNameInput(this.value)" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+                        <datalist id="clients-datalist"></datalist>
+                    </div>
+                    <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Teléfono</label><input type="tel" id="m-phone" oninput="var me=this;setTimeout(function(){window.cleanPhone(me)},10)" onpaste="var me=this;setTimeout(function(){window.cleanPhone(me)},50)" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+                    <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Email</label><input type="email" id="m-email" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+                    <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Fecha</label><input type="date" id="m-date" onchange="window.updateAvailability()" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold" style="color:var(--brown-mid)">Servicios</label>
+                    <div id="m-svc-list" class="space-y-1 mt-1 mb-2"></div>
+                    <div id="m-svc-total" class="text-xs font-bold hidden mb-2" style="color:var(--blue-deep)"></div>
+                    <button onclick="window.addSvcToApt()" type="button" class="w-full p-2 border-2 border-dashed rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[var(--cream)] transition-colors" style="border-color:var(--brown-light);color:var(--blue-mid)">+ Añadir Servicio</button>
+                    <div id="m-svc-picker" class="hidden mt-2">
+                        <input type="text" id="m-svc-search" placeholder="Buscar servicio..." oninput="window.filterSvcOptions()" class="w-full p-2 border rounded-xl text-xs outline-none mb-2" style="background:white;border-color:var(--brown-light);color:var(--brown)">
+                        <div id="m-svc-options" class="max-h-48 overflow-y-auto space-y-1 custom-scroll border rounded-xl p-2" style="background:white;border-color:var(--brown-light)"></div>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[10px] font-bold" style="color:var(--brown-mid)">Selecciona la Hora</label>
+                        <span id="selected-time-label" class="text-xs font-bold px-2 py-1 rounded-lg" style="color:var(--blue-deep);background:var(--blue)">Sin selección</span>
+                    </div>
+                    <div id="time-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Estado</label><select id="m-status" class="w-full p-2.5 border rounded-xl font-medium mt-1" style="background:white;border-color:var(--brown-light);color:var(--brown)"><option value="confirmed">Confirmada</option><option value="completed">Pagada</option><option value="cancelled">Cancelada</option></select></div>
+                    <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Precio (€)</label><input type="number" id="m-price" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+                    <div class="flex items-end pb-1"><label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="m-paid" class="w-4 h-4 rounded" style="accent-color:var(--blue-deep)"><span class="text-xs font-bold uppercase" style="color:var(--brown-mid)">Cobrado</span></label></div>
+                </div>
+            </div>
+            <div class="p-5 border-t flex flex-col sm:flex-row gap-3 shrink-0" style="background:var(--cream);border-color:var(--brown-light)">
+                <button id="btn-delete-apt" onclick="window.deleteAptFromModal()" class="hidden flex-1 py-3 rounded-2xl font-bold border-2 uppercase text-xs" style="background:#fff1f2;color:#e05c6a;border-color:#fecdd3">Eliminar</button>
+                <button onclick="window.closeModal()" class="flex-1 py-3 rounded-2xl font-bold border-2 uppercase text-xs" style="color:var(--brown-mid);border-color:var(--brown-light)">Cancelar</button>
+                <button onclick="window.saveAppointment()" class="flex-1 py-3 rounded-2xl shadow-md font-bold uppercase text-xs text-white" style="background:var(--blue-deep)">Guardar Cita</button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- MODAL SERVICIO -->
+    <div id="service-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-[70] backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4" style="border:1px solid var(--brown-light)">
+            <h3 id="service-modal-title" class="font-serif italic font-semibold text-xl" style="color:var(--brown)">Nuevo Servicio</h3>
+            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Nombre</label><input type="text" id="svc-name" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Precio (€)</label><input type="number" id="svc-price" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Duración (min)</label><input type="number" id="svc-duration" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+            </div>
+            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Descripción</label><input type="text" id="svc-desc" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Categoría</label><select id="svc-category" class="w-full p-2.5 border rounded-xl font-medium" style="background:white;border-color:var(--brown-light);color:var(--brown)"></select></div>
+                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Empleadas</label><select id="svc-employee" multiple class="w-full p-2.5 border rounded-xl font-medium min-h-[120px]" style="background:white;border-color:var(--brown-light);color:var(--brown)"></select><p class="text-[8px] opacity-50 mt-1" style="color:var(--brown-mid)">Selecciona varias con Ctrl+clic. "Todas" = cualquier empleada.</p></div>
+            </div>
+            <div class="flex gap-3 pt-4" style="border-top:1px solid var(--brown-light)">
+                <button onclick="document.getElementById('service-modal').classList.add('hidden')" class="flex-1 py-3 border rounded-2xl font-semibold uppercase text-xs" style="color:var(--brown-mid);border-color:var(--brown-light)">Cancelar</button>
+                <button onclick="window.saveService()" class="flex-1 py-3 rounded-2xl shadow-md font-semibold uppercase text-xs text-white" style="background:var(--blue-deep)">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CATEGORÍA -->
+    <div id="category-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-[70] backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4" style="border:1px solid var(--brown-light)">
+            <h3 class="font-serif italic font-semibold text-xl" style="color:var(--brown)">Nueva Categoría</h3>
+            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Nombre</label><input type="text" id="cat-name" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Nombre</label><input type="text" id="cat-name" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Icono</label>
+                <div class="flex items-center gap-3">
+                    <div id="cat-icon-preview" class="w-10 h-10 rounded-xl flex items-center justify-center border-2 shadow-sm" style="background:var(--cream);border-color:var(--brown-light);color:var(--blue-deep)"><i data-lucide="sparkles" class="w-5 h-5"></i></div>
+                    <input type="text" id="cat-icon" value="sparkles" class="flex-1 p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)" readonly onclick="window.openIconPicker()" placeholder="Haz clic para elegir un icono">
+                    <button onclick="window.openIconPicker()" class="px-3 py-2.5 rounded-xl font-bold text-xs border" style="border-color:var(--brown-light);color:var(--blue-deep)">Elegir</button>
+                </div>
+            </div>
+            <div class="flex gap-3 pt-4" style="border-top:1px solid var(--brown-light)">
+                <button onclick="document.getElementById('category-modal').classList.add('hidden')" class="flex-1 py-3 border rounded-2xl font-semibold uppercase text-xs" style="color:var(--brown-mid);border-color:var(--brown-light)">Cancelar</button>
+                <button onclick="window.saveCategory()" class="flex-1 py-3 rounded-2xl shadow-md font-semibold uppercase text-xs text-white" style="background:var(--blue-deep)">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ICON PICKER MODAL -->
+    <div id="icon-picker-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-[80] backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl overflow-hidden" style="border:1px solid var(--brown-light)">
+            <div class="p-5 border-b flex justify-between items-center shrink-0" style="border-color:var(--brown-light);background:var(--cream)">
+                <h3 class="font-bold text-sm uppercase tracking-widest" style="color:var(--brown)">Seleccionar Icono</h3>
+                <button onclick="document.getElementById('icon-picker-modal').classList.add('hidden')" class="p-2 rounded-full hover:bg-slate-200 transition-colors"><i data-lucide="x" class="w-5 h-5" style="color:var(--brown-mid)"></i></button>
+            </div>
+            <div id="icon-picker-grid" class="flex-1 overflow-y-auto p-4 grid grid-cols-6 sm:grid-cols-8 gap-2 content-start custom-scroll"></div>
+        </div>
+    </div>
+
+    <!-- MODAL EMPLEADO -->
+    <div id="employee-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-[70] backdrop-blur-sm">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4" style="border:1px solid var(--brown-light)">
+            <h3 id="employee-modal-title" class="font-serif italic font-semibold text-xl" style="color:var(--brown)">Nueva Empleada</h3>
+            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Nombre</label><input type="text" id="emp-name" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Especialidad</label><select id="emp-specialty" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></select></div>
+            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Color identificativo</label><input type="color" id="emp-color" value="#8fb8ca" class="w-full h-10 border rounded-xl cursor-pointer" style="border-color:var(--brown-light)"></div>
+            <div class="flex gap-3 pt-4" style="border-top:1px solid var(--brown-light)">
+                <button onclick="document.getElementById('employee-modal').classList.add('hidden')" class="flex-1 py-3 border rounded-2xl font-semibold uppercase text-xs" style="color:var(--brown-mid);border-color:var(--brown-light)">Cancelar</button>
+                <button onclick="window.saveEmployee()" class="flex-1 py-3 rounded-2xl shadow-md font-semibold uppercase text-xs text-white" style="background:var(--blue-deep)">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <input type="file" id="exp-photo-input" accept="image/*" capture="environment" class="hidden">
+
+    <!-- Visor foto factura -->
+    <div id="exp-photo-viewer" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:200;align-items:center;justify-content:center;flex-direction:column;gap:16px">
+      <img id="exp-photo-viewer-img" src="" style="max-width:90vw;max-height:80vh;border-radius:12px;object-fit:contain">
+      <button onclick="document.getElementById('exp-photo-viewer').style.display='none'" class="px-6 py-3 rounded-2xl font-bold text-sm uppercase text-white" style="background:rgba(255,255,255,0.2)">Cerrar</button>
+    </div>
+
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODAL TICKET
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="ticket-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)">
+      <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden" style="border:1px solid var(--brown-light)">
+        <div class="flex items-center justify-between px-6 py-4" style="background:var(--brown);color:white">
+          <h3 class="font-serif italic text-xl font-semibold">Ticket de Cobro</h3>
+          <button onclick="document.getElementById('ticket-modal').style.display='none'" class="p-1 rounded-full hover:bg-white/20"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <!-- Ticket imprimible -->
+        <div id="ticket-content" class="p-6 space-y-3 font-mono text-xs" style="background:#fffdf9">
+          <!-- generado dinámicamente -->
+        </div>
+        <!-- Acciones -->
+        <div class="px-5 pb-5 pt-3 flex flex-col gap-2" style="background:white">
+          <button onclick="window.tpvSendWhatsapp()" class="w-full py-3 rounded-2xl font-bold text-xs uppercase flex items-center justify-center gap-2 text-white" style="background:#25D366">
+            <i data-lucide="message-circle" class="w-4 h-4"></i> Enviar por WhatsApp
+          </button>
+          <button onclick="window.tpvPrintTicket()" class="w-full py-3 rounded-2xl border-2 font-bold text-xs uppercase flex items-center justify-center gap-2" style="border-color:var(--brown-light);color:var(--brown)">
+            <i data-lucide="printer" class="w-4 h-4"></i> Imprimir Ticket
+          </button>
+          <button onclick="document.getElementById('ticket-modal').style.display='none';window.closeTPV()" class="w-full py-3 rounded-2xl font-bold text-xs uppercase" style="color:var(--brown-mid)">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rango Modal -->
+    <div id="range-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeRangeModal()"></div>
+        <div class="relative w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" style="background:var(--bg-main)">
+            <div class="p-5 border-b border-black/5" style="background:var(--brown)">
+                <h3 class="font-bold text-white text-lg text-center" id="range-modal-title">Configurar Rango</h3>
+                <p class="text-white/80 text-center text-xs mt-1" id="range-modal-subtitle"></p>
+            </div>
+            
+            <div class="p-6 space-y-5 overflow-y-auto" style="background:#fffdf9">
+                <div>
+                    <div class="flex gap-3 mb-4">
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">Desde</label>
+                            <input type="date" id="range-start-date" class="w-full p-3 rounded-xl border-2 font-bold text-sm bg-transparent" style="border-color:var(--brown-light);color:var(--brown)">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">Hasta</label>
+                            <input type="date" id="range-end-date" class="w-full p-3 rounded-xl border-2 font-bold text-sm bg-transparent" style="border-color:var(--brown-light);color:var(--brown)">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-3 text-center" style="color:var(--brown)">Afecta a</label>
+                    <div class="flex gap-2">
+                        <button id="range-scope-global" onclick="selectRangeScope('global')" class="flex-1 py-3 rounded-2xl border-2 font-bold text-xs uppercase transition-colors" style="border-color:var(--blue-deep);background:var(--blue-deep);color:white">Global</button>
+                        <button id="range-scope-emp" onclick="selectRangeScope('emp')" class="flex-1 py-3 rounded-2xl border-2 font-bold text-xs uppercase transition-colors" style="border-color:var(--brown-light);color:var(--brown);background:transparent">Por Empleada</button>
+                    </div>
+                </div>
+
+                <div id="range-emp-select-container" class="hidden">
+                    <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">Empleada</label>
+                    <select id="range-emp-select" class="w-full p-4 rounded-2xl border-2 font-bold text-sm bg-transparent appearance-none" style="border-color:var(--brown-light);color:var(--brown)"></select>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">Estado</label>
+                    <button id="range-btn-cerrado" onclick="selectRangeType('closed')" class="w-full py-4 rounded-2xl border-2 font-bold text-sm uppercase transition-all flex items-center justify-between px-5" style="border-color:var(--red-light);color:var(--red)">
+                        <span>Cerrado (Todos los días)</span><i data-lucide="door-closed" class="w-5 h-5"></i>
+                    </button>
+                    <button id="range-btn-custom" onclick="selectRangeType('custom')" class="w-full py-4 rounded-2xl border-2 font-bold text-sm uppercase transition-all flex items-center justify-between px-5" style="border-color:var(--brown-light);color:var(--brown)">
+                        <span>Jornada Continua</span><i data-lucide="clock" class="w-5 h-5"></i>
+                    </button>
+                    <button id="range-btn-split" onclick="selectRangeType('split')" class="w-full py-4 rounded-2xl border-2 font-bold text-sm uppercase transition-all flex items-center justify-between px-5" style="border-color:var(--brown-light);color:var(--brown)">
+                        <span>Jornada Partida</span><i data-lucide="sun" class="w-5 h-5"></i>
+                    </button>
+                    <button id="range-btn-delete" onclick="selectRangeType('delete')" class="w-full py-4 rounded-2xl border-2 font-bold text-sm uppercase transition-all flex items-center justify-between px-5" style="border-color:var(--green-light);color:var(--blue-deep)">
+                        <span>Eliminar Configuración</span><i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Tiempos para custom/split -->
+                <div id="range-custom-times" class="hidden space-y-4 pt-2 border-t" style="border-color:var(--brown-light)">
+                    <div class="flex gap-3">
+                        <div class="flex-1">
+                            <label class="block text-[10px] font-bold uppercase mb-1" style="color:var(--brown-mid)">Apertura</label>
+                            <input type="time" id="range-start" class="w-full p-3 rounded-xl border-2 font-bold text-sm bg-transparent" style="border-color:var(--brown-light);color:var(--brown)">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[10px] font-bold uppercase mb-1" style="color:var(--brown-mid)">Cierre</label>
+                            <input type="time" id="range-end" class="w-full p-3 rounded-xl border-2 font-bold text-sm bg-transparent" style="border-color:var(--brown-light);color:var(--brown)">
+                        </div>
+                    </div>
+                    <div id="range-split-times" class="hidden flex gap-3">
+                        <div class="flex-1">
+                            <label class="block text-[10px] font-bold uppercase mb-1" style="color:var(--brown-mid)">Apertura 2</label>
+                            <input type="time" id="range-start2" class="w-full p-3 rounded-xl border-2 font-bold text-sm bg-transparent" style="border-color:var(--brown-light);color:var(--brown)">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-[10px] font-bold uppercase mb-1" style="color:var(--brown-mid)">Cierre 2</label>
+                            <input type="time" id="range-end2" class="w-full p-3 rounded-xl border-2 font-bold text-sm bg-transparent" style="border-color:var(--brown-light);color:var(--brown)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-4">
+                    <button onclick="closeRangeModal()" class="flex-1 py-4 rounded-2xl border-2 font-bold text-sm uppercase transition-colors" style="border-color:var(--brown-light);color:var(--brown)">Cancelar</button>
+                    <button onclick="saveRangeConfig()" class="flex-1 py-4 rounded-2xl font-bold text-sm uppercase transition-colors shadow-lg text-white" style="background:var(--blue-deep)">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Block Modal -->
+    <div id="block-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeBlockModal()"></div>
+        <div class="relative w-full max-w-sm rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]" style="background:var(--bg-main)">
+            <div class="p-5 border-b border-black/5" style="background:#f97316">
+                <h3 class="font-bold text-white text-lg text-center">Bloquear Horario</h3>
+                <p class="text-white/80 text-center text-xs mt-1" id="block-modal-emp">Camila</p>
+            </div>
+            
+            <div class="p-6 space-y-5 overflow-y-auto" style="background:#fffdf9">
+                <input type="hidden" id="block-emp-name">
+                <input type="hidden" id="block-date">
+                
+                <div class="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" id="block-fullday" onchange="window.toggleBlockFullDay()" class="w-5 h-5 accent-orange-500 rounded border-gray-300">
+                        <span class="text-sm font-black uppercase text-orange-800">Bloquear día completo</span>
+                    </label>
+                </div>
+
+                <div id="block-time-container" class="flex gap-3 transition-opacity">
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">Desde</label>
+                        <select id="block-start" class="w-full p-4 rounded-2xl border-2 font-bold text-sm bg-transparent appearance-none" style="border-color:var(--brown-light);color:var(--brown)">
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">Hasta</label>
+                        <select id="block-end" class="w-full p-4 rounded-2xl border-2 font-bold text-sm bg-transparent appearance-none" style="border-color:var(--brown-light);color:var(--brown)">
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">Motivo</label>
+                    <select id="block-reason" class="w-full p-4 rounded-2xl border-2 font-bold text-sm bg-transparent appearance-none" style="border-color:var(--brown-light);color:var(--brown)">
+                        <option value="Comida">Comida</option>
+                        <option value="Descanso">Descanso</option>
+                        <option value="Formación">Formación</option>
+                        <option value="Personal">Asunto Personal</option>
+                        <option value="Vacaciones">Vacaciones</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+
+                <div class="hidden">
+                    <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">Repetición</label>
+                    <select id="block-recurrence" onchange="toggleBlockRecurrenceEnd()" class="w-full p-4 rounded-2xl border-2 font-bold text-sm bg-transparent appearance-none" style="border-color:var(--brown-light);color:var(--brown)">
+                        <option value="none">Solo este día</option>
+                        <option value="daily">Todos los días</option>
+                        <option value="weekly" id="block-recurrence-weekly">Cada semana</option>
+                        <option value="biweekly">Cada dos semanas</option>
+                    </select>
+                </div>
+
+                <div id="block-recurrence-end-container" class="hidden">
+                    <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">Hasta (opcional)</label>
+                    <input type="date" id="block-recurrence-end" class="w-full p-4 rounded-2xl border-2 font-bold text-sm bg-transparent" style="border-color:var(--brown-light);color:var(--brown)">
+                </div>
+
+                <div class="flex gap-2 pt-4 border-t" style="border-color:var(--brown-light)">
+                    <button onclick="closeBlockModal()" class="flex-1 py-4 rounded-2xl border-2 font-bold text-sm uppercase transition-colors" style="border-color:var(--brown-light);color:var(--brown)">Cancelar</button>
+                    <button onclick="saveBlockForm()" class="flex-1 py-4 rounded-2xl font-bold text-sm uppercase transition-colors shadow-lg text-white" style="background:#f97316">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+
+    <!-- MODAL MULTI CONFIG DÍAS -->
+    <div id="config-multi-day-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
+        <div class="bg-white rounded-3xl w-full max-w-sm flex flex-col shadow-2xl overflow-hidden" style="border:1px solid var(--brown-light)">
+            <div class="p-5 border-b bg-orange-50 flex justify-between items-center" style="border-color:var(--brown-light)">
+                <div>
+                    <h3 id="cmd-title" class="font-black text-lg text-orange-900">Configurar X días</h3>
+                    <p id="cmd-subtitle" class="text-xs font-bold text-orange-600 uppercase tracking-widest mt-1">Global</p>
+                </div>
+                <button onclick="window.closeMultiDayModal()" class="p-2 hover:bg-orange-200/50 rounded-xl transition-colors text-orange-800"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4 bg-slate-50 overflow-y-auto max-h-[75vh] custom-scroll">
+                <input type="hidden" id="cmd-entity" value="">
+                
+                <button onclick="window.applyMultiDayConfig('closed')" class="w-full flex flex-col items-center justify-center p-4 rounded-xl border-2 border-red-200 bg-red-50 hover:bg-red-100 hover:border-red-300 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-red-200 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                        <i data-lucide="ban" class="w-5 h-5 text-red-600"></i>
+                    </div>
+                    <span class="font-black text-red-700 uppercase tracking-widest text-sm">Cerrar Días</span>
+                    <span class="text-[10px] text-red-500 font-medium text-center mt-1">Marcar como no laborable / festivo</span>
+                </button>
+
+                <!-- Panel Horario Especial -->
+                <div class="border-2 border-indigo-200 bg-indigo-50/50 rounded-xl p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i data-lucide="clock" class="w-4 h-4 text-indigo-600"></i>
+                        <span class="font-black text-indigo-700 uppercase tracking-widest text-xs">Horario Especial</span>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <select id="cmd-shift-type" onchange="window.toggleCmdShiftType()" class="w-full p-2 border-2 border-indigo-100 rounded-xl font-bold text-xs bg-white text-indigo-900 outline-none">
+                            <option value="continuous">Jornada Continua</option>
+                            <option value="split">Jornada Partida</option>
+                        </select>
+                        
+                        <div class="flex items-center gap-2 text-xs font-bold text-indigo-800">
+                            <input type="time" id="cmd-start-1" value="09:00" class="flex-1 p-2 border border-indigo-200 rounded-lg bg-white outline-none">
+                            <span>-</span>
+                            <input type="time" id="cmd-end-1" value="14:00" class="flex-1 p-2 border border-indigo-200 rounded-lg bg-white outline-none">
+                        </div>
+                        
+                        <div id="cmd-split-container" class="hidden flex items-center gap-2 text-xs font-bold text-indigo-800 pt-1">
+                            <input type="time" id="cmd-start-2" value="16:00" class="flex-1 p-2 border border-indigo-200 rounded-lg bg-white outline-none">
+                            <span>-</span>
+                            <input type="time" id="cmd-end-2" value="20:00" class="flex-1 p-2 border border-indigo-200 rounded-lg bg-white outline-none">
+                        </div>
+                        
+                        <button onclick="window.applyMultiDayConfig('special')" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-colors mt-2">
+                            Aplicar Horario
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-200">
+                    <button onclick="window.applyMultiDayConfig('reset')" class="w-full py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Restaurar a Normal
+                    </button>
+                </div>
+
+                <!-- SECCIÓN 3: CIERRES DE HORA (LEGACY) -->
+                <div id="local-closed-hours-section" class="hidden pt-4 border-t border-slate-200">
+                    <h4 class="font-black text-[10px] uppercase tracking-widest flex items-center gap-2 mb-3" style="color:var(--brown)">
+                        <i data-lucide="clock" class="w-3.5 h-3.5" style="color:#ef4444"></i> Cierres de Hora Guardados
+                    </h4>
+                    <div id="local-closed-hours-list" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Información sobre Cierres -->
+    <div id="closures-info-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[32px] w-full max-w-xl overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]">
+            <div class="p-6 border-b flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center">
+                        <i data-lucide="info" class="w-4 h-4 text-orange-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif italic font-bold text-lg text-slate-800">Guía de Cierres y Horarios</h3>
+                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Opciones de configuración</p>
+                    </div>
+                </div>
+                <button onclick="window.closeClosuresInfoModal()" class="p-2 hover:bg-slate-200/50 rounded-xl transition-colors text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            
+            <div class="p-6 space-y-6 overflow-y-auto custom-scroll text-sm text-slate-600">
+                <!-- Horario Semanal -->
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2 text-indigo-700 font-black uppercase text-xs">
+                        <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                        1. Horario Semanal Regular
+                    </div>
+                    <p class="text-xs leading-relaxed text-slate-500">
+                        Define la jornada base que se repite semana tras semana. Se configura en la pestaña de <strong>Configuración</strong> en la barra lateral.
+                    </p>
+                    <ul class="list-disc list-inside text-xs space-y-1 text-slate-500 pl-2">
+                        <li><strong>Global (Centro):</strong> Define el horario general de apertura del salón.</li>
+                        <li><strong>Individual (Empleado):</strong> Si una empleada tiene su propio horario semanal (por ejemplo, turnos rotativos), se configurará en su pestaña.</li>
+                    </ul>
+                </div>
+                
+                <hr class="border-slate-100">
+                
+                <!-- Días Especiales -->
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2 text-rose-700 font-black uppercase text-xs">
+                        <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                        2. Días Especiales, Festivos y Cierres Globales
+                    </div>
+                    <p class="text-xs leading-relaxed text-slate-500">
+                        Para cerrar días concretos (festivos, vacaciones) o cambiar el horario de una fecha específica. Se organiza desde la pestaña <strong>Configuración</strong>.
+                    </p>
+                    <ul class="list-disc list-inside text-xs space-y-1 text-slate-500 pl-2">
+                        <li>Haz clic en un día (o arrastra para seleccionar varios) para abrir el gestor.</li>
+                        <li><strong>Cerrar Día (Día Completo):</strong> Cierra la agenda para esa fecha.</li>
+                        <li><strong>Horario Especial / Jornada Partida:</strong> Configura un tramo personalizado para ese día.</li>
+                        <li>Las modificaciones a nivel <strong>Global</strong> cierran el salón y se heredan por todas las empleadas, a menos que tengan un override manual.</li>
+                    </ul>
+                </div>
+                
+                <hr class="border-slate-100">
+                
+                <!-- Bloqueos Rápidos -->
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2 text-orange-700 font-black uppercase text-xs">
+                        <i data-lucide="lock" class="w-4 h-4"></i>
+                        3. Bloqueos de Horas (Agenda)
+                    </div>
+                    <p class="text-xs leading-relaxed text-slate-500">
+                        Se usan para bloquear huecos rápidos en el día a día (descansos, reuniones, asuntos personales) directamente desde la agenda de citas.
+                    </p>
+                    <ul class="list-disc list-inside text-xs space-y-1 text-slate-500 pl-2">
+                        <li>Haz doble clic sobre el día en el calendario de la especialista y pulsa en <strong>🔒 Bloquear</strong>.</li>
+                        <li>Puedes bloquear un tramo de horas o marcar <strong>Día Completo</strong>.</li>
+                        <li>Soporta <strong>Recurrencia</strong> (diaria, semanal, bisemanal) para bloqueos periódicos.</li>
+                        <li><strong>Restaurar Horario:</strong> Si deseas eliminar el bloqueo, haz clic en el botón naranja <code>🔁 Restaurar</code> que aparece en la celda del calendario mensual o en la cabecera de la ficha diaria.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="p-6 bg-slate-50 border-t flex justify-end">
+                <button onclick="window.closeClosuresInfoModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 text-white font-bold text-xs uppercase tracking-widest hover:bg-slate-700 transition-colors">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Éxito Configuración -->
+    <div id="config-success-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl border border-slate-100 flex flex-col p-6 text-center space-y-4">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl">✓</div>
+            <h3 class="font-serif italic font-bold text-xl text-slate-800">Acción Confirmada</h3>
+            <div id="config-success-summary" class="text-xs font-bold text-slate-500 space-y-2 py-2">
+                <!-- Resumen dinámico -->
+            </div>
+            <button onclick="window.closeConfigSuccessModal()" class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-colors">Aceptar</button>
+        </div>
+    </div>
+
+    <script src="admin_logic.js?v=20260707_V21"></script>
+    <script>
+
+
+                // Guardar en localStorage si el usuario cerró el banner hoy
+                const bannerClosedToday = localStorage.getItem('pwa_banner_closed_time');
+                const oneDay = 24 * 60 * 60 * 1000;
+                if (bannerClosedToday && (Date.now() - parseInt(bannerClosedToday)) < oneDay) {
+                    console.log('[PWA] El usuario cerró el banner recientemente. Mantener oculto.');
+                    return;
+                }
+            }
+
+            // Mostrar el banner por defecto (Android, iOS y Escritorio) si no está instalada o forceShow es true
+            banner.classList.remove('hidden');
+
+            // Configurar acción del botón de instalar
+            installBtn.addEventListener('click', async () => {
+                if (isIOS()) {
+                    // Mostrar modal de instrucciones para iOS
+                    document.getElementById('pwa-ios-modal').classList.remove('hidden');
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                } else if (deferredPrompt) {
+                    // Si el navegador ya disparó beforeinstallprompt, usar el instalador nativo
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`[PWA] Respuesta del usuario: ${outcome}`);
+                    deferredPrompt = null;
+                    banner.classList.add('hidden');
+                } else {
+                    // En caso de que Android/Chrome no haya disparado aún el prompt nativo, mostrar instrucciones
+                    document.getElementById('pwa-android-modal').classList.remove('hidden');
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                }
+            });
+
+            // Capturar prompt de instalación en Android / Chrome
+            window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('[PWA] event:beforeinstallprompt disparado.');
+                e.preventDefault();
+                deferredPrompt = e;
+            });
+
+            // Ocultar banner si el usuario lo cierra
+            closeBtn.addEventListener('click', () => {
+                banner.classList.add('hidden');
+                localStorage.setItem('pwa_banner_closed_time', Date.now().toString());
+            });
+
+            // Ocultar banner automáticamente al instalar
+            window.addEventListener('appinstalled', (event) => {
+                console.log('[PWA] Aplicación instalada correctamente.');
+                banner.classList.add('hidden');
+            });
+        };
+
+        // Inicializar
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            setTimeout(initPwaInstall, 1000);
+        } else {
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(initPwaInstall, 1000);
+            });
+        }
+    </script>
+</body>
+</html>
