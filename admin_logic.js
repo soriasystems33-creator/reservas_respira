@@ -1792,7 +1792,12 @@ window.closeModal();
 }catch(e){alert("Error: "+e.message)}};
 window.deleteAptFromModal=async(id=null)=>{var tid=id||editingId;if(!tid)return;if(!confirm("¿Eliminar esta cita?"))return;
 try{var apt=appointments.find(function(a){return a.id===tid});if(apt){window.trackNotif({...apt,id:tid,status:'cancelled'},'cancelled');notifyWebhook('cancellation',{...apt,id:tid});}
-await deleteDoc(doc(db,'artifacts',AID,'public','data','appointments',tid));window.closeModal()}catch(e){alert("Error: "+e.message)}};
+await deleteDoc(doc(db,'artifacts',AID,'public','data','appointments',tid));
+appointments=appointments.filter(function(a){return a.id!==tid});
+window.closeModal();
+if(typeof render==='function')render();
+if(typeof renderSpecialistDayView==='function'&&currentTab.startsWith('calendar_emp_'))renderSpecialistDayView();
+}catch(e){alert("Error: "+e.message)}};
 window.cleanPhone=function(el){
     var v=el.value.trim();
     v=v.replace(/^\+34/,'');           // quita +34
