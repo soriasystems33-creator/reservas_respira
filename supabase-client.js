@@ -96,9 +96,19 @@ function doc(db) {
   return { _type: 'doc', path: parts.join('/'), table: t.table, id: t.id };
 }
 
+// Map of active listeners per table so local operations trigger immediate local refresh
+var _tableListeners = {};
+
+function _notifyTable(table) {
+  if (_tableListeners[table]) {
+    _tableListeners[table].forEach(function(fn) { fn(); });
+  }
+}
+
 function addDoc(ref, data) {
   return supabase.from(ref.table).insert(_camelToSnake(data)).select().single().then(function(r) {
     if (r.error) throw r.error;
+    _notifyTable(ref.table);
     return _snakeToCamel(r.data);
   });
 }
@@ -106,18 +116,21 @@ function addDoc(ref, data) {
 function setDoc(ref, data, opts) {
   return supabase.from(ref.table).upsert({ ..._camelToSnake(data), id: ref.id }).then(function(r) {
     if (r.error) throw r.error;
+    _notifyTable(ref.table);
   });
 }
 
 function updateDoc(ref, data) {
   return supabase.from(ref.table).update(_camelToSnake(data)).eq('id', ref.id).then(function(r) {
     if (r.error) throw r.error;
+    _notifyTable(ref.table);
   });
 }
 
 function deleteDoc(ref) {
   return supabase.from(ref.table).delete().eq('id', ref.id).then(function(r) {
     if (r.error) throw r.error;
+    _notifyTable(ref.table);
   });
 }
 
@@ -158,6 +171,9 @@ function onSnapshot(ref, cb) {
 
   fetchData();
 
+  if (!_tableListeners[table]) _tableListeners[table] = [];
+  _tableListeners[table].push(fetchData);
+
   channel = supabase
     .channel('public:' + table + ':' + (ref.id || '*'))
     .on('postgres_changes',
@@ -168,6 +184,9 @@ function onSnapshot(ref, cb) {
 
   return function() {
     destroyed = true;
+    if (_tableListeners[table]) {
+      _tableListeners[table] = _tableListeners[table].filter(function(fn) { return fn !== fetchData; });
+    }
     if (channel) supabase.removeChannel(channel);
   };
 }
