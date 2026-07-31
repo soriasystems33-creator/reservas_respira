@@ -1788,10 +1788,33 @@ try{var isEdit=!!editingId;let res;if(isEdit){await updateDoc(doc(db,'artifacts'
 else{data.createdAt=new Date().toISOString();if(isCancelled) data.cancelledAt = new Date().toISOString();res=await addDoc(collection(db,'artifacts',AID,'public','data','appointments'),data);data.id=res.id;}
 window.closeModal();
     window.trackNotif(data, 'new');
-    notifyWebhook(isEdit?'modification':'new',data);
+    var payload = {
+      event: isEdit ? 'modification' : 'new',
+      appointment: data,
+      newAppointment: data,
+      ...data,
+      clientEmail: data.clientEmail || data.client_email,
+      client_email: data.client_email || data.clientEmail,
+      clientName: data.clientName || data.client_name,
+      client_name: data.client_name || data.clientName
+    };
+    notifyWebhook(isEdit?'modification':'new', payload);
 }catch(e){alert("Error: "+e.message)}};
 window.deleteAptFromModal=async(id=null)=>{var tid=id||editingId;if(!tid)return;if(!confirm("¿Eliminar esta cita?"))return;
-try{var apt=appointments.find(function(a){return a.id===tid});if(apt){window.trackNotif({...apt,id:tid,status:'cancelled'},'cancelled');notifyWebhook('cancellation',{...apt,id:tid});}
+try{var apt=appointments.find(function(a){return a.id===tid});if(apt){
+  window.trackNotif({...apt,id:tid,status:'cancelled'},'cancelled');
+  var cancelPayload = {
+    event: 'cancellation',
+    appointment: {...apt, id: tid},
+    ...apt,
+    id: tid,
+    clientEmail: apt.clientEmail || apt.client_email,
+    client_email: apt.client_email || apt.clientEmail,
+    clientName: apt.clientName || apt.client_name,
+    client_name: apt.client_name || apt.clientName
+  };
+  notifyWebhook('cancellation', cancelPayload);
+}
 await deleteDoc(doc(db,'artifacts',AID,'public','data','appointments',tid));
 appointments=appointments.filter(function(a){return a.id!==tid});
 window.closeModal();
