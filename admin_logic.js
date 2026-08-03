@@ -998,6 +998,131 @@ tbody.appendChild(tr)});
 lucide.createIcons()};
 
 // ---- CLIENTS ----
+window.getClientList = () => {
+    const cMap = {};
+    (window.appointments || appointments || []).forEach(a => {
+        if (!a.clientName && !a.name) return;
+        const name = (a.clientName || a.name).trim();
+        const phone = (a.clientPhone || a.phone || '').trim();
+        const email = (a.clientEmail || a.email || '').trim();
+        
+        const key = phone ? phone : name.toLowerCase();
+        
+        if (!cMap[key]) {
+            cMap[key] = {
+                name: name,
+                phone: phone,
+                email: email,
+                totalSpent: 0,
+                visits: []
+            };
+        }
+        
+        cMap[key].totalSpent += parseFloat(a.price) || 0;
+        cMap[key].visits.push(a);
+    });
+    
+    Object.values(cMap).forEach(c => {
+        c.visits.sort((a, b) => new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time));
+    });
+    
+    return Object.values(cMap).sort((a, b) => a.name.localeCompare(b.name));
+};
+
+window.handleClientNameInput = (val) => {
+    const dl = document.getElementById('clients-datalist');
+    if (!dl) return;
+    
+    if (!val || val.length < 2) {
+        dl.innerHTML = '';
+        return;
+    }
+    
+    const term = val.toLowerCase();
+    const cl = window.getClientList().filter(c => c.name.toLowerCase().includes(term) || c.phone.includes(term));
+    
+    dl.innerHTML = cl.map(c => `<option value="${c.name}">${c.phone ? ' - ' + c.phone : ''}</option>`).join('');
+    
+    const exactMatch = cl.find(c => c.name.toLowerCase() === term);
+    if (exactMatch) {
+        const phoneInput = document.getElementById('m-phone');
+        const emailInput = document.getElementById('m-email');
+        if (phoneInput && !phoneInput.value && exactMatch.phone) phoneInput.value = exactMatch.phone;
+        if (emailInput && !emailInput.value && exactMatch.email) emailInput.value = exactMatch.email;
+    }
+};
+
+window.showClientDetails = (c) => {
+    let modal = document.getElementById('client-details-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'client-details-modal';
+        modal.className = 'fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-[80] backdrop-blur-sm';
+        document.body.appendChild(modal);
+    }
+    
+    const historyHtml = c.visits.map(v => {
+        const parts = v.date.split('-'); 
+        let formattedDate = v.date;
+        if (parts.length === 3) formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        const st = v.status || 'pending';
+        return `
+        <div class="border-b last:border-0 py-3 border-slate-100 flex justify-between items-center">
+            <div>
+                <p class="text-xs font-bold text-slate-700">${formattedDate} a las ${v.time}</p>
+                <p class="text-[10px] text-blue-600 font-black uppercase mt-0.5">${v.service || 'Servicio General'}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-xs font-black text-green-600">${parseFloat(v.price||0).toFixed(2)}€</p>
+                <p class="text-[9px] text-slate-400 font-bold uppercase">${st}</p>
+            </div>
+        </div>
+        `;
+    }).join('');
+    
+    modal.innerHTML = `
+        <div class="bg-white rounded-3xl w-full max-w-md flex flex-col shadow-2xl overflow-hidden modal-mobile border" style="border-color:var(--brown-light); max-height: 85vh;">
+            <div class="p-6 border-b flex justify-between items-center" style="background:var(--cream); border-color:var(--brown-light)">
+                <h3 class="font-serif italic font-semibold text-xl" style="color:var(--brown)">Detalles del Cliente</h3>
+                <button onclick="document.getElementById('client-details-modal').classList.add('hidden')" class="p-2 rounded-full hover:bg-slate-200/50 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5" style="color:var(--brown-mid)"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-grow" style="background:#fff">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center font-black text-white uppercase text-xl shadow-md">${c.name.substring(0,2).toUpperCase()}</div>
+                    <div>
+                        <h4 class="font-black text-lg text-slate-700 uppercase leading-none">${c.name}</h4>
+                        <p class="text-xs text-slate-500 font-mono mt-1"><i data-lucide="phone" class="w-3 h-3 inline"></i> ${c.phone || 'Sin teléfono'}</p>
+                        ${c.email ? `<p class="text-xs text-slate-500 mt-0.5"><i data-lucide="mail" class="w-3 h-3 inline"></i> ${c.email}</p>` : ''}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="p-4 rounded-2xl bg-blue-50 border border-blue-100 text-center">
+                        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Total Gastado</p>
+                        <p class="text-xl font-black text-blue-700 mt-1">${c.totalSpent.toFixed(2)}€</p>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-purple-50 border border-purple-100 text-center">
+                        <p class="text-[10px] font-bold text-purple-400 uppercase tracking-wider">Visitas</p>
+                        <p class="text-xl font-black text-purple-700 mt-1">${c.visits.length}</p>
+                    </div>
+                </div>
+                
+                <h5 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Historial de Citas</h5>
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                    ${historyHtml || '<p class="text-xs text-slate-400 text-center py-4">No hay citas registradas.</p>'}
+                </div>
+            </div>
+            <div class="p-4 border-t bg-slate-50 flex gap-2">
+                <button onclick="document.getElementById('client-details-modal').classList.add('hidden')" class="flex-1 py-3 rounded-2xl font-bold uppercase text-xs border bg-white text-slate-500 hover:bg-slate-100 transition-colors">Cerrar</button>
+            </div>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+    if(window.lucide) window.lucide.createIcons({root: modal});
+};
+
 window.renderClients=()=>{
     const cmList = window.getClientList();
     const se=document.getElementById('client-search');
