@@ -67,7 +67,7 @@ CREATE TABLE employees (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   specialty TEXT DEFAULT '',
-  color TEXT DEFAULT '#3b82f6',
+  color TEXT DEFAULT '#a78bfa',
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );

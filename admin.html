@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Gestión â€” Magic Studio Vicen</title>
+    <title>Panel Gestión — Magic Studio Vicen</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/magic.jpg" type="image/png">
     <link rel="apple-touch-icon" href="/magic.jpg">
@@ -176,7 +176,7 @@
         }
         /* â”€ Notif Cards Animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         @keyframes slideDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
-        @keyframes pulse-notif { 0%,100% { box-shadow:0 0 0 0 rgba(59,130,246,.4); } 50% { box-shadow:0 0 0 12px rgba(59,130,246,0); } }
+        @keyframes pulse-notif { 0%,100% { box-shadow:0 0 0 0 rgba(124,53,237,.4); } 50% { box-shadow:0 0 0 12px rgba(124,53,237,0); } }
         .notif-new { animation:slideDown .35s ease,pulse-notif 1.5s ease 3; }
 
         /* â”€ Animations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -343,7 +343,7 @@
                 </div>
             </div>
 
-            <!-- VISTA TIMELINE ESPECIALISTA â€” Google Calendar style -->
+            <!-- VISTA TIMELINE ESPECIALISTA — Google Calendar style -->
             <div id="view-specialist-day" class="hidden rounded-3xl shadow-sm border" style="background:white;border-color:var(--brown-light);height:calc(100vh - 220px);overflow-y:auto">
                 <div id="timeline-container" class="p-6" style="min-width:320px"></div>
             </div>
@@ -448,7 +448,7 @@
                             <div class="mb-4">
                                 <label class="text-[9px] md:text-[10px] font-bold uppercase tracking-wider mb-1 block" style="color:var(--brown-mid)">Vincular Cita (opcional)</label>
                                 <select id="tpv-apt-select" onchange="window.tpvLinkAppointment()" class="w-full p-2 md:p-3 border rounded-xl font-semibold text-[11px] md:text-sm" style="background:white;border-color:var(--brown-light);color:var(--brown)">
-                                    <option value="">â€” Cobro manual sin cita â€”</option>
+                                    <option value="">— Cobro manual sin cita —</option>
                                 </select>
                             </div>
                             <div class="flex gap-3">
@@ -576,15 +576,15 @@
                     <div class="flex gap-3">
                       <div class="flex-grow rounded-xl p-2.5 border text-xs font-black flex flex-col gap-0.5" style="background:#f0fdf4;border-color:#bbf7d0">
                         <span class="text-[8px] font-bold uppercase opacity-60" style="color:#166534">Base imponible</span>
-                        <span id="exp-base-display" style="color:#166534">â€” â‚¬</span>
+                        <span id="exp-base-display" style="color:#166534">— â‚¬</span>
                       </div>
                       <div class="w-28 rounded-xl p-2.5 border text-xs font-black flex flex-col gap-0.5" style="background:#fefce8;border-color:#fde68a">
                         <span class="text-[8px] font-bold uppercase opacity-60" style="color:#92400e">IVA</span>
-                        <span id="exp-iva-display" style="color:#92400e">â€” â‚¬</span>
+                        <span id="exp-iva-display" style="color:#92400e">— â‚¬</span>
                       </div>
                       <div class="w-28 rounded-xl p-2.5 border text-xs font-black flex flex-col gap-0.5" style="background:#eff6ff;border-color:#bfdbfe">
                         <span class="text-[8px] font-bold uppercase opacity-60" style="color:#1e40af">Total</span>
-                        <span id="exp-total-display" style="color:#1e40af">â€” â‚¬</span>
+                        <span id="exp-total-display" style="color:#1e40af">— â‚¬</span>
                       </div>
                     </div>
                   </div>
@@ -622,7 +622,7 @@
               <div id="expenses-list" class="space-y-3"></div>
             </div>
 
-            <!-- VISTA GESTIÃ“N SERVICIOS -->
+            <!-- VISTA GESTIÓN SERVICIOS -->
             <div id="view-services_mgmt" class="hidden space-y-6">
                 <div class="flex justify-between items-center">
                     <h3 class="font-serif italic font-semibold text-2xl" style="color:var(--brown)">Gestión de Servicios</h3>
@@ -634,7 +634,7 @@
                 <div id="services-mgmt-list" class="space-y-6"></div>
             </div>
 
-            <!-- VISTA GESTIÃ“N EMPLEADOS -->
+            <!-- VISTA GESTIÓN EMPLEADOS -->
             <div id="view-employees_mgmt" class="hidden space-y-6">
                 <div class="flex justify-between items-center">
                     <h3 class="font-serif italic font-semibold text-2xl" style="color:var(--brown)">Gestión de Empleadas</h3>
@@ -1068,7 +1068,7 @@
                     </button>
                 </div>
 
-                <!-- SECCIÃ“N 3: CIERRES DE HORA (LEGACY) -->
+                <!-- SECCIÓN 3: CIERRES DE HORA (LEGACY) -->
                 <div id="local-closed-hours-section" class="hidden pt-4 border-t border-slate-200">
                     <h4 class="font-black text-[10px] uppercase tracking-widest flex items-center gap-2 mb-3" style="color:var(--brown)">
                         <i data-lucide="clock" class="w-3.5 h-3.5" style="color:#ef4444"></i> Cierres de Hora Guardados
@@ -1158,7 +1158,7 @@
         </div>
     </div>
 
-    <!-- Modal Ã‰xito Configuración -->
+    <!-- Modal Éxito Configuración -->
     <div id="config-success-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl border border-slate-100 flex flex-col p-6 text-center space-y-4">
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl">âœ“</div>
