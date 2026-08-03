@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Gestión — Magic Studio Vicen</title>
+    <title>Panel GestiÃ³n â€” Magic Studio Vicen</title>
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" href="/magic.jpg" type="image/png">
     <link rel="apple-touch-icon" href="/magic.jpg">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="UNIR Gestión">
+    <meta name="apple-mobile-web-app-title" content="UNIR GestiÃ³n">
     <meta name="theme-color" content="#7c3aed">
     <meta name="mobile-web-app-capable" content="yes">
 
@@ -45,13 +45,13 @@
         *{font-family:'Nunito',sans-serif;}
         h1,h2,h3,.font-serif{font-family:'Cormorant Garamond',serif;}
 
-        /* ─ Scrollbar ─────────────────────────────────── */
+        /* â”€ Scrollbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .custom-scroll::-webkit-scrollbar{width:5px;height:5px}
         .custom-scroll::-webkit-scrollbar-track{background:var(--cream-dark)}
         .custom-scroll::-webkit-scrollbar-thumb{background:var(--brown-light);border-radius:4px}
         .custom-scroll::-webkit-scrollbar-thumb:hover{background:var(--brown-mid)}
 
-        /* ─ Calendar ──────────────────────────────────── */
+        /* â”€ Calendar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--brown-light);border:1px solid var(--brown-light)}
         .calendar-day{background:white;min-height:110px;padding:8px;transition:all .2s;cursor:pointer;position:relative}
         .calendar-day:hover{background:var(--cream)}
@@ -60,25 +60,25 @@
         .calendar-day.closed::after{content:'CERRADO';position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:9px;font-weight:900;color:#ef4444;letter-spacing:1px;}
         .calendar-day.custom-hours{border:2px solid var(--blue-deep);background:#f0f6fa}
 
-        /* ─ Time slots ────────────────────────────────── */
+        /* â”€ Time slots â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .time-btn{border:1px solid var(--brown-light);padding:8px 4px;border-radius:10px;font-size:11px;font-weight:700;text-align:center;transition:all .2s;font-family:'Nunito',sans-serif}
         .time-btn:hover:not(.occupied){border-color:var(--blue-mid);background:var(--cream)}
         .time-btn.selected{background:var(--blue-deep);color:white;border-color:var(--blue-deep)}
         .time-btn.occupied{background:var(--cream-dark);color:var(--brown-light);cursor:not-allowed;text-decoration:line-through;border-style:dashed}
 
-        /* ─ Timeline ──────────────────────────────────── */
+        /* â”€ Timeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .timeline-apt{position:absolute;left:4px;right:4px;border-radius:8px;padding:6px 10px;font-size:10px;font-weight:700;overflow:hidden;z-index:20;display:flex;flex-direction:column;justify-content:start;cursor:pointer;box-shadow:0 2px 8px rgba(46,40,38,.08);border-left-width:4px;transition:transform .15s}
         .timeline-apt:hover{transform:scale(1.01);z-index:30}
         .hour-row{height:60px;border-top:1px solid var(--cream-dark);position:relative}
         .hour-label{position:absolute;top:-10px;left:-50px;width:40px;text-align:right;color:var(--brown-mid);font-size:10px;font-weight:600}
 
-        /* ─ Config tabs ───────────────────────────────── */
+        /* â”€ Config tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .config-selected{border-color:var(--blue-deep)!important;background-color:var(--blue-deep)!important;color:white!important}
 
-        /* ─ Sidebar nav active ────────────────────────── */
+        /* â”€ Sidebar nav active â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         .nav-active{background:white!important;color:var(--blue-deep)!important;font-weight:800;box-shadow:0 2px 12px rgba(91,143,160,.15)}
 
-        /* ─ Mobile Sidebar ───────────────────────────── */
+        /* â”€ Mobile Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         #sidebar-overlay{display:none}
         @media(max-width:767px){
             #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:60}
@@ -90,7 +90,7 @@
             #conn-status{top:10px!important;right:130px!important;font-size:8px!important;padding:3px 8px!important}
         }
 
-        /* ─ Mobile ────────────────────────────────────── */
+        /* â”€ Mobile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         @media(max-width:640px){
             .calendar-grid{display:flex;flex-direction:column;gap:8px;background:transparent;border:none}
             .calendar-day{min-height:auto;padding:12px;border-radius:12px;border:1px solid var(--brown-light);border-left:4px solid var(--blue-mid)}
@@ -107,13 +107,13 @@
             .table-mobile{font-size:9px!important}
             .table-mobile th,.table-mobile td{padding:6px 4px!important}
             #client-detail-panel{position:fixed;inset:0;z-Index:50;border-radius:0!important}
-            /* ── Main padding ── */
+            /* â”€â”€ Main padding â”€â”€ */
             main{padding:12px!important}
             #view-title{font-size:1.3rem!important}
-            /* ── Botones touch-friendly ── */
+            /* â”€â”€ Botones touch-friendly â”€â”€ */
             button,.btn-like{min-height:44px!important}
             .sidebar-btn{min-height:48px!important;font-size:12px!important}
-            /* ── Tabla citas → tarjetas ── */
+            /* â”€â”€ Tabla citas â†’ tarjetas â”€â”€ */
             #view-appointments table,#view-appointments thead,#view-appointments tbody,#view-appointments th,#view-appointments td,#view-appointments tr{display:block!important}
             #view-appointments thead{display:none!important}
             #view-appointments tr{background:white;border-radius:16px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--brown-light);box-shadow:0 2px 8px rgba(0,0,0,.04)}
@@ -130,56 +130,56 @@
             #view-appointments td[data-label="Pagado"] span{font-size:9px!important;padding:2px 8px!important}
             #view-appointments td .text-\[10px\].font-mono{font-size:9px!important}
             #view-appointments .highlight-new{background:#fefce8!important;border-left:3px solid #facc15!important}
-            /* ── TPV view mobile ── */
+            /* â”€â”€ TPV view mobile â”€â”€ */
 
-            /* ── Modales generales ── */
+            /* â”€â”€ Modales generales â”€â”€ */
             #day-modal>div,#modal>div,#service-modal>div,#category-modal>div,#employee-modal>div,#config-day-modal>div,#ticket-modal>div{max-width:100%!important;width:100%!important;border-radius:0!important;max-height:100vh!important;height:100vh!important}
             #day-modal,#modal,#service-modal,#category-modal,#employee-modal,#config-day-modal,#ticket-modal{padding:0!important;align-items:stretch!important}
             #day-modal>div>div:last-child,#modal>div>div:last-child{flex-grow:1!important;overflow-y:auto!important}
-            /* ── Vista clientes ── */
+            /* â”€â”€ Vista clientes â”€â”€ */
             #view-clients .grid{grid-template-columns:1fr!important}
             #clients-list{max-height:40vh!important}
             #client-detail-panel{position:fixed;inset:0;z-index:50;border-radius:0!important;overflow-y:auto!important;padding:12px!important}
-            /* ── Vista contabilidad ── */
+            /* â”€â”€ Vista contabilidad â”€â”€ */
             #acc-kpi-cards{grid-template-columns:1fr 1fr!important;gap:8px!important}
             #view-billing .bg-white.p-8{padding:16px!important}
-            /* ── Vista gastos ── */
+            /* â”€â”€ Vista gastos â”€â”€ */
             #view-gastos .bg-white.p-6{padding:16px!important}
             #view-gastos .grid-cols-1.gap-4>.flex.gap-3{flex-direction:column!important}
             #view-gastos .flex.gap-3>div{width:100%!important}
-            /* ── Servicios/Empleados ── */
+            /* â”€â”€ Servicios/Empleados â”€â”€ */
             #view-services_mgmt .flex.justify-between,#view-employees_mgmt .flex.justify-between{flex-direction:column!important;align-items:stretch!important;gap:8px!important}
             #view-services_mgmt .flex.justify-between button,#view-employees_mgmt .flex.justify-between button{width:100%!important;justify-content:center!important}
-            /* ── Config ── */
+            /* â”€â”€ Config â”€â”€ */
             #view-config .bg-white.p-8{padding:16px!important}
             #standard-inputs-container{grid-template-columns:1fr!important}
             #config-calendar-body .calendar-grid{display:flex!important;flex-direction:column!important;gap:4px!important}
             #config-calendar-body .calendar-day{min-height:auto!important;padding:8px!important}
-            /* ── Notificaciones ── */
+            /* â”€â”€ Notificaciones â”€â”€ */
             #view-notifications-content .flex.items-start{gap:8px!important}
-            /* ── Timeline especialista ── */
+            /* â”€â”€ Timeline especialista â”€â”€ */
             #view-specialist-day{height:calc(100vh - 100px)!important}
 
-            /* ── viewAppointment modal (JS) ── */
+            /* â”€â”€ viewAppointment modal (JS) â”€â”€ */
             .view-apt-modal{max-width:100%!important;width:100%!important;border-radius:0!important;height:100vh!important;max-height:100vh!important;margin:0!important}
-            /* ── Listado citas contador ── */
+            /* â”€â”€ Listado citas contador â”€â”€ */
             #view-appointments .flex-wrap .ml-auto{margin-left:0!important}
-            /* ── Billing export button ── */
+            /* â”€â”€ Billing export button â”€â”€ */
             #view-billing .flex-wrap button{width:100%!important;justify-content:center!important}
-            /* ── Modal día - min-height ── */
+            /* â”€â”€ Modal dÃ­a - min-height â”€â”€ */
             #day-modal-columns{min-height:auto!important}
             #day-modal-columns{grid-template-columns:1fr!important}
             #day-modal-columns>div{min-height:auto!important}
             #day-modal-columns .overflow-y-auto{max-height:none!important;overflow-y:visible!important}
-            /* ── Show more clickable area ── */
+            /* â”€â”€ Show more clickable area â”€â”€ */
             select,input{font-size:16px!important} /* prevent iOS zoom */
         }
-        /* ─ Notif Cards Animation ──────────────────────────── */
+        /* â”€ Notif Cards Animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         @keyframes slideDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
         @keyframes pulse-notif { 0%,100% { box-shadow:0 0 0 0 rgba(59,130,246,.4); } 50% { box-shadow:0 0 0 12px rgba(59,130,246,0); } }
         .notif-new { animation:slideDown .35s ease,pulse-notif 1.5s ease 3; }
 
-        /* ─ Animations ────────────────────────────────── */
+        /* â”€ Animations â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         @keyframes badge-dancing {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.2) rotate(5deg); }
@@ -191,7 +191,7 @@
             justify-content: center;
         }
 
-        /* ─ Bell Ring Animation ───────────────────────── */
+        /* â”€ Bell Ring Animation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         @keyframes ring {
           0% { transform: rotate(0); }
           10% { transform: rotate(15deg); }
@@ -207,7 +207,7 @@
           animation: ring 2s infinite;
         }
 
-        /* ─ Highlight New Appointment ────────────────── */
+        /* â”€ Highlight New Appointment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
         @keyframes highlight-fade {
           0% { background-color: #fef08a; } /* yellow-200 */
           100% { background-color: transparent; }
@@ -231,15 +231,15 @@
         <div id="login-error" class="hidden mb-4 p-3 rounded-xl text-xs font-bold text-center" style="background:#fff1f2;color:#e05c6a;border:1px solid #fecdd3"></div>
         <div class="space-y-4">
             <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Correo electrónico</label>
+                <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Correo electrÃ³nico</label>
                 <input type="email" id="login-email" value="magicnailskaty@gmail.com" class="w-full p-3 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
             </div>
             <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Contraseña</label>
+                <label class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">ContraseÃ±a</label>
                 <input type="password" id="login-password" class="w-full p-3 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)" onkeydown="if(event.key==='Enter')window.doLogin()">
             </div>
-            <button id="login-btn" onclick="window.doLogin()" class="w-full py-3 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-md active:scale-95 transition-all text-white disabled:opacity-50 disabled:cursor-not-allowed" style="background:var(--blue-deep)">Iniciar Sesión</button>
-            <button onclick="window.resetPassword()" class="w-full text-center text-[10px] font-bold underline mt-3 transition-colors" style="color:var(--brown-mid)">¿Olvidaste tu contraseña?</button>
+            <button id="login-btn" onclick="window.doLogin()" class="w-full py-3 rounded-2xl font-bold uppercase text-xs tracking-widest shadow-md active:scale-95 transition-all text-white disabled:opacity-50 disabled:cursor-not-allowed" style="background:var(--blue-deep)">Iniciar SesiÃ³n</button>
+            <button onclick="window.resetPassword()" class="w-full text-center text-[10px] font-bold underline mt-3 transition-colors" style="color:var(--brown-mid)">Â¿Olvidaste tu contraseÃ±a?</button>
         </div>
     </div>
 </div>
@@ -249,7 +249,7 @@
         <div id="sidebar-overlay" onclick="window.toggleSidebar()"></div>
         <!-- Hamburger Button (mobile) -->
         <button id="hamburger-btn" onclick="window.toggleSidebar()" class="hidden fixed top-3 left-3 z-[65] p-2.5 bg-white rounded-xl shadow-lg border active:scale-95 transition-all" style="border-color:var(--brown-light);color:var(--brown-mid)"><i data-lucide="menu" class="w-5 h-5"></i></button>
-        <!-- Campana de Notificación Flotante -->
+        <!-- Campana de NotificaciÃ³n Flotante -->
         <div id="floating-bell" class="fixed top-3 right-40 z-[100] hidden cursor-pointer animate-ring" onclick="window.handleBellClick()">
             <div class="relative bg-white p-3 rounded-full shadow-2xl border-2 border-red-500 flex items-center justify-center">
                 <i data-lucide="bell" class="w-6 h-6 text-red-500"></i>
@@ -286,7 +286,7 @@
                 </button>
                 <button onclick="window.setTab('notifications')" id="tab-notifications" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="bell" class="w-4 h-4" style="color:var(--rose)"></i> Notificaciones</button>
                 <button onclick="window.setTab('clients')" id="tab-clients" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="users" class="w-4 h-4" style="color:var(--rose)"></i> Clientes</button>
-                <button onclick="window.openTPV()" id="tab-tpv" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="shopping-cart" class="w-4 h-4" style="color:var(--gold)"></i> TPV · Cobro</button>
+                <button onclick="window.openTPV()" id="tab-tpv" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="shopping-cart" class="w-4 h-4" style="color:var(--gold)"></i> TPV Â· Cobro</button>
                 <button onclick="window.setTab('billing')" id="tab-billing" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="bar-chart-3" class="w-4 h-4 opacity-60"></i> Contabilidad</button>
                 <button onclick="window.setTab('gastos')" id="tab-gastos" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="receipt" class="w-4 h-4" style="color:#e05c6a"></i> Gastos</button>
 
@@ -296,8 +296,8 @@
                 <div class="text-[9px] font-bold uppercase mt-5 mb-2 px-3 tracking-widest opacity-50" style="color:var(--brown-mid)">Sistema</div>
                 <button onclick="window.setTab('services_mgmt')" id="tab-services_mgmt" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="sparkles" class="w-4 h-4" style="color:var(--gold)"></i> Servicios</button>
                 <button onclick="window.setTab('employees_mgmt')" id="tab-employees_mgmt" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="user-cog" class="w-4 h-4" style="color:var(--blue-deep)"></i> Empleados</button>
-                <button onclick="window.setTab('config')" id="tab-config" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="settings" class="w-4 h-4 opacity-60"></i> Configuración</button>
-                <button onclick="window.doLogout()" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium mt-4" style="color:#e05c6a"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar Sesión</button>
+                <button onclick="window.setTab('config')" id="tab-config" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium" style="color:var(--brown)"><i data-lucide="settings" class="w-4 h-4 opacity-60"></i> ConfiguraciÃ³n</button>
+                <button onclick="window.doLogout()" class="w-full text-left p-3 rounded-xl hover:bg-white/60 flex items-center gap-3 transition-all font-medium mt-4" style="color:#e05c6a"><i data-lucide="log-out" class="w-4 h-4"></i> Cerrar SesiÃ³n</button>
             </nav>
         </aside>
 
@@ -308,18 +308,18 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h2 id="view-title" class="font-serif text-3xl italic font-semibold tracking-tight" style="color:var(--brown)">Agenda Global</h2>
-                            <button id="btn-info-closures" onclick="window.openClosuresInfoModal()" class="p-1.5 rounded-full hover:bg-slate-200/50 transition-all flex items-center justify-center text-slate-400 hover:text-slate-600 outline-none" title="Información sobre cierres y bloqueos">
+                            <button id="btn-info-closures" onclick="window.openClosuresInfoModal()" class="p-1.5 rounded-full hover:bg-slate-200/50 transition-all flex items-center justify-center text-slate-400 hover:text-slate-600 outline-none" title="InformaciÃ³n sobre cierres y bloqueos">
                                 <i data-lucide="info" class="w-5 h-5"></i>
                             </button>
                         </div>
-                        <p id="view-subtitle" class="text-xs font-medium" style="color:var(--brown-mid)">Gestión de Magic Studio Vicen</p>
+                        <p id="view-subtitle" class="text-xs font-medium" style="color:var(--brown-mid)">GestiÃ³n de Magic Studio Vicen</p>
                     </div>
                 </div>
                 <div id="nav-controls" class="flex items-center gap-3 w-full sm:w-auto">
                     <button onclick="window.changeDate(-1)" class="p-2 rounded-lg border bg-white hover:opacity-80 transition-opacity" style="border-color:var(--brown-light)"><i data-lucide="chevron-left" class="w-5 h-5" style="color:var(--brown-mid)"></i></button>
                     <span id="current-view-label" class="text-base font-bold min-w-[150px] text-center capitalize" style="color:var(--brown)">Hoy</span>
                     <button onclick="window.changeDate(1)" class="p-2 rounded-lg border bg-white hover:opacity-80 transition-opacity" style="border-color:var(--brown-light)"><i data-lucide="chevron-right" class="w-5 h-5" style="color:var(--brown-mid)"></i></button>
-                    <button id="btn-toggle-config-mode" onclick="window.toggleEmpConfigMode()" class="hidden ml-4 px-5 py-2.5 rounded-xl font-semibold items-center gap-2 shadow-md active:scale-95 transition-all text-xs uppercase tracking-widest text-orange-700 bg-orange-100 border border-orange-200"><i data-lucide="settings" class="w-4 h-4"></i> Configurar Varios Días</button>
+                    <button id="btn-toggle-config-mode" onclick="window.toggleEmpConfigMode()" class="hidden ml-4 px-5 py-2.5 rounded-xl font-semibold items-center gap-2 shadow-md active:scale-95 transition-all text-xs uppercase tracking-widest text-orange-700 bg-orange-100 border border-orange-200"><i data-lucide="settings" class="w-4 h-4"></i> Configurar Varios DÃ­as</button>
                     <button onclick="window.openModal()" class="ml-4 px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-md active:scale-95 transition-all text-xs uppercase tracking-widest text-white" style="background:var(--blue-deep)"><i data-lucide="plus" class="w-4 h-4"></i> Nueva Cita</button>
                 </div>
             </div>
@@ -327,12 +327,12 @@
             <!-- VISTA CALENDARIO MES -->
             <div id="view-calendar" class="space-y-4">
                 <div class="grid grid-cols-7 text-center text-[10px] font-bold uppercase mb-2 tracking-widest" style="color:var(--brown-mid)">
-                    <div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div><div>Dom</div>
+                    <div>Lun</div><div>Mar</div><div>MiÃ©</div><div>Jue</div><div>Vie</div><div>SÃ¡b</div><div>Dom</div>
                 </div>
                 <div id="calendar-body" class="calendar-grid rounded-2xl overflow-hidden shadow-sm" style="border:1px solid var(--brown-light)"></div>
             </div>
 
-            <!-- VISTA DÍA GLOBAL -->
+            <!-- VISTA DÃA GLOBAL -->
             <div id="view-global-day" class="hidden flex-col h-full">
                 <div class="flex justify-between items-center mb-4 px-2">
                     <span class="text-xs font-semibold uppercase px-3 py-1 rounded-lg" style="background:var(--cream-dark);color:var(--brown-mid)">Vista Diaria</span>
@@ -343,7 +343,7 @@
                 </div>
             </div>
 
-            <!-- VISTA TIMELINE ESPECIALISTA — Google Calendar style -->
+            <!-- VISTA TIMELINE ESPECIALISTA â€” Google Calendar style -->
             <div id="view-specialist-day" class="hidden rounded-3xl shadow-sm border" style="background:white;border-color:var(--brown-light);height:calc(100vh - 220px);overflow-y:auto">
                 <div id="timeline-container" class="p-6" style="min-width:320px"></div>
             </div>
@@ -385,7 +385,7 @@
                 <div class="bg-white p-4 rounded-2xl shadow-sm border" style="border-color:var(--brown-light)">
                     <div class="relative">
                         <i data-lucide="search" class="absolute left-3 top-3 w-5 h-5" style="color:var(--brown-light)"></i>
-                        <input type="text" id="client-search" onkeyup="window.renderClients()" placeholder="Buscar cliente por nombre o teléfono..." class="w-full pl-10 p-2.5 border rounded-xl font-medium outline-none" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+                        <input type="text" id="client-search" onkeyup="window.renderClients()" placeholder="Buscar cliente por nombre o telÃ©fono..." class="w-full pl-10 p-2.5 border rounded-xl font-medium outline-none" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
                     </div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
@@ -416,115 +416,128 @@
                 </div>
                 <div id="acc-kpi-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
                 <div class="bg-white p-8 rounded-3xl border shadow-sm" style="border-color:var(--brown-light)">
-                    <h4 class="font-serif italic font-semibold text-lg mb-6 flex items-center gap-2" style="color:var(--brown)"><i data-lucide="trending-up" class="w-5 h-5" style="color:var(--blue-deep)"></i> Evolución Diaria</h4>
+                    <h4 class="font-serif italic font-semibold text-lg mb-6 flex items-center gap-2" style="color:var(--brown)"><i data-lucide="trending-up" class="w-5 h-5" style="color:var(--blue-deep)"></i> EvoluciÃ³n Diaria</h4>
                     <div class="h-64 w-full"><canvas id="incomeChart"></canvas></div>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-3xl border p-6 shadow-sm" style="border-color:var(--brown-light)"><h4 class="font-serif italic font-semibold text-lg mb-6 flex items-center gap-2" style="color:var(--brown)"><i data-lucide="award" class="w-5 h-5" style="color:var(--gold)"></i> Servicios más Rentables</h4><div id="acc-services-list" class="space-y-6"></div></div>
+                    <div class="bg-white rounded-3xl border p-6 shadow-sm" style="border-color:var(--brown-light)"><h4 class="font-serif italic font-semibold text-lg mb-6 flex items-center gap-2" style="color:var(--brown)"><i data-lucide="award" class="w-5 h-5" style="color:var(--gold)"></i> Servicios mÃ¡s Rentables</h4><div id="acc-services-list" class="space-y-6"></div></div>
                     <div class="bg-white rounded-3xl border p-6 shadow-sm" style="border-color:var(--brown-light)"><h4 class="font-serif italic font-semibold text-lg mb-6 flex items-center gap-2" style="color:var(--brown)"><i data-lucide="crown" class="w-5 h-5" style="color:var(--gold)"></i> Top 5 Mejores Clientes</h4><div id="acc-top-clients" class="space-y-4"></div></div>
                 </div>
             </div>
 
             <!-- VISTA TPV -->
-            <div id="view-tpv" class="hidden space-y-6 pb-12">
-                <div class="bg-white p-6 rounded-3xl border shadow-sm flex flex-col md:flex-row gap-6" style="border-color:var(--brown-light)">
-                    <!-- Lado izquierdo: Ticket y cobro -->
-                    <div class="flex-1 flex flex-col border-r pr-0 md:pr-6 border-slate-100">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-serif italic font-semibold text-2xl" style="color:var(--brown)">Ticket de Cobro</h3>
-                            <span id="tpv-date-label" class="text-xs font-bold text-slate-500 uppercase tracking-widest"></span>
+            <div id="view-tpv" class="hidden flex-col" style="background:white">
+                <div class="p-4 md:p-6 border-b" style="background:var(--cream);border-color:var(--brown-light)">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="font-serif italic text-lg md:text-2xl font-semibold">TPV Â· Punto de Venta</h2>
+                            <p id="tpv-date-label" class="text-[9px] md:text-[10px] uppercase tracking-widest opacity-60">Magic Studio by Katy</p>
                         </div>
-                        
-                        <!-- Cita y Cliente -->
-                        <div class="space-y-3 mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Vincular Cita (opcional)</label>
-                                <select id="tpv-apt-select" class="w-full p-2.5 rounded-xl border outline-none font-medium text-sm" onchange="window.tpvLinkAppointment()"></select>
+                        <button onclick="window.closeTPV()" class="p-2 rounded-full hover:bg-white/20 transition-colors flex items-center gap-2 text-xs font-bold" style="color:var(--brown-mid)">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Cerrar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row flex-grow overflow-y-auto">
+                    <!-- Lado izquierdo: Ticket y Cobro -->
+                    <div class="flex-1 flex flex-col h-full border-r" style="background:white;border-color:var(--brown-light)">
+                        <!-- Cliente y Cita -->
+                        <div class="p-4 md:p-6 border-b" style="border-color:var(--brown-light)">
+                            <div class="mb-4">
+                                <label class="text-[9px] md:text-[10px] font-bold uppercase tracking-wider mb-1 block" style="color:var(--brown-mid)">Vincular Cita (opcional)</label>
+                                <select id="tpv-apt-select" onchange="window.tpvLinkAppointment()" class="w-full p-2 md:p-3 border rounded-xl font-semibold text-[11px] md:text-sm" style="background:white;border-color:var(--brown-light);color:var(--brown)">
+                                    <option value="">â€” Cobro manual sin cita â€”</option>
+                                </select>
                             </div>
                             <div class="flex gap-3">
                                 <div class="flex-1">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Cliente</label>
-                                    <input type="text" id="tpv-client-name" placeholder="Nombre" class="w-full p-2.5 rounded-xl border outline-none font-medium text-sm">
+                                    <label class="text-[9px] md:text-[10px] font-bold uppercase tracking-wider mb-1 block" style="color:var(--brown-mid)">Cliente</label>
+                                    <input id="tpv-client-name" type="text" placeholder="Nombre cliente" class="flex-grow p-1.5 md:p-3 border rounded-xl text-[11px] md:text-sm font-medium outline-none" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
                                 </div>
                                 <div class="flex-1">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Teléfono</label>
-                                    <input type="tel" id="tpv-client-phone" placeholder="Ej: 600123456" class="w-full p-2.5 rounded-xl border outline-none font-medium text-sm">
+                                    <label class="text-[9px] md:text-[10px] font-bold uppercase tracking-wider mb-1 block" style="color:var(--brown-mid)">TelÃ©fono</label>
+                                    <input id="tpv-client-phone" type="tel" oninput="var me=this;setTimeout(function(){window.cleanPhone(me)},10)" placeholder="TelÃ©fono" class="w-24 md:w-36 p-1.5 md:p-3 border rounded-xl text-[11px] md:text-sm font-medium outline-none" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Líneas de Ticket -->
-                        <div class="flex-grow flex flex-col relative min-h-[250px]">
-                            <div id="tpv-empty" class="absolute inset-0 flex flex-col items-center justify-center text-slate-300">
-                                <i data-lucide="shopping-bag" class="w-12 h-12 mb-3"></i>
-                                <p class="text-xs font-bold uppercase tracking-widest">Ticket Vacío</p>
+                        <!-- LÃ­neas del Ticket -->
+                        <div class="flex-grow overflow-y-auto p-4 md:p-6 min-h-[250px]">
+                            <div id="tpv-lines" class="space-y-1 md:space-y-3"></div>
+                            <div id="tpv-empty" class="py-8 md:py-16 text-center opacity-40">
+                                <i data-lucide="shopping-bag" class="w-12 h-12 mb-3 mx-auto"></i>
+                                <p class="text-xs font-bold uppercase tracking-widest">Ticket VacÃ­o</p>
                             </div>
-                            <div id="tpv-lines" class="space-y-2 overflow-y-auto mb-4 z-10"></div>
                         </div>
 
-                        <!-- Totales y Cobro -->
-                        <div class="border-t pt-4 border-slate-100 mt-auto">
+                        <!-- Totales -->
+                        <div class="border-t p-4 md:p-6" style="border-color:var(--brown-light)">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-xs font-bold text-slate-500 uppercase">Subtotal</span>
-                                <span id="tpv-subtotal" class="font-medium text-slate-700">0,00€</span>
+                                <span id="tpv-subtotal" class="font-medium text-slate-700">0,00 â‚¬</span>
                             </div>
-                            <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-100">
+                            <div class="flex justify-between items-center mb-4 pb-4 border-b" style="border-color:var(--brown-light)">
                                 <span class="text-xs font-bold text-slate-500 uppercase">IVA (21%) inc.</span>
-                                <span id="tpv-iva" class="font-medium text-slate-400">0,00€</span>
+                                <span id="tpv-iva" class="font-medium text-slate-400">0,00 â‚¬</span>
                             </div>
                             <div class="flex justify-between items-center mb-6">
                                 <span class="text-sm font-black text-slate-800 uppercase tracking-widest">Total</span>
-                                <span id="tpv-total" class="text-3xl font-black" style="color:var(--blue-deep)">0,00€</span>
+                                <span id="tpv-total" class="text-3xl font-black" style="color:var(--blue-deep)">0,00 â‚¬</span>
                             </div>
 
+                            <!-- MÃ©todo de Pago -->
                             <div class="grid grid-cols-2 gap-3 mb-6">
-                                <button id="btn-tpv-cash" onclick="window.tpvSetPayment('cash')" class="p-3 rounded-xl border-2 font-bold flex items-center justify-center gap-2 transition-all">
+                                <button id="btn-pay-cash" onclick="window.tpvSetPayment('cash')" class="flex-1 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 font-bold text-[10px] md:text-sm uppercase flex items-center justify-center gap-1 md:gap-2 transition-all" style="border-color:var(--gold);color:var(--gold)">
                                     <i data-lucide="coins" class="w-5 h-5"></i> Efectivo
                                 </button>
-                                <button id="btn-tpv-card" onclick="window.tpvSetPayment('card')" class="p-3 rounded-xl border-2 font-bold flex items-center justify-center gap-2 transition-all">
+                                <button id="btn-pay-card" onclick="window.tpvSetPayment('card')" class="flex-1 py-2 md:py-3 rounded-xl md:rounded-2xl border-2 font-bold text-[10px] md:text-sm uppercase flex items-center justify-center gap-1 md:gap-2 transition-all" style="border-color:var(--blue-deep);color:var(--blue-deep)">
                                     <i data-lucide="credit-card" class="w-5 h-5"></i> Tarjeta
                                 </button>
                             </div>
 
                             <!-- Cambio para efectivo -->
-                            <div id="tpv-change-row" class="hidden mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-100">
-                                <div class="flex justify-between items-center mb-2">
-                                    <label class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Entregado</label>
-                                    <input type="number" id="tpv-cash-given" oninput="window.tpvCalcChange()" placeholder="0.00" class="w-24 p-1.5 text-right rounded-lg border border-amber-200 outline-none font-bold text-amber-800">
+                            <div id="tpv-change-row" class="hidden mb-6 flex gap-1 md:gap-3 items-center">
+                                <div class="flex-1">
+                                    <label class="text-[9px] font-bold text-amber-600 uppercase tracking-wider">Entregado</label>
+                                    <input id="tpv-cash-given" type="number" min="0" step="0.01" placeholder="Importe" oninput="window.tpvCalcChange()" class="flex-grow p-1.5 md:p-3 border rounded-xl text-[11px] md:text-sm font-medium outline-none" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
                                 </div>
-                                <div class="flex justify-between items-center border-t border-amber-200/50 pt-2">
-                                    <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Cambio</span>
-                                    <span id="tpv-change-display" class="font-black text-amber-600 text-lg">0,00€</span>
+                                <div class="shrink-0">
+                                    <label class="text-[9px] font-bold text-amber-600 uppercase tracking-wider">Cambio</label>
+                                    <span id="tpv-change-display" class="text-[10px] md:text-sm font-black shrink-0" style="color:var(--blue-deep)">0,00 â‚¬</span>
                                 </div>
                             </div>
 
-                            <button id="btn-tpv-charge" onclick="window.tpvExecuteCharge()" class="w-full py-4 rounded-2xl font-black text-white text-lg shadow-lg uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all" style="background:var(--blue-deep)">
-                                <i data-lucide="check-circle" class="w-6 h-6"></i> <span id="tpv-charge-btn-label">Cobrar</span>
+                            <button onclick="window.tpvCharge()" class="w-full py-3 md:py-5 rounded-xl md:rounded-2xl font-black text-sm md:text-lg uppercase tracking-widest text-white shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 md:gap-3" style="background:var(--blue-deep)">
+                                <i data-lucide="check-circle" class="w-6 h-6"></i>
+                                <span id="tpv-charge-btn-label">Cobrar</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Lado derecho: Servicios rápidos -->
+                    <!-- Lado derecho: Servicios rÃ¡pidos -->
                     <div class="flex-1 flex flex-col h-[75vh]">
-                        <div class="mb-4 flex gap-3 relative">
-                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
-                            <input type="text" id="tpv-search" oninput="window.tpvRenderServices()" placeholder="Buscar servicio..." class="w-full pl-9 p-2.5 rounded-xl border outline-none font-medium text-sm border-slate-200 focus:border-blue-400">
+                        <div class="p-4 md:p-6 border-b" style="border-color:var(--brown-light)">
+                            <div class="relative">
+                                <i data-lucide="search" class="absolute left-3 top-3 w-4 h-4 text-slate-400"></i>
+                                <input id="tpv-search" type="text" placeholder="Buscar servicio..." oninput="window.tpvRenderServices()" class="w-full pl-8 md:pl-11 pr-4 py-1.5 md:py-3 border rounded-xl text-[11px] md:text-sm font-medium outline-none" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
+                            </div>
                         </div>
-                        
-                        <div id="tpv-cats" class="flex gap-2 overflow-x-auto pb-3 mb-2 scrollbar-hide no-scrollbar flex-shrink-0"></div>
-                        
-                        <div id="tpv-services-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto pr-2 pb-4 content-start"></div>
+
+                        <div id="tpv-cats" class="flex gap-2 flex-wrap p-4 md:p-6"></div>
+
+                        <div id="tpv-services-grid" class="flex-grow overflow-y-auto min-h-0 p-2 md:p-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-2 content-start custom-scroll"></div>
                     </div>
                 </div>
             </div>
-
             <!-- VISTA GASTOS -->
             <div id="view-gastos" class="hidden space-y-6 pb-12">
 
-              <!-- Formulario añadir gasto -->
+              <!-- Formulario aÃ±adir gasto -->
               <div class="bg-white rounded-3xl border shadow-sm p-6" style="border-color:var(--brown-light)">
                 <h3 class="font-serif italic font-semibold text-xl mb-5 flex items-center gap-2" style="color:var(--brown)">
-                  <i data-lucide="plus-circle" class="w-5 h-5" style="color:var(--gold)"></i> Añadir Gasto
+                  <i data-lucide="plus-circle" class="w-5 h-5" style="color:var(--gold)"></i> AÃ±adir Gasto
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div class="space-y-1 lg:col-span-2">
@@ -532,21 +545,21 @@
                     <input type="text" id="exp-concept" placeholder="Ej: Alquiler local, Producto X..." class="w-full p-2.5 border rounded-xl outline-none font-medium text-xs" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
                   </div>
                   <div class="space-y-1">
-                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Categoría</label>
+                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">CategorÃ­a</label>
                     <select id="exp-category" class="w-full p-2.5 border rounded-xl font-medium text-xs" style="background:white;border-color:var(--brown-light);color:var(--brown)">
                       <option>Alquiler</option>
                       <option>Material / Productos</option>
                       <option>Suministros</option>
                       <option>Publicidad</option>
                       <option>Mantenimiento</option>
-                      <option>Formación</option>
+                      <option>FormaciÃ³n</option>
                       <option>Seguros</option>
-                      <option>Gestoría</option>
+                      <option>GestorÃ­a</option>
                       <option>Otros</option>
                     </select>
                   </div>
                   <div class="space-y-1">
-                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Importe Total (€) *</label>
+                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Importe Total (â‚¬) *</label>
                     <input type="number" id="exp-total" min="0" step="0.01" placeholder="0.00" oninput="window.expCalc()" class="w-full p-2.5 border rounded-xl outline-none font-medium text-xs" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
                   </div>
                   <div class="space-y-1">
@@ -559,19 +572,19 @@
                     </select>
                   </div>
                   <div class="space-y-1 lg:col-span-3">
-                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Desglose automático (IVA incluido)</label>
+                    <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Desglose automÃ¡tico (IVA incluido)</label>
                     <div class="flex gap-3">
                       <div class="flex-grow rounded-xl p-2.5 border text-xs font-black flex flex-col gap-0.5" style="background:#f0fdf4;border-color:#bbf7d0">
                         <span class="text-[8px] font-bold uppercase opacity-60" style="color:#166534">Base imponible</span>
-                        <span id="exp-base-display" style="color:#166534">— €</span>
+                        <span id="exp-base-display" style="color:#166534">â€” â‚¬</span>
                       </div>
                       <div class="w-28 rounded-xl p-2.5 border text-xs font-black flex flex-col gap-0.5" style="background:#fefce8;border-color:#fde68a">
                         <span class="text-[8px] font-bold uppercase opacity-60" style="color:#92400e">IVA</span>
-                        <span id="exp-iva-display" style="color:#92400e">— €</span>
+                        <span id="exp-iva-display" style="color:#92400e">â€” â‚¬</span>
                       </div>
                       <div class="w-28 rounded-xl p-2.5 border text-xs font-black flex flex-col gap-0.5" style="background:#eff6ff;border-color:#bfdbfe">
                         <span class="text-[8px] font-bold uppercase opacity-60" style="color:#1e40af">Total</span>
-                        <span id="exp-total-display" style="color:#1e40af">— €</span>
+                        <span id="exp-total-display" style="color:#1e40af">â€” â‚¬</span>
                       </div>
                     </div>
                   </div>
@@ -583,7 +596,7 @@
                     <label class="text-[9px] font-bold uppercase tracking-widest" style="color:var(--brown-mid)">Foto Factura</label>
                     <button onclick="document.getElementById('exp-photo-input').click()" class="w-full p-2.5 border-2 border-dashed rounded-xl font-bold text-xs uppercase flex items-center justify-center gap-2 transition-all hover:opacity-80" style="border-color:var(--brown-light);color:var(--brown-mid)">
                       <i data-lucide="camera" class="w-4 h-4"></i>
-                      <span id="exp-photo-label">Cámara / Galería</span>
+                      <span id="exp-photo-label">CÃ¡mara / GalerÃ­a</span>
                     </button>
                   </div>
                   <div class="flex items-end">
@@ -603,28 +616,28 @@
                 <select id="exp-filter-year" onchange="window.renderExpenses()" class="font-semibold border rounded-lg p-1 px-3 outline-none text-xs" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
                   <option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option>
                 </select>
-                <span id="exp-total-badge" class="ml-auto px-4 py-1.5 rounded-xl text-xs font-black" style="background:#fef2f2;color:#e05c6a">Total: 0,00 €</span>
+                <span id="exp-total-badge" class="ml-auto px-4 py-1.5 rounded-xl text-xs font-black" style="background:#fef2f2;color:#e05c6a">Total: 0,00 â‚¬</span>
               </div>
 
               <div id="expenses-list" class="space-y-3"></div>
             </div>
 
-            <!-- VISTA GESTIÓN SERVICIOS -->
+            <!-- VISTA GESTIÃ“N SERVICIOS -->
             <div id="view-services_mgmt" class="hidden space-y-6">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-serif italic font-semibold text-2xl" style="color:var(--brown)">Gestión de Servicios</h3>
+                    <h3 class="font-serif italic font-semibold text-2xl" style="color:var(--brown)">GestiÃ³n de Servicios</h3>
                     <div class="flex gap-3">
-                        <button onclick="window.openCategoryModal()" class="text-white px-4 py-2 rounded-xl font-semibold text-xs uppercase flex items-center gap-2 shadow-md" style="background:var(--brown)"><i data-lucide="folder-plus" class="w-4 h-4"></i> Nueva Categoría</button>
+                        <button onclick="window.openCategoryModal()" class="text-white px-4 py-2 rounded-xl font-semibold text-xs uppercase flex items-center gap-2 shadow-md" style="background:var(--brown)"><i data-lucide="folder-plus" class="w-4 h-4"></i> Nueva CategorÃ­a</button>
                         <button onclick="window.openServiceModal()" class="text-white px-4 py-2 rounded-xl font-semibold text-xs uppercase flex items-center gap-2 shadow-md" style="background:var(--blue-deep)"><i data-lucide="plus" class="w-4 h-4"></i> Nuevo Servicio</button>
                     </div>
                 </div>
                 <div id="services-mgmt-list" class="space-y-6"></div>
             </div>
 
-            <!-- VISTA GESTIÓN EMPLEADOS -->
+            <!-- VISTA GESTIÃ“N EMPLEADOS -->
             <div id="view-employees_mgmt" class="hidden space-y-6">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-serif italic font-semibold text-2xl" style="color:var(--brown)">Gestión de Empleadas</h3>
+                    <h3 class="font-serif italic font-semibold text-2xl" style="color:var(--brown)">GestiÃ³n de Empleadas</h3>
                     <button onclick="window.openEmployeeModal()" class="text-white px-4 py-2 rounded-xl font-semibold text-xs uppercase flex items-center gap-2 shadow-md" style="background:var(--blue-deep)"><i data-lucide="user-plus" class="w-4 h-4"></i> Nueva Empleada</button>
                 </div>
                 <div id="employees-mgmt-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -653,16 +666,16 @@
                         <div id="standard-inputs-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
                         <div id="employee-closure-warning" class="hidden p-4 bg-orange-50 border-2 border-orange-200 text-orange-900 text-xs font-bold rounded-2xl flex items-center gap-3">
                             <i data-lucide="info" class="w-5 h-5 text-orange-500 shrink-0"></i>
-                            <span>Para configurar días festivos o cierres de horas específicos de esta empleada, ve al apartado de <strong>Especialistas / Empleados</strong> en el menú.</span>
+                            <span>Para configurar dÃ­as festivos o cierres de horas especÃ­ficos de esta empleada, ve al apartado de <strong>Especialistas / Empleados</strong> en el menÃº.</span>
                         </div>
                         <div class="flex justify-end pt-4" style="border-top:1px solid var(--cream-dark)">
-                            <button id="btn-save-config" class="text-white px-8 py-3 rounded-2xl font-semibold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all" style="background:var(--blue-deep)">Guardar Configuración</button>
+                            <button id="btn-save-config" class="text-white px-8 py-3 rounded-2xl font-semibold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all" style="background:var(--blue-deep)">Guardar ConfiguraciÃ³n</button>
                         </div>
                     </div>
                 </div>
                 <div id="config-calendar-section" class="bg-white p-8 rounded-3xl shadow-sm border" style="border-color:var(--brown-light)">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-serif italic font-semibold text-xl flex items-center gap-3" style="color:var(--brown)"><i data-lucide="calendar-check" class="w-5 h-5"></i> Gestor de Cierres y Días Especiales (Global)</h3>
+                        <h3 class="font-serif italic font-semibold text-xl flex items-center gap-3" style="color:var(--brown)"><i data-lucide="calendar-check" class="w-5 h-5"></i> Gestor de Cierres y DÃ­as Especiales (Global)</h3>
                     </div>
                     <div id="config-calendar-body" class="calendar-grid rounded-2xl overflow-hidden" style="border:1px solid var(--brown-light)"></div>
                 </div>
@@ -673,13 +686,13 @@
         </main>
     </div>
 
-    <!-- MODAL DÍA -->
+    <!-- MODAL DÃA -->
     <div id="day-modal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-2 z-50 backdrop-blur-sm">
         <div class="bg-white rounded-3xl w-full max-w-3xl h-[92vh] flex flex-col shadow-2xl overflow-hidden modal-mobile" style="border:1px solid var(--brown-light)">
             <div class="p-6 border-b flex justify-between items-center bg-white z-20 shadow-sm" style="border-color:var(--brown-light)">
                 <div>
                     <h3 id="day-modal-title" class="font-serif italic font-semibold text-3xl" style="color:var(--brown)">Agenda</h3>
-                    <p class="text-xs font-medium uppercase tracking-widest mt-1" style="color:var(--brown-mid)">Vista detallada del día</p>
+                    <p class="text-xs font-medium uppercase tracking-widest mt-1" style="color:var(--brown-mid)">Vista detallada del dÃ­a</p>
                 </div>
                 <button onclick="window.closeDayModal()" class="p-2 rounded-full transition-colors" style="background:var(--cream-dark);color:var(--brown-mid)"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
@@ -701,7 +714,7 @@
                     <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Nombre Cliente</label><input type="text" id="m-name" list="clients-datalist" oninput="window.handleClientNameInput(this.value)" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)">
                         <datalist id="clients-datalist"></datalist>
                     </div>
-                    <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Teléfono</label><input type="tel" id="m-phone" oninput="var me=this;setTimeout(function(){window.cleanPhone(me)},10)" onpaste="var me=this;setTimeout(function(){window.cleanPhone(me)},50)" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+                    <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">TelÃ©fono</label><input type="tel" id="m-phone" oninput="var me=this;setTimeout(function(){window.cleanPhone(me)},10)" onpaste="var me=this;setTimeout(function(){window.cleanPhone(me)},50)" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
                     <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Email</label><input type="email" id="m-email" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
                     <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Fecha</label><input type="date" id="m-date" onchange="window.updateAvailability()" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
                 </div>
@@ -709,7 +722,7 @@
                     <label class="text-[10px] font-bold" style="color:var(--brown-mid)">Servicios</label>
                     <div id="m-svc-list" class="space-y-1 mt-1 mb-2"></div>
                     <div id="m-svc-total" class="text-xs font-bold hidden mb-2" style="color:var(--blue-deep)"></div>
-                    <button onclick="window.addSvcToApt()" type="button" class="w-full p-2 border-2 border-dashed rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[var(--cream)] transition-colors" style="border-color:var(--brown-light);color:var(--blue-mid)">+ Añadir Servicio</button>
+                    <button onclick="window.addSvcToApt()" type="button" class="w-full p-2 border-2 border-dashed rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[var(--cream)] transition-colors" style="border-color:var(--brown-light);color:var(--blue-mid)">+ AÃ±adir Servicio</button>
                     <div id="m-svc-picker" class="hidden mt-2">
                         <input type="text" id="m-svc-search" placeholder="Buscar servicio..." oninput="window.filterSvcOptions()" class="w-full p-2 border rounded-xl text-xs outline-none mb-2" style="background:white;border-color:var(--brown-light);color:var(--brown)">
                         <div id="m-svc-options" class="max-h-48 overflow-y-auto space-y-1 custom-scroll border rounded-xl p-2" style="background:white;border-color:var(--brown-light)"></div>
@@ -718,13 +731,13 @@
                 <div class="space-y-2">
                     <div class="flex justify-between items-center">
                         <label class="text-[10px] font-bold" style="color:var(--brown-mid)">Selecciona la Hora</label>
-                        <span id="selected-time-label" class="text-xs font-bold px-2 py-1 rounded-lg" style="color:var(--blue-deep);background:var(--blue)">Sin selección</span>
+                        <span id="selected-time-label" class="text-xs font-bold px-2 py-1 rounded-lg" style="color:var(--blue-deep);background:var(--blue)">Sin selecciÃ³n</span>
                     </div>
                     <div id="time-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2"></div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Estado</label><select id="m-status" class="w-full p-2.5 border rounded-xl font-medium mt-1" style="background:white;border-color:var(--brown-light);color:var(--brown)"><option value="confirmed">Confirmada</option><option value="completed">Pagada</option><option value="cancelled">Cancelada</option></select></div>
-                    <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Precio (€)</label><input type="number" id="m-price" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+                    <div><label class="text-[10px] font-bold" style="color:var(--brown-mid)">Precio (â‚¬)</label><input type="number" id="m-price" class="w-full p-2.5 border rounded-xl outline-none font-medium mt-1" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
                     <div class="flex items-end pb-1"><label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="m-paid" class="w-4 h-4 rounded" style="accent-color:var(--blue-deep)"><span class="text-xs font-bold uppercase" style="color:var(--brown-mid)">Cobrado</span></label></div>
                 </div>
             </div>
@@ -744,12 +757,12 @@
             <h3 id="service-modal-title" class="font-serif italic font-semibold text-xl" style="color:var(--brown)">Nuevo Servicio</h3>
             <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Nombre</label><input type="text" id="svc-name" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
             <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Precio (€)</label><input type="number" id="svc-price" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
-                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Duración (min)</label><input type="number" id="svc-duration" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Precio (â‚¬)</label><input type="number" id="svc-price" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">DuraciÃ³n (min)</label><input type="number" id="svc-duration" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
             </div>
-            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Descripción</label><input type="text" id="svc-desc" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">DescripciÃ³n</label><input type="text" id="svc-desc" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
             <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Categoría</label><select id="svc-category" class="w-full p-2.5 border rounded-xl font-medium" style="background:white;border-color:var(--brown-light);color:var(--brown)"></select></div>
+                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">CategorÃ­a</label><select id="svc-category" class="w-full p-2.5 border rounded-xl font-medium" style="background:white;border-color:var(--brown-light);color:var(--brown)"></select></div>
                 <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Empleadas</label><select id="svc-employee" multiple class="w-full p-2.5 border rounded-xl font-medium min-h-[120px]" style="background:white;border-color:var(--brown-light);color:var(--brown)"></select><p class="text-[8px] opacity-50 mt-1" style="color:var(--brown-mid)">Selecciona varias con Ctrl+clic. "Todas" = cualquier empleada.</p></div>
             </div>
             <div class="flex gap-3 pt-4" style="border-top:1px solid var(--brown-light)">
@@ -759,11 +772,10 @@
         </div>
     </div>
 
-    <!-- MODAL CATEGORÍA -->
+    <!-- MODAL CATEGORÃA -->
     <div id="category-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-[70] backdrop-blur-sm">
         <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4" style="border:1px solid var(--brown-light)">
-            <h3 class="font-serif italic font-semibold text-xl" style="color:var(--brown)">Nueva Categoría</h3>
-            <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Nombre</label><input type="text" id="cat-name" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
+            <h3 class="font-serif italic font-semibold text-xl" style="color:var(--brown)">Nueva CategorÃ­a</h3>
             <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Nombre</label><input type="text" id="cat-name" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
             <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Icono</label>
                 <div class="flex items-center gap-3">
@@ -815,9 +827,9 @@
 
 
 
-    <!-- ═══════════════════════════════════════════════════════════
+    <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
          MODAL TICKET
-    ═══════════════════════════════════════════════════════════ -->
+    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
     <div id="ticket-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)">
       <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden" style="border:1px solid var(--brown-light)">
         <div class="flex items-center justify-between px-6 py-4" style="background:var(--brown);color:white">
@@ -826,7 +838,7 @@
         </div>
         <!-- Ticket imprimible -->
         <div id="ticket-content" class="p-6 space-y-3 font-mono text-xs" style="background:#fffdf9">
-          <!-- generado dinámicamente -->
+          <!-- generado dinÃ¡micamente -->
         </div>
         <!-- Acciones -->
         <div class="px-5 pb-5 pt-3 flex flex-col gap-2" style="background:white">
@@ -882,7 +894,7 @@
                 <div class="space-y-2">
                     <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">Estado</label>
                     <button id="range-btn-cerrado" onclick="selectRangeType('closed')" class="w-full py-4 rounded-2xl border-2 font-bold text-sm uppercase transition-all flex items-center justify-between px-5" style="border-color:var(--red-light);color:var(--red)">
-                        <span>Cerrado (Todos los días)</span><i data-lucide="door-closed" class="w-5 h-5"></i>
+                        <span>Cerrado (Todos los dÃ­as)</span><i data-lucide="door-closed" class="w-5 h-5"></i>
                     </button>
                     <button id="range-btn-custom" onclick="selectRangeType('custom')" class="w-full py-4 rounded-2xl border-2 font-bold text-sm uppercase transition-all flex items-center justify-between px-5" style="border-color:var(--brown-light);color:var(--brown)">
                         <span>Jornada Continua</span><i data-lucide="clock" class="w-5 h-5"></i>
@@ -891,7 +903,7 @@
                         <span>Jornada Partida</span><i data-lucide="sun" class="w-5 h-5"></i>
                     </button>
                     <button id="range-btn-delete" onclick="selectRangeType('delete')" class="w-full py-4 rounded-2xl border-2 font-bold text-sm uppercase transition-all flex items-center justify-between px-5" style="border-color:var(--green-light);color:var(--blue-deep)">
-                        <span>Eliminar Configuración</span><i data-lucide="trash-2" class="w-5 h-5"></i>
+                        <span>Eliminar ConfiguraciÃ³n</span><i data-lucide="trash-2" class="w-5 h-5"></i>
                     </button>
                 </div>
 
@@ -943,7 +955,7 @@
                 <div class="mb-4 bg-orange-50 border border-orange-200 p-3 rounded-xl">
                     <label class="flex items-center gap-3 cursor-pointer">
                         <input type="checkbox" id="block-fullday" onchange="window.toggleBlockFullDay()" class="w-5 h-5 accent-orange-500 rounded border-gray-300">
-                        <span class="text-sm font-black uppercase text-orange-800">Bloquear día completo</span>
+                        <span class="text-sm font-black uppercase text-orange-800">Bloquear dÃ­a completo</span>
                     </label>
                 </div>
 
@@ -965,7 +977,7 @@
                     <select id="block-reason" class="w-full p-4 rounded-2xl border-2 font-bold text-sm bg-transparent appearance-none" style="border-color:var(--brown-light);color:var(--brown)">
                         <option value="Comida">Comida</option>
                         <option value="Descanso">Descanso</option>
-                        <option value="Formación">Formación</option>
+                        <option value="FormaciÃ³n">FormaciÃ³n</option>
                         <option value="Personal">Asunto Personal</option>
                         <option value="Vacaciones">Vacaciones</option>
                         <option value="Otro">Otro</option>
@@ -973,10 +985,10 @@
                 </div>
 
                 <div class="hidden">
-                    <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">Repetición</label>
+                    <label class="block text-xs font-bold uppercase mb-2" style="color:var(--brown)">RepeticiÃ³n</label>
                     <select id="block-recurrence" onchange="toggleBlockRecurrenceEnd()" class="w-full p-4 rounded-2xl border-2 font-bold text-sm bg-transparent appearance-none" style="border-color:var(--brown-light);color:var(--brown)">
-                        <option value="none">Solo este día</option>
-                        <option value="daily">Todos los días</option>
+                        <option value="none">Solo este dÃ­a</option>
+                        <option value="daily">Todos los dÃ­as</option>
                         <option value="weekly" id="block-recurrence-weekly">Cada semana</option>
                         <option value="biweekly">Cada dos semanas</option>
                     </select>
@@ -998,12 +1010,12 @@
 
     </div>
 
-    <!-- MODAL MULTI CONFIG DÍAS -->
+    <!-- MODAL MULTI CONFIG DÃAS -->
     <div id="config-multi-day-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
         <div class="bg-white rounded-3xl w-full max-w-sm flex flex-col shadow-2xl overflow-hidden" style="border:1px solid var(--brown-light)">
             <div class="p-5 border-b bg-orange-50 flex justify-between items-center" style="border-color:var(--brown-light)">
                 <div>
-                    <h3 id="cmd-title" class="font-black text-lg text-orange-900">Configurar X días</h3>
+                    <h3 id="cmd-title" class="font-black text-lg text-orange-900">Configurar X dÃ­as</h3>
                     <p id="cmd-subtitle" class="text-xs font-bold text-orange-600 uppercase tracking-widest mt-1">Global</p>
                 </div>
                 <button onclick="window.closeMultiDayModal()" class="p-2 hover:bg-orange-200/50 rounded-xl transition-colors text-orange-800"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -1015,7 +1027,7 @@
                     <div class="w-10 h-10 rounded-full bg-red-200 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                         <i data-lucide="ban" class="w-5 h-5 text-red-600"></i>
                     </div>
-                    <span class="font-black text-red-700 uppercase tracking-widest text-sm">Cerrar Días</span>
+                    <span class="font-black text-red-700 uppercase tracking-widest text-sm">Cerrar DÃ­as</span>
                     <span class="text-[10px] text-red-500 font-medium text-center mt-1">Marcar como no laborable / festivo</span>
                 </button>
 
@@ -1056,7 +1068,7 @@
                     </button>
                 </div>
 
-                <!-- SECCIÓN 3: CIERRES DE HORA (LEGACY) -->
+                <!-- SECCIÃ“N 3: CIERRES DE HORA (LEGACY) -->
                 <div id="local-closed-hours-section" class="hidden pt-4 border-t border-slate-200">
                     <h4 class="font-black text-[10px] uppercase tracking-widest flex items-center gap-2 mb-3" style="color:var(--brown)">
                         <i data-lucide="clock" class="w-3.5 h-3.5" style="color:#ef4444"></i> Cierres de Hora Guardados
@@ -1067,7 +1079,7 @@
         </div>
     </div>
 
-    <!-- Modal Información sobre Cierres -->
+    <!-- Modal InformaciÃ³n sobre Cierres -->
     <div id="closures-info-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[32px] w-full max-w-xl overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[85vh]">
             <div class="p-6 border-b flex items-center justify-between bg-slate-50">
@@ -1076,8 +1088,8 @@
                         <i data-lucide="info" class="w-4 h-4 text-orange-600"></i>
                     </div>
                     <div>
-                        <h3 class="font-serif italic font-bold text-lg text-slate-800">Guía de Cierres y Horarios</h3>
-                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Opciones de configuración</p>
+                        <h3 class="font-serif italic font-bold text-lg text-slate-800">GuÃ­a de Cierres y Horarios</h3>
+                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Opciones de configuraciÃ³n</p>
                     </div>
                 </div>
                 <button onclick="window.closeClosuresInfoModal()" class="p-2 hover:bg-slate-200/50 rounded-xl transition-colors text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -1091,49 +1103,49 @@
                         1. Horario Semanal Regular
                     </div>
                     <p class="text-xs leading-relaxed text-slate-500">
-                        Define la jornada base que se repite semana tras semana. Se configura en la pestaña de <strong>Configuración</strong> en la barra lateral.
+                        Define la jornada base que se repite semana tras semana. Se configura en la pestaÃ±a de <strong>ConfiguraciÃ³n</strong> en la barra lateral.
                     </p>
                     <ul class="list-disc list-inside text-xs space-y-1 text-slate-500 pl-2">
-                        <li><strong>Global (Centro):</strong> Define el horario general de apertura del salón.</li>
-                        <li><strong>Individual (Empleado):</strong> Si una empleada tiene su propio horario semanal (por ejemplo, turnos rotativos), se configurará en su pestaña.</li>
+                        <li><strong>Global (Centro):</strong> Define el horario general de apertura del salÃ³n.</li>
+                        <li><strong>Individual (Empleado):</strong> Si una empleada tiene su propio horario semanal (por ejemplo, turnos rotativos), se configurarÃ¡ en su pestaÃ±a.</li>
                     </ul>
                 </div>
                 
                 <hr class="border-slate-100">
                 
-                <!-- Días Especiales -->
+                <!-- DÃ­as Especiales -->
                 <div class="space-y-2">
                     <div class="flex items-center gap-2 text-rose-700 font-black uppercase text-xs">
                         <i data-lucide="calendar-check" class="w-4 h-4"></i>
-                        2. Días Especiales, Festivos y Cierres Globales
+                        2. DÃ­as Especiales, Festivos y Cierres Globales
                     </div>
                     <p class="text-xs leading-relaxed text-slate-500">
-                        Para cerrar días concretos (festivos, vacaciones) o cambiar el horario de una fecha específica. Se organiza desde la pestaña <strong>Configuración</strong>.
+                        Para cerrar dÃ­as concretos (festivos, vacaciones) o cambiar el horario de una fecha especÃ­fica. Se organiza desde la pestaÃ±a <strong>ConfiguraciÃ³n</strong>.
                     </p>
                     <ul class="list-disc list-inside text-xs space-y-1 text-slate-500 pl-2">
-                        <li>Haz clic en un día (o arrastra para seleccionar varios) para abrir el gestor.</li>
-                        <li><strong>Cerrar Día (Día Completo):</strong> Cierra la agenda para esa fecha.</li>
-                        <li><strong>Horario Especial / Jornada Partida:</strong> Configura un tramo personalizado para ese día.</li>
-                        <li>Las modificaciones a nivel <strong>Global</strong> cierran el salón y se heredan por todas las empleadas, a menos que tengan un override manual.</li>
+                        <li>Haz clic en un dÃ­a (o arrastra para seleccionar varios) para abrir el gestor.</li>
+                        <li><strong>Cerrar DÃ­a (DÃ­a Completo):</strong> Cierra la agenda para esa fecha.</li>
+                        <li><strong>Horario Especial / Jornada Partida:</strong> Configura un tramo personalizado para ese dÃ­a.</li>
+                        <li>Las modificaciones a nivel <strong>Global</strong> cierran el salÃ³n y se heredan por todas las empleadas, a menos que tengan un override manual.</li>
                     </ul>
                 </div>
                 
                 <hr class="border-slate-100">
                 
-                <!-- Bloqueos Rápidos -->
+                <!-- Bloqueos RÃ¡pidos -->
                 <div class="space-y-2">
                     <div class="flex items-center gap-2 text-orange-700 font-black uppercase text-xs">
                         <i data-lucide="lock" class="w-4 h-4"></i>
                         3. Bloqueos de Horas (Agenda)
                     </div>
                     <p class="text-xs leading-relaxed text-slate-500">
-                        Se usan para bloquear huecos rápidos en el día a día (descansos, reuniones, asuntos personales) directamente desde la agenda de citas.
+                        Se usan para bloquear huecos rÃ¡pidos en el dÃ­a a dÃ­a (descansos, reuniones, asuntos personales) directamente desde la agenda de citas.
                     </p>
                     <ul class="list-disc list-inside text-xs space-y-1 text-slate-500 pl-2">
-                        <li>Haz doble clic sobre el día en el calendario de la especialista y pulsa en <strong>🔒 Bloquear</strong>.</li>
-                        <li>Puedes bloquear un tramo de horas o marcar <strong>Día Completo</strong>.</li>
-                        <li>Soporta <strong>Recurrencia</strong> (diaria, semanal, bisemanal) para bloqueos periódicos.</li>
-                        <li><strong>Restaurar Horario:</strong> Si deseas eliminar el bloqueo, haz clic en el botón naranja <code>🔁 Restaurar</code> que aparece en la celda del calendario mensual o en la cabecera de la ficha diaria.</li>
+                        <li>Haz doble clic sobre el dÃ­a en el calendario de la especialista y pulsa en <strong>ðŸ”’ Bloquear</strong>.</li>
+                        <li>Puedes bloquear un tramo de horas o marcar <strong>DÃ­a Completo</strong>.</li>
+                        <li>Soporta <strong>Recurrencia</strong> (diaria, semanal, bisemanal) para bloqueos periÃ³dicos.</li>
+                        <li><strong>Restaurar Horario:</strong> Si deseas eliminar el bloqueo, haz clic en el botÃ³n naranja <code>ðŸ” Restaurar</code> que aparece en la celda del calendario mensual o en la cabecera de la ficha diaria.</li>
                     </ul>
                 </div>
             </div>
@@ -1146,13 +1158,13 @@
         </div>
     </div>
 
-    <!-- Modal Éxito Configuración -->
+    <!-- Modal Ã‰xito ConfiguraciÃ³n -->
     <div id="config-success-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
         <div class="bg-white rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl border border-slate-100 flex flex-col p-6 text-center space-y-4">
-            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl">✓</div>
-            <h3 class="font-serif italic font-bold text-xl text-slate-800">Acción Confirmada</h3>
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl">âœ“</div>
+            <h3 class="font-serif italic font-bold text-xl text-slate-800">AcciÃ³n Confirmada</h3>
             <div id="config-success-summary" class="text-xs font-bold text-slate-500 space-y-2 py-2">
-                <!-- Resumen dinámico -->
+                <!-- Resumen dinÃ¡mico -->
             </div>
             <button onclick="window.closeConfigSuccessModal()" class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-colors">Aceptar</button>
         </div>
@@ -1162,39 +1174,39 @@
     <script>
 
 
-                // Guardar en localStorage si el usuario cerró el banner hoy
+                // Guardar en localStorage si el usuario cerrÃ³ el banner hoy
                 const bannerClosedToday = localStorage.getItem('pwa_banner_closed_time');
                 const oneDay = 24 * 60 * 60 * 1000;
                 if (bannerClosedToday && (Date.now() - parseInt(bannerClosedToday)) < oneDay) {
-                    console.log('[PWA] El usuario cerró el banner recientemente. Mantener oculto.');
+                    console.log('[PWA] El usuario cerrÃ³ el banner recientemente. Mantener oculto.');
                     return;
                 }
             }
 
-            // Mostrar el banner por defecto (Android, iOS y Escritorio) si no está instalada o forceShow es true
+            // Mostrar el banner por defecto (Android, iOS y Escritorio) si no estÃ¡ instalada o forceShow es true
             banner.classList.remove('hidden');
 
-            // Configurar acción del botón de instalar
+            // Configurar acciÃ³n del botÃ³n de instalar
             installBtn.addEventListener('click', async () => {
                 if (isIOS()) {
                     // Mostrar modal de instrucciones para iOS
                     document.getElementById('pwa-ios-modal').classList.remove('hidden');
                     if (typeof lucide !== 'undefined') lucide.createIcons();
                 } else if (deferredPrompt) {
-                    // Si el navegador ya disparó beforeinstallprompt, usar el instalador nativo
+                    // Si el navegador ya disparÃ³ beforeinstallprompt, usar el instalador nativo
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
                     console.log(`[PWA] Respuesta del usuario: ${outcome}`);
                     deferredPrompt = null;
                     banner.classList.add('hidden');
                 } else {
-                    // En caso de que Android/Chrome no haya disparado aún el prompt nativo, mostrar instrucciones
+                    // En caso de que Android/Chrome no haya disparado aÃºn el prompt nativo, mostrar instrucciones
                     document.getElementById('pwa-android-modal').classList.remove('hidden');
                     if (typeof lucide !== 'undefined') lucide.createIcons();
                 }
             });
 
-            // Capturar prompt de instalación en Android / Chrome
+            // Capturar prompt de instalaciÃ³n en Android / Chrome
             window.addEventListener('beforeinstallprompt', (e) => {
                 console.log('[PWA] event:beforeinstallprompt disparado.');
                 e.preventDefault();
@@ -1207,9 +1219,9 @@
                 localStorage.setItem('pwa_banner_closed_time', Date.now().toString());
             });
 
-            // Ocultar banner automáticamente al instalar
+            // Ocultar banner automÃ¡ticamente al instalar
             window.addEventListener('appinstalled', (event) => {
-                console.log('[PWA] Aplicación instalada correctamente.');
+                console.log('[PWA] AplicaciÃ³n instalada correctamente.');
                 banner.classList.add('hidden');
             });
         };

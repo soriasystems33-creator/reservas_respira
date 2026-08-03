@@ -88,8 +88,8 @@ window.openEmployeeModal=(id=null)=>{editingEmployeeId=id;document.getElementByI
 document.getElementById('employee-modal-title').innerText=id?'Editar Empleado':'Nuevo Empleado';
 const sel=document.getElementById('emp-specialty');const cur=sel.value;
 sel.innerHTML='<option value="">— Sin especialidad —</option>'+categoriesDB.map(c=>'<option value="'+esc(c.name)+'">'+esc(c.name)+'</option>').join('');
-if(id){const e=getEmpById(id);if(e){document.getElementById('emp-name').value=e.name;sel.value=e.specialty||'';document.getElementById('emp-color').value=e.color||'#3b82f6'}}
-else{['emp-name'].forEach(i=>document.getElementById(i).value='');sel.value='';document.getElementById('emp-color').value='#3b82f6'}};
+if(id){const e=getEmpById(id);if(e){document.getElementById('emp-name').value=e.name;sel.value=e.specialty||'';document.getElementById('emp-color').value=e.color||'#a78bfa'}}
+else{['emp-name'].forEach(i=>document.getElementById(i).value='');sel.value='';document.getElementById('emp-color').value='#a78bfa'}};
 window.saveEmployee=async()=>{const d={name:document.getElementById('emp-name').value.trim(),specialty:document.getElementById('emp-specialty').value.trim(),color:document.getElementById('emp-color').value,updatedAt:new Date().toISOString()};
 if(!d.name)return alert('Escribe un nombre');
 if(editingEmployeeId)await updateDoc(doc(db,'artifacts',AID,'public','data','employees',editingEmployeeId),d);
@@ -98,10 +98,10 @@ document.getElementById('employee-modal').classList.add('hidden')};
 window.deleteEmployee=async id=>{if(!confirm('¿Eliminar este empleado?'))return;await deleteDoc(doc(db,'artifacts',AID,'public','data','employees',id))};
 window.renderEmployeesMgmt=()=>{const c=document.getElementById('employees-mgmt-list');if(!c)return;c.innerHTML='';
 if(employeesDB.length===0){c.innerHTML='<div class="col-span-full bg-white p-12 rounded-3xl border text-center text-slate-400"><p class="font-black uppercase">No hay empleados</p><p class="text-xs mt-2">Añade al menos un empleado para empezar.</p></div>';return}
-employeesDB.forEach(e=>{c.innerHTML+=`<div class="bg-white rounded-3xl border shadow-sm p-6 flex flex-col items-center gap-4 hover:shadow-md transition-shadow"><div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-black" style="background:${e.color||'#3b82f6'}">${e.name.substring(0,1).toUpperCase()}</div><div class="text-center"><h4 class="font-black uppercase text-sm">${esc(e.name)}</h4><p class="text-[10px] text-slate-400">${esc(e.specialty||'')}</p></div><div class="flex gap-2"><button onclick="window.openEmployeeModal('${e.id}')" class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100"><i data-lucide="edit-3" class="w-3 h-3 inline"></i> Editar</button><button onclick="window.deleteEmployee('${e.id}')" class="px-3 py-1.5 bg-red-50 text-red-500 rounded-lg text-[10px] font-black uppercase hover:bg-red-100"><i data-lucide="trash-2" class="w-3 h-3 inline"></i></button></div></div>`});
+employeesDB.forEach(e=>{c.innerHTML+=`<div class="bg-white rounded-3xl border shadow-sm p-6 flex flex-col items-center gap-4 hover:shadow-md transition-shadow"><div class="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-black" style="background:${e.color||'#7c3aed'}">${e.name.substring(0,1).toUpperCase()}</div><div class="text-center"><h4 class="font-black uppercase text-sm">${esc(e.name)}</h4><p class="text-[10px] text-slate-400">${esc(e.specialty||'')}</p></div><div class="flex gap-2"><button onclick="window.openEmployeeModal('${e.id}')" class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100"><i data-lucide="edit-3" class="w-3 h-3 inline"></i> Editar</button><button onclick="window.deleteEmployee('${e.id}')" class="px-3 py-1.5 bg-red-50 text-red-500 rounded-lg text-[10px] font-black uppercase hover:bg-red-100"><i data-lucide="trash-2" class="w-3 h-3 inline"></i></button></div></div>`});
 lucide.createIcons()};
 window.renderSidebarEmployees=()=>{const c=document.getElementById('sidebar-employee-buttons');if(!c)return;c.innerHTML='';
-employeesDB.forEach(e=>{c.innerHTML+=`<button onclick="window.setTab('calendar_emp_${e.id}')" id="tab-calendar_emp_${e.id}" class="w-full text-left p-3 rounded-xl hover:bg-white/40 flex items-center gap-3 transition-all text-slate-700 font-bold"><div class="w-5 h-5 rounded-full" style="background:${e.color||'#3b82f6'}"></div> ${esc(e.name)}</button>`})};
+employeesDB.forEach(e=>{c.innerHTML+=`<button onclick="window.setTab('calendar_emp_${e.id}')" id="tab-calendar_emp_${e.id}" class="w-full text-left p-3 rounded-xl hover:bg-white/40 flex items-center gap-3 transition-all text-slate-700 font-bold"><div class="w-5 h-5 rounded-full" style="background:${e.color||'#7c3aed'}"></div> ${esc(e.name)}</button>`})};
 // ---- POPULATE MODAL SELECTS ----
 
 const populateModalSelects=()=>{
@@ -1160,7 +1160,7 @@ html+=`<div class="bg-white p-6 rounded-3xl border shadow-sm"><p class="text-[10
 // Chart
 const dim=new Date(sy,sm+1,0).getDate();const labels=Array.from({length:dim},(_,i)=>i+1);const dd=new Array(dim).fill(0);
 filtered.forEach(a=>{const d=parseInt(a.date.split('-')[2]);if(d>=1&&d<=dim)dd[d-1]+=a.price||0});
-const ctx=document.getElementById('incomeChart');if(ctx){if(incomeChart)incomeChart.destroy();incomeChart=new Chart(ctx.getContext('2d'),{type:'line',data:{labels,datasets:[{label:'Ingresos',data:dd,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',fill:true,tension:0.4,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},maxRotation:0}},y:{beginAtZero:true,ticks:{callback:v=>v+'€'}}}}})}
+const ctx=document.getElementById('incomeChart');if(ctx){if(incomeChart)incomeChart.destroy();incomeChart=new Chart(ctx.getContext('2d'),{type:'line',data:{labels,datasets:[{label:'Ingresos',data:dd,borderColor:'#7c3aed',backgroundColor:'rgba(124,61,237,0.1)',fill:true,tension:0.4,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:9},maxRotation:0}},y:{beginAtZero:true,ticks:{callback:v=>v+'€'}}}}})}
 // Top services
 const sMap={};filtered.forEach(a=>{const s=a.service||'?';if(!sMap[s])sMap[s]={rev:0,count:0};sMap[s].rev+=a.price||0;sMap[s].count++});
 const ss=Object.entries(sMap).sort((a,b)=>b[1].rev-a[1].rev);const mr=ss.length>0?ss[0][1].rev:1;
