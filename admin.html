@@ -425,6 +425,99 @@
                 </div>
             </div>
 
+            <!-- VISTA TPV -->
+            <div id="view-tpv" class="hidden space-y-6 pb-12">
+                <div class="bg-white p-6 rounded-3xl border shadow-sm flex flex-col md:flex-row gap-6" style="border-color:var(--brown-light)">
+                    <!-- Lado izquierdo: Ticket y cobro -->
+                    <div class="flex-1 flex flex-col border-r pr-0 md:pr-6 border-slate-100">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-serif italic font-semibold text-2xl" style="color:var(--brown)">Ticket de Cobro</h3>
+                            <span id="tpv-date-label" class="text-xs font-bold text-slate-500 uppercase tracking-widest"></span>
+                        </div>
+                        
+                        <!-- Cita y Cliente -->
+                        <div class="space-y-3 mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Vincular Cita (opcional)</label>
+                                <select id="tpv-apt-select" class="w-full p-2.5 rounded-xl border outline-none font-medium text-sm" onchange="window.tpvLinkAppointment()"></select>
+                            </div>
+                            <div class="flex gap-3">
+                                <div class="flex-1">
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Cliente</label>
+                                    <input type="text" id="tpv-client-name" placeholder="Nombre" class="w-full p-2.5 rounded-xl border outline-none font-medium text-sm">
+                                </div>
+                                <div class="flex-1">
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">Teléfono</label>
+                                    <input type="tel" id="tpv-client-phone" placeholder="Ej: 600123456" class="w-full p-2.5 rounded-xl border outline-none font-medium text-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Líneas de Ticket -->
+                        <div class="flex-grow flex flex-col relative min-h-[250px]">
+                            <div id="tpv-empty" class="absolute inset-0 flex flex-col items-center justify-center text-slate-300">
+                                <i data-lucide="shopping-bag" class="w-12 h-12 mb-3"></i>
+                                <p class="text-xs font-bold uppercase tracking-widest">Ticket Vacío</p>
+                            </div>
+                            <div id="tpv-lines" class="space-y-2 overflow-y-auto mb-4 z-10"></div>
+                        </div>
+
+                        <!-- Totales y Cobro -->
+                        <div class="border-t pt-4 border-slate-100 mt-auto">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-slate-500 uppercase">Subtotal</span>
+                                <span id="tpv-subtotal" class="font-medium text-slate-700">0,00€</span>
+                            </div>
+                            <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-100">
+                                <span class="text-xs font-bold text-slate-500 uppercase">IVA (21%) inc.</span>
+                                <span id="tpv-iva" class="font-medium text-slate-400">0,00€</span>
+                            </div>
+                            <div class="flex justify-between items-center mb-6">
+                                <span class="text-sm font-black text-slate-800 uppercase tracking-widest">Total</span>
+                                <span id="tpv-total" class="text-3xl font-black" style="color:var(--blue-deep)">0,00€</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 mb-6">
+                                <button id="btn-tpv-cash" onclick="window.tpvSetPayment('cash')" class="p-3 rounded-xl border-2 font-bold flex items-center justify-center gap-2 transition-all">
+                                    <i data-lucide="coins" class="w-5 h-5"></i> Efectivo
+                                </button>
+                                <button id="btn-tpv-card" onclick="window.tpvSetPayment('card')" class="p-3 rounded-xl border-2 font-bold flex items-center justify-center gap-2 transition-all">
+                                    <i data-lucide="credit-card" class="w-5 h-5"></i> Tarjeta
+                                </button>
+                            </div>
+
+                            <!-- Cambio para efectivo -->
+                            <div id="tpv-change-row" class="hidden mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-100">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Entregado</label>
+                                    <input type="number" id="tpv-cash-given" oninput="window.tpvCalcChange()" placeholder="0.00" class="w-24 p-1.5 text-right rounded-lg border border-amber-200 outline-none font-bold text-amber-800">
+                                </div>
+                                <div class="flex justify-between items-center border-t border-amber-200/50 pt-2">
+                                    <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Cambio</span>
+                                    <span id="tpv-change-display" class="font-black text-amber-600 text-lg">0,00€</span>
+                                </div>
+                            </div>
+
+                            <button id="btn-tpv-charge" onclick="window.tpvExecuteCharge()" class="w-full py-4 rounded-2xl font-black text-white text-lg shadow-lg uppercase tracking-wider flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all" style="background:var(--blue-deep)">
+                                <i data-lucide="check-circle" class="w-6 h-6"></i> <span id="tpv-charge-btn-label">Cobrar</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lado derecho: Servicios rápidos -->
+                    <div class="flex-1 flex flex-col h-[75vh]">
+                        <div class="mb-4 flex gap-3 relative">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+                            <input type="text" id="tpv-search" oninput="window.tpvRenderServices()" placeholder="Buscar servicio..." class="w-full pl-9 p-2.5 rounded-xl border outline-none font-medium text-sm border-slate-200 focus:border-blue-400">
+                        </div>
+                        
+                        <div id="tpv-cats" class="flex gap-2 overflow-x-auto pb-3 mb-2 scrollbar-hide no-scrollbar flex-shrink-0"></div>
+                        
+                        <div id="tpv-services-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto pr-2 pb-4 content-start"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- VISTA GASTOS -->
             <div id="view-gastos" class="hidden space-y-6 pb-12">
 
