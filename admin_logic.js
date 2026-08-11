@@ -25,6 +25,42 @@ const t2m=t=>{if(!t||typeof t!=='string')return 0;const p=t.split(':').map(Numbe
 const m2t=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
 const esc=s=>typeof s!=='string'?s:s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 const statusColors={'pending':'bg-yellow-100 border-yellow-300 text-yellow-800','confirmed':'bg-blue-100 border-blue-300 text-blue-800','completed':'bg-green-100 border-green-300 text-green-800','cancelled':'bg-red-100 border-red-300 text-red-800 opacity-60'};
+const getAptServiceBlocks = (apt) => {
+  const blocks = [];
+  const svcs = apt.services || [];
+  if (svcs.length === 0) {
+    blocks.push({
+      apt,
+      serviceName: apt.service || '',
+      employee: apt.employee || '',
+      time: apt.time,
+      duration: parseInt(apt.duration || 15, 10),
+      index: 0,
+      totalServices: 1
+    });
+    return blocks;
+  }
+  const uniqueEmps = [...new Set(svcs.map(s => s.employee).filter(Boolean))];
+  const isMultiEmp = uniqueEmps.length > 1;
+  let currentStart = t2m(apt.time);
+  svcs.forEach((svc, index) => {
+    const svcDur = parseInt(svc.duration || 15, 10);
+    const svcTime = isMultiEmp ? apt.time : m2t(currentStart);
+    blocks.push({
+      apt,
+      serviceName: svc.name,
+      employee: svc.employee || apt.employee || '',
+      time: svcTime,
+      duration: svcDur,
+      index: index,
+      totalServices: svcs.length
+    });
+    if (!isMultiEmp) {
+      currentStart += svcDur;
+    }
+  });
+  return blocks;
+};
 const WEBHOOK_URL="https://n8nyt.soriasystems.site/webhook/73794b5a-65e9-494f-bd50-9c461b78d93e";
 const notifyWebhook=(event,data)=>{if(!WEBHOOK_URL)return;try{fetch(WEBHOOK_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({event,...data})})}catch(e){console.error('[webhook]',e)}};
 const setStatus=(s,t)=>{const d=document.getElementById('status-dot');if(d)d.className=`w-2.5 h-2.5 rounded-full ${s==='ok'?'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]':s==='loading'?'bg-yellow-400 animate-pulse':'bg-red-500'}`;const l=document.getElementById('status-text');if(l)l.innerText=t};
@@ -429,9 +465,20 @@ try{
     });
 
     // Citas
-    dayApts.forEach(apt=>{
-        const aptStart=t2m(apt.time);
-        const aptDur=apt.duration||15;
+    const visualBlocks = [];
+    dayApts.forEach(apt => {
+        visualBlocks.push(...getAptServiceBlocks(apt));
+    });
+    const filteredBlocks = visualBlocks.filter(b => {
+        const bEmp = (b.employee || '').toLowerCase();
+        const curEmp = emp.name.toLowerCase();
+        return bEmp === curEmp || bEmp === 'todas' || bEmp === 'cualquiera' || bEmp === 'ambos';
+    });
+
+    filteredBlocks.forEach(b=>{
+        const apt=b.apt;
+        const aptStart=t2m(b.time);
+        const aptDur=b.duration;
         const topPx=(aptStart-startMin)*PX_PER_MIN;
         const heightPx=Math.max(aptDur*PX_PER_MIN-2, 24);
 
@@ -442,9 +489,10 @@ try{
         else                            {bg='#fffbeb';border='#f59e0b';}
 
         const paidDot=apt.isPaid?`<span style="font-size:8px;background:rgba(34,197,94,.2);color:#166534;padding:1px 5px;border-radius:99px;font-weight:700">✓</span>`:'';
+        const svcLabel = b.totalServices > 1 ? `<span style="font-size:8px;opacity:.7;font-weight:bold;margin-left:4px">(${b.index + 1}/${b.totalServices})</span>` : '';
 
         html+=`<div onclick="window.openModal('${apt.id}')"
-            title="${esc(apt.clientName)} — ${esc(apt.service)} (${apt.time}, ${aptDur}min)"
+            title="${esc(apt.clientName)} — ${esc(b.serviceName)} (${b.time}, ${aptDur}min)"
             style="
                 position:absolute;
                 top:${topPx}px;
@@ -463,12 +511,12 @@ try{
             onmouseover="this.style.boxShadow='0 4px 14px rgba(0,0,0,.18)';this.style.transform='scale(1.01)';this.style.zIndex='20'"
             onmouseout="this.style.boxShadow='0 2px 6px rgba(0,0,0,.08)';this.style.transform='';this.style.zIndex='10'">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:4px">
-                <span style="font-size:11px;font-weight:900;color:${textCol};font-family:monospace">${apt.time}</span>
-                <span style="font-size:9px;font-weight:600;color:${textCol};opacity:.7">${aptDur}m</span>
+                <span style="font-size:11px;font-weight:900;color:${textCol};font-family:monospace">${b.time}</span>
+                <span style="font-size:9px;font-weight:600;color:${textCol};opacity:.7">${aptDur}m${svcLabel}</span>
                 ${paidDot}
             </div>
             ${heightPx>26?`<div style="font-size:11px;font-weight:800;color:${textCol};text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px">${esc(apt.clientName||apt.name||'?')}</div>`:''}
-            ${heightPx>44?`<div style="font-size:9px;color:${textCol};opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(apt.service||'')}</div>`:''}
+            ${heightPx>44?`<div style="font-size:9px;color:${textCol};opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.serviceName)}</div>`:''}
         </div>`;
     });
 
@@ -654,10 +702,21 @@ if(empFilter){
     });
 
     // Appointments
-    empApts.forEach(apt=>{
+    const visualBlocks = [];
+    empApts.forEach(apt => {
+      visualBlocks.push(...getAptServiceBlocks(apt));
+    });
+    const filteredBlocks = visualBlocks.filter(b => {
+      const bEmp = (b.employee || '').toLowerCase();
+      const curEmp = emp.name.toLowerCase();
+      return bEmp === curEmp || bEmp === 'todas' || bEmp === 'cualquiera' || bEmp === 'ambos';
+    });
+
+    filteredBlocks.forEach(b=>{
+      const apt = b.apt;
       const sm2=startH*60;
-      const aptM=parseInt((apt.time||'00:00').split(':')[0],10)*60+parseInt((apt.time||'00:00').split(':')[1]||'0',10);
-      const dur=apt.duration||15;
+      const aptM=parseInt((b.time||'00:00').split(':')[0],10)*60+parseInt((b.time||'00:00').split(':')[1]||'0',10);
+      const dur=b.duration;
       const topPx=(aptM-sm2)/60*PX;
       const hPx=Math.max(dur/60*PX-2,22);
       let bg,bord;
@@ -666,8 +725,10 @@ if(empFilter){
       else if(apt.status==='confirmed'){bg=empColor+'20';bord=empColor;}
       else{bg='#fffbeb';bord='#f59e0b';}
       const paid=apt.isPaid?'<span style="font-size:8px;font-weight:700;background:rgba(34,197,94,.2);color:#166534;padding:1px 5px;border-radius:99px">✓</span>':'';
+      const svcLabel = b.totalServices > 1 ? `<span style="font-size:8px;opacity:.7;font-weight:bold;margin-left:4px">(${b.index + 1}/${b.totalServices})</span>` : '';
+
       html+=`<div onclick="window.openModal('${apt.id}')"
-        title="${esc(apt.clientName)} · ${esc(apt.service)}"
+        title="${esc(apt.clientName)} · ${esc(b.serviceName)} (${b.time}, ${dur}min)"
         style="position:absolute;top:${topPx}px;left:4px;right:4px;height:${hPx}px;
           background:${bg};border-left:4px solid ${bord};border-radius:8px;
           padding:3px 8px;cursor:pointer;overflow:hidden;z-index:10;
@@ -675,11 +736,11 @@ if(empFilter){
         onmouseover="this.style.boxShadow='0 4px 14px rgba(0,0,0,.18)';this.style.transform='scaleX(1.01)';this.style.zIndex=20"
         onmouseout="this.style.boxShadow='0 2px 6px rgba(0,0,0,.08)';this.style.transform='';this.style.zIndex=10">
         <div style="display:flex;align-items:center;gap:5px">
-          <span style="font-size:11px;font-weight:900;font-family:monospace;color:#2e2826">${apt.time}</span>
-          <span style="font-size:9px;color:#7a6b67">${dur}m</span>${paid}
+          <span style="font-size:11px;font-weight:900;font-family:monospace;color:#2e2826">${b.time}</span>
+          <span style="font-size:9px;color:#7a6b67">${dur}m${svcLabel}</span>${paid}
         </div>
         ${hPx>26?`<div style="font-size:11px;font-weight:800;color:#2e2826;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(apt.clientName||apt.name||'?')}</div>`:''}
-        ${hPx>44?`<div style="font-size:9px;color:#7a6b67;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(apt.service||'')}</div>`:''}
+        ${hPx>44?`<div style="font-size:9px;color:#7a6b67;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.serviceName)}</div>`:''}
       </div>`;
     });
 
@@ -701,20 +762,36 @@ if(empFilter){
       </div>
       <div class="flex flex-col gap-3 p-4 overflow-y-auto" style="max-height:780px">`;
     if(ea.length===0)html+='<div class="text-center text-slate-400 mt-10 text-xs italic">Sin citas</div>';
-    else ea.forEach(apt=>{
-      let cc='bg-white border-l-4 border-slate-300';
-      if(apt.status==='confirmed')cc='border-l-4';
-      else if(apt.status==='completed')cc='bg-emerald-50 border-emerald-500';
-      else if(apt.status==='pending')cc='bg-amber-50 border-amber-400';
-      html+=`<div onclick="window.openModal('${apt.id}')" class="p-3 rounded-xl shadow-sm hover:shadow-md cursor-pointer transition-all ${cc}" style="border-color:${emp.color}">
-        <div class="flex justify-between items-center mb-1">
-          <span class="font-black text-lg text-slate-800">${apt.time}</span>
-          <span class="text-[10px] uppercase font-bold text-slate-500 bg-white px-2 py-0.5 rounded-full shadow-sm">${apt.duration} min</span>
-        </div>
-        <div class="font-black text-sm uppercase text-slate-700 truncate">${esc(apt.clientName||apt.name)}</div>
-        <div class="text-xs text-slate-500 truncate">${esc(apt.service)}</div>
-      </div>`;
-    });
+    else {
+      const visualBlocks = [];
+      ea.forEach(apt => {
+        visualBlocks.push(...getAptServiceBlocks(apt));
+      });
+      const filteredBlocks = visualBlocks.filter(b => {
+        const bEmp = (b.employee || '').toLowerCase();
+        const curEmp = emp.name.toLowerCase();
+        return bEmp === curEmp || bEmp === 'todas' || bEmp === 'cualquiera' || bEmp === 'ambos';
+      });
+
+      filteredBlocks.forEach(b => {
+        const apt = b.apt;
+        let cc='bg-white border-l-4 border-slate-300';
+        if(apt.status==='confirmed')cc='border-l-4';
+        else if(apt.status==='completed')cc='bg-emerald-50 border-emerald-500';
+        else if(apt.status==='pending')cc='bg-amber-50 border-amber-400';
+
+        const svcLabel = b.totalServices > 1 ? `<span style="font-size:10px;opacity:.7;font-weight:bold;margin-left:4px">(${b.index + 1}/${b.totalServices})</span>` : '';
+
+        html+=`<div onclick="window.openModal('${apt.id}')" class="p-3 rounded-xl shadow-sm hover:shadow-md cursor-pointer transition-all ${cc}" style="border-color:${emp.color}">
+          <div class="flex justify-between items-center mb-1">
+            <span class="font-black text-lg text-slate-800">${b.time}</span>
+            <span class="text-[10px] uppercase font-bold text-slate-500 bg-white px-2 py-0.5 rounded-full shadow-sm">${b.duration} min${svcLabel}</span>
+          </div>
+          <div class="font-black text-sm uppercase text-slate-700 truncate">${esc(apt.clientName||apt.name)}</div>
+          <div class="text-xs text-slate-500 truncate">${esc(b.serviceName)}</div>
+        </div>`;
+      });
+    }
     html+='</div></div>';
     cols.innerHTML+=html;
   });
@@ -800,10 +877,21 @@ window.renderMultiEmpTimeline = (ds, dayApts, container) => {
     });
 
     const ea=dayApts.filter(function(a){return empInApt(a,emp.name)});
-    ea.forEach(apt=>{
+    const visualBlocks = [];
+    ea.forEach(apt => {
+      visualBlocks.push(...getAptServiceBlocks(apt));
+    });
+    const filteredBlocks = visualBlocks.filter(b => {
+      const bEmp = (b.employee || '').toLowerCase();
+      const curEmp = emp.name.toLowerCase();
+      return bEmp === curEmp || bEmp === 'todas' || bEmp === 'cualquiera' || bEmp === 'ambos';
+    });
+
+    filteredBlocks.forEach(b=>{
+      const apt = b.apt;
       const sm2=startH*60;
-      const aptM=parseInt((apt.time||'00:00').split(':')[0],10)*60+parseInt((apt.time||'00:00').split(':')[1]||'0',10);
-      const dur=apt.duration||15;
+      const aptM=parseInt((b.time||'00:00').split(':')[0],10)*60+parseInt((b.time||'00:00').split(':')[1]||'0',10);
+      const dur=b.duration;
       const topPx=(aptM-sm2)/60*PX;
       const hPx=Math.max(dur/60*PX-2,20);
       let bg,bord;
@@ -812,13 +900,16 @@ window.renderMultiEmpTimeline = (ds, dayApts, container) => {
       else if(apt.status==='completed'){bg='#f0fdf4';bord='#22c55e';}
       else if(apt.status==='confirmed'){bg=empColor+'20';bord=empColor;}
       else{bg='#fffbeb';bord='#f59e0b';}
+      const svcLabel = b.totalServices > 1 ? `<span style="font-size:8px;opacity:.7;font-weight:bold;margin-left:2px">(${b.index + 1}/${b.totalServices})</span>` : '';
+
       html+=`<div onclick="window.openModal('${apt.id}')"
-        title="${esc(apt.clientName)} · ${esc(apt.service)}"
+        title="${esc(apt.clientName)} · ${esc(b.serviceName)} (${b.time}, ${dur}min)"
         style="position:absolute;top:${topPx}px;left:2px;right:2px;height:${hPx}px;
           background:${bg};border-left:3px solid ${bord};border-radius:6px;
           padding:2px 4px;cursor:pointer;overflow:hidden;z-index:10;box-shadow:0 2px 4px rgba(0,0,0,0.05)">
-        <div style="font-size:9px;font-weight:900;color:#2e2826;line-height:1">${apt.time}</div>
+        <div style="font-size:9px;font-weight:900;color:#2e2826;line-height:1">${b.time}${svcLabel}</div>
         ${hPx>20?`<div style="font-size:9px;font-weight:800;color:#2e2826;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px">${esc(apt.clientName||apt.name||'?')}</div>`:''}
+        ${hPx>34?`<div style="font-size:8px;color:#2e2826;opacity:.75;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px">${esc(b.serviceName)}</div>`:''}
       </div>`;
     });
 
