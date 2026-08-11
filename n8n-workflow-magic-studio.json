@@ -2,24 +2,22 @@
   "nodes": [
     {
       "parameters": {
-        "authentication": "serviceAccount",
         "operation": "getAll",
-        "projectId": "crm-lqf-2026",
-        "collection": "=artifacts/magic-studio-default/public/data/appointments",
+        "table": "appointments",
         "returnAll": true
       },
       "id": "1d94d471-0b96-4d46-b672-33c6b84826e6",
-      "name": "Firestore - Obtener Citas (Ayer)2",
-      "type": "n8n-nodes-base.googleFirebaseCloudFirestore",
+      "name": "Supabase - Obtener Citas (Ayer)2",
+      "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
         -272,
         2704
       ],
       "credentials": {
-        "googleApi": {
-          "id": "ovzhJx6VZgJHFXIf",
-          "name": "Vicen Firebase"
+        "supabaseApi": {
+          "id": "",
+          "name": "Supabase account"
         }
       }
     },
@@ -124,7 +122,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = $input.item.json.body || $input.item.json;\nreturn { json: { ...raw } };"
+        "jsCode": "let raw = $input.item.json.body || $input.item.json;\nif (typeof raw === 'string') {\n  try { raw = JSON.parse(raw); } catch (e) {}\n}\nreturn { json: { ...raw } };"
       },
       "id": "ae870132-20db-4772-8d3d-02b7d0724376",
       "name": "Normalizar Payload2",
@@ -317,24 +315,22 @@
     },
     {
       "parameters": {
-        "authentication": "serviceAccount",
         "operation": "getAll",
-        "projectId": "crm-lqf-2026",
-        "collection": "=artifacts/magic-studio-default/public/data/appointments",
+        "table": "appointments",
         "returnAll": true
       },
       "id": "283939b4-493e-4bd8-af8e-8dbd7fca31e7",
-      "name": "Firestore - Obtener Citas2",
-      "type": "n8n-nodes-base.googleFirebaseCloudFirestore",
+      "name": "Supabase - Obtener Citas2",
+      "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
         -272,
         2928
       ],
       "credentials": {
-        "googleApi": {
-          "id": "ovzhJx6VZgJHFXIf",
-          "name": "Vicen Firebase"
+        "supabaseApi": {
+          "id": "",
+          "name": "Supabase account"
         }
       }
     },
