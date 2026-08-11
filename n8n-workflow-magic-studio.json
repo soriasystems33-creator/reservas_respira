@@ -67,19 +67,12 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.date }}",
-              "value2": "={{ $now.minus({days: 1}).toISODate() }}"
-            }
-          ]
-        }
+        "jsCode": "const yesterdayStr = $now.minus({days: 1}).toISODate();\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  if (apt.date === yesterdayStr) {\n    const email = apt.clientEmail || apt.client_email;\n    if (email) {\n      apt.clientEmail = email;\n      apt.clientName = apt.clientName || apt.client_name;\n      apt.clientPhone = apt.clientPhone || apt.client_phone;\n      apt.isPaid = apt.isPaid !== undefined ? apt.isPaid : apt.is_paid;\n      result.push({ json: apt });\n    }\n  }\n});\nreturn result;"
       },
       "id": "12fb24c2-4225-4b1c-b78b-f219be6623f7",
       "name": "Filtrar: Citas de Ayer2",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
         -48,
         2704
@@ -336,7 +329,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const now = new Date();\nconst offset = now.getTimezoneOffset();\nconst madridOffset = 120; // CEST (UTC+2)\nconst diff = offset + madridOffset;\nconst local = new Date(now.getTime() + diff * 60000);\nlocal.setDate(local.getDate() + 1);\nconst dateStr = local.getFullYear() + '-' +\n  String(local.getMonth() + 1).padStart(2, '0') + '-' +\n  String(local.getDate()).padStart(2, '0');\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  const id = apt._id || apt.id;\n  if (!id) return;\n  apt.id = id;\n  if (!apt.clientEmail) return;\n  if (apt.status === 'cancelled' || apt.status === 'noshow') return;\n  if (apt.date !== dateStr) return;\n  result.push({ json: apt });\n});\nreturn result;"
+        "jsCode": "const now = new Date();\nconst offset = now.getTimezoneOffset();\nconst madridOffset = 120; // CEST (UTC+2)\nconst diff = offset + madridOffset;\nconst local = new Date(now.getTime() + diff * 60000);\nlocal.setDate(local.getDate() + 1);\nconst dateStr = local.getFullYear() + '-' +\n  String(local.getMonth() + 1).padStart(2, '0') + '-' +\n  String(local.getDate()).padStart(2, '0');\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  const id = apt._id || apt.id;\n  if (!id) return;\n  apt.id = id;\n  const email = apt.clientEmail || apt.client_email;\n  if (!email) return;\n  apt.clientEmail = email;\n  apt.clientName = apt.clientName || apt.client_name;\n  apt.clientPhone = apt.clientPhone || apt.client_phone;\n  apt.isPaid = apt.isPaid !== undefined ? apt.isPaid : apt.is_paid;\n  if (apt.status === 'cancelled' || apt.status === 'noshow') return;\n  if (apt.date !== dateStr) return;\n  result.push({ json: apt });\n});\nreturn result;"
       },
       "id": "62adeebf-141c-452c-8ad6-a224a1ec52b9",
       "name": "Filtrar Citas de Mañana2",
@@ -374,7 +367,7 @@
     }
   ],
   "connections": {
-    "Firestore - Obtener Citas (Ayer)2": {
+    "Supabase - Obtener Citas (Ayer)2": {
       "main": [
         [
           {
@@ -389,7 +382,7 @@
       "main": [
         [
           {
-            "node": "Firestore - Obtener Citas (Ayer)2",
+            "node": "Supabase - Obtener Citas (Ayer)2",
             "type": "main",
             "index": 0
           }
@@ -411,7 +404,7 @@
       "main": [
         [
           {
-            "node": "Firestore - Obtener Citas2",
+            "node": "Supabase - Obtener Citas2",
             "type": "main",
             "index": 0
           }
@@ -505,7 +498,7 @@
         ]
       ]
     },
-    "Firestore - Obtener Citas2": {
+    "Supabase - Obtener Citas2": {
       "main": [
         [
           {
