@@ -2416,7 +2416,18 @@ window.applyMultiDayConfig = async (action) => {
         // Mostrar modal resumen confirmación de éxito
         let typeText = '';
         if (action === 'closed') typeText = 'Configurado como 🚫 CERRADO.';
-        else if (action === 'special') typeText = `Horario especial: ⏰ ${specialStart} - ${specialEnd}.`;
+        else if (action === 'special') {
+            const type = document.getElementById('cmd-shift-type').value;
+            const s1 = document.getElementById('cmd-start-1').value || '09:00';
+            const e1 = document.getElementById('cmd-end-1').value || '14:00';
+            if (type === 'split') {
+                const s2 = document.getElementById('cmd-start-2').value || '16:00';
+                const e2 = document.getElementById('cmd-end-2').value || '20:00';
+                typeText = `Horario especial: ⏰ ${s1} - ${e1} y ${s2} - ${e2}.`;
+            } else {
+                typeText = `Horario especial: ⏰ ${s1} - ${e1}.`;
+            }
+        }
         else if (action === 'reset') typeText = 'Restaurado al horario estándar.';
 
         const daysFormatted = days.map(ds => {
