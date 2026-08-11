@@ -1598,6 +1598,8 @@ window.saveBlock=async(blockData)=>{
 };
 window.deleteBlock=async(id)=>{
   if(!confirm('¿Eliminar este bloqueo?'))return;
+  // Optimistic update to reflect in UI immediately
+  blocksDB = blocksDB.filter(b => b.id !== id);
   await deleteDoc(doc(db,'artifacts',AID,'public','data','blocks',id));
   if (document.getElementById('day-modal') && !document.getElementById('day-modal').classList.contains('hidden')) {
     let empFilter = null;
@@ -1612,6 +1614,10 @@ window.deleteBlock=async(id)=>{
 window.restoreDayForEmp = async (ds, empName) => {
   if (!confirm('¿Restaurar el horario por defecto para este día?')) return;
   const empBlocks = window.loadBlocksForDate(ds, empName);
+  const idsToDelete = empBlocks.map(bl => bl.id);
+  // Optimistic update to reflect in UI immediately
+  blocksDB = blocksDB.filter(b => !idsToDelete.includes(b.id));
+
   const deletePromises = empBlocks.map(bl => 
     deleteDoc(doc(db, 'artifacts', AID, 'public', 'data', 'blocks', bl.id))
   );
@@ -2498,6 +2504,17 @@ onSnapshot(collection(db,'artifacts',AID,'public','data','blocks'),snap=>{
   blocksDB=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(currentTab.startsWith('calendar_emp_')&&specialistViewLevel==='day')window.renderSpecialistDayView();
   else if(currentTab.startsWith('calendar')) window.render();
+  
+  const dm = document.getElementById('day-modal');
+  if (dm && !dm.classList.contains('hidden') && window.selectedDayInModal) {
+      let empFilter = null;
+      if (currentTab.startsWith('calendar_emp_')) {
+          const eid = currentTab.replace('calendar_emp_', '');
+          const emp = window.getEmpById ? window.getEmpById(eid) : null;
+          if (emp) empFilter = emp.name;
+      }
+      window.openDayModal(window.selectedDayInModal, empFilter);
+  }
 });
 
 }catch(err){console.error("❌ ERROR CRÍTICO EN startListeners:",err)}};
