@@ -1815,8 +1815,8 @@ function updateAptSvcSummary(){
       '</div>'+
     '</div>';
   }).join('');
-  var tPrice=_aptSvcs.reduce(function(sum,s){return sum+(s.price||0)},0);
-  var tDur=_aptSvcs.reduce(function(sum,s){return sum+(s.duration||0)},0);
+  var tPrice=_aptSvcs.reduce(function(sum,s){return sum+parseFloat(s.price||0)},0);
+  var tDur=_aptSvcs.reduce(function(sum,s){return sum+parseInt(s.duration||0, 10)},0);
   document.getElementById('m-price').value=tPrice;
   if(_aptSvcs.length>0){total.classList.remove('hidden');total.textContent='Total: '+tDur+' min · '+tPrice+'€'}else{total.classList.add('hidden')}
   var emps=[...new Set(_aptSvcs.map(function(s){return s.employee}).filter(Boolean))];
@@ -1830,7 +1830,7 @@ const empNames=[];const empDurs={};
 _aptSvcs.forEach(function(s){(s.employee||'').split(',').map(function(e){return e.trim()}).filter(Boolean).forEach(function(e){if(e!=='Cualquiera'){if(!empNames.includes(e))empNames.push(e);if(!empDurs[e])empDurs[e]=0;empDurs[e]+=(s.duration||0)}})});
 const isMulti=empNames.length>1;
 const maxDur=isMulti?Math.max(...Object.values(empDurs)):0;
-const totalDur=_aptSvcs.reduce(function(sum,s){return sum+(s.duration||0)},0)||15;
+const totalDur=_aptSvcs.reduce(function(sum,s){return sum+parseInt(s.duration||0, 10)},0)||15;
 // Check if employee is busy for a duration block
 const isEmpBusy=(empName,start,end)=>{
   return appointments.some(function(a){return a.date===date&&empInApt(a,empName)&&a.id!==editingId&&a.status!=='cancelled'&&start<t2m(a.time)+(a.duration||15)&&end>t2m(a.time)});
@@ -1898,7 +1898,7 @@ window.saveAppointment=async()=>{if(!selectedTime)return alert("Selecciona una h
 if(_aptSvcs.length===0)return alert("Añade al menos un servicio.");
 var sName=_aptSvcs.map(function(s){return s.name}).join(' + ');
 var empStr=_aptSvcs.map(function(s){var e=s.employee||'';if(e.includes(',')){var parts=e.split(',').map(function(p){return p.trim()}).filter(Boolean);e=parts[0]};return e}).filter(Boolean).join(', ');
-var sDur=_aptSvcs.reduce(function(sum,s){return sum+(s.duration||0)},0);
+var sDur=_aptSvcs.reduce(function(sum,s){return sum+parseInt(s.duration||0, 10)},0);
 var sPrice=parseFloat(document.getElementById('m-price').value)||0;
 var phone=document.getElementById('m-phone').value;window.cleanPhone(document.getElementById('m-phone'));phone=document.getElementById('m-phone').value;
 var isCancelled = document.getElementById('m-status').value === 'cancelled';
