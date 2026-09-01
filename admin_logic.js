@@ -3396,6 +3396,31 @@ window.closeConfigSuccessModal = () => {
   document.getElementById('config-success-modal')?.classList.add('hidden');
 };
 
+// ── WEBPUSHR PUSH NOTIFICATIONS HELPER ────────────────────────────────
+window.sendWebpushrNotification = async (title, message, url = window.location.href) => {
+  try {
+    const res = await fetch('https://api.webpushr.com/v1/notification/send/all', {
+      method: 'POST',
+      headers: {
+        'webpushrKey': 'fd20f5d8102632481213e3008a79f836',
+        'webpushrAuthToken': '123896',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: title || 'Magic Studio Vicén',
+        message: message || 'Actualización en el panel',
+        target_url: url,
+        action_buttons: [{ title: 'Ver Panel', url }]
+      })
+    });
+    const data = await res.json();
+    console.log('[Webpushr] Admin Push Sent:', data);
+    return data;
+  } catch (e) {
+    console.error('[Webpushr] Error sending admin push notification:', e);
+  }
+};
+
 // ══════════════════════════════════════════════════════════════
 // VERSION 2026-05-11 17:36 - LÍNEA LIMPIA PARA EVITAR CACHÉ
 // ══════════════════════════════════════════════════════════════
