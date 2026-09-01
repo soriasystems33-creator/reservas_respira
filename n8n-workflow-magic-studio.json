@@ -2,528 +2,19 @@
   "nodes": [
     {
       "parameters": {
-        "authentication": "serviceAccount",
-        "operation": "getAll",
-        "projectId": "crm-lqf-2026",
-        "collection": "=artifacts/magic-studio-default/public/data/appointments",
-        "returnAll": true
-      },
-      "id": "1d94d471-0b96-4d46-b672-33c6b84826e6",
-      "name": "Firestore - Obtener Citas (Ayer)2",
-      "type": "n8n-nodes-base.googleFirebaseCloudFirestore",
-      "typeVersion": 1,
-      "position": [
-        -272,
-        2704
-      ],
-      "credentials": {
-        "googleApi": {
-          "id": "ovzhJx6VZgJHFXIf",
-          "name": "Katy Firebase"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $json.clientEmail }}",
-        "subject": "✨ ¿Qué tal tu experiencia en Magic Studio?",
-        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta charset=\"UTF-8\">\n    <style>\n        @media only screen and (max-width: 600px) {\n            .email-container {\n                margin: 10px auto !important;\n                max-width: 100% !important;\n                width: 100% !important;\n                border-radius: 16px !important;\n            }\n            .email-header {\n                padding: 30px 20px !important;\n            }\n            .email-body {\n                padding: 30px 20px !important;\n            }\n            .email-footer {\n                padding: 30px 20px !important;\n            }\n            .info-box {\n                max-width: 100% !important;\n                padding: 12px 15px !important;\n                box-sizing: border-box !important;\n            }\n            .btn-action {\n                padding: 12px 20px !important;\n                font-size: 11px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .btn-sub {\n                padding: 10px 20px !important;\n                font-size: 10px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .detail-table {\n                font-size: 13px !important;\n            }\n            .detail-table td {\n                padding: 8px 0 !important;\n            }\n        }\n    </style>\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div class=\"email-container\" style=\"max-width:600px;width:100%;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div class=\"email-header\" style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">by Katy</p>\n        </div>\n        <div class=\"email-body\" style=\"padding:45px 40px;text-align:center;\">\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Avda. Valladolid 10 · Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 528 678</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a1a;\">¡Hola, {{ $json.clientName }}!</h2>\n            <p style=\"font-size:16px;line-height:1.7;color:#44403c;margin-bottom:15px;\">Esperamos que disfrutaras de tu <strong style=\"color:#1a1a1a;\">{{ $json.service }}</strong>.</p>\n            <p style=\"font-size:15px;line-height:1.7;color:#78716c;margin-bottom:35px;\">¿Te tomas un minuto para valorarnos?</p>\n            <div style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:25px;padding:40px 30px;margin-bottom:35px;\">\n                <p style=\"margin:0 0 20px 0;font-size:15px;color:#1a1a1a;font-weight:600;\">¿Cómo fue tu experiencia?</p>\n                <div style=\"font-size:24px;color:#c9a96e;margin-bottom:30px;letter-spacing:8px;\">★ ★ ★ ★ ★</div>\n                <a href=\"https://g.page/r/CZ2KyrZFA9xwEBM/review\" class=\"btn-action\" style=\"display:inline-block;padding:15px 40px;background:#1a1a1a;color:#c9a96e;text-decoration:none;border-radius:50px;font-weight:bold;font-size:13px;text-transform:uppercase;letter-spacing:1px;border:1px solid #c9a96e;\">Dejar mi reseña</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://magic-nails-reservas.vercel.app\" class=\"btn-sub\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div class=\"email-footer\" style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio by Katy</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Avda. Valladolid 10 · Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 528 678</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "id": "0ab9cfc6-2310-4e38-beac-d0f281f55b0a",
-      "name": "Email - Pedir Reseña2",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        176,
-        2688
-      ],
-      "webhookId": "b66f78b3-8e5c-4d64-bba7-ae3fec4e6794",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "6jQSY3sPZd4AHnwE",
-          "name": "Katy Recordatorios"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "triggerAtHour": 12
-            }
-          ]
-        }
-      },
-      "id": "825c069b-5478-437f-8baf-d19c3e8ff096",
-      "name": "Cada día a las 12:2",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -496,
-        2704
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.date }}",
-              "value2": "={{ $now.minus({days: 1}).toISODate() }}"
-            }
-          ]
-        }
-      },
-      "id": "12fb24c2-4225-4b1c-b78b-f219be6623f7",
-      "name": "Filtrar: Citas de Ayer2",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        -48,
-        2704
-      ]
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "triggerAtHour": 8
-            }
-          ]
-        }
-      },
-      "id": "a800272b-84dc-4eb1-8fde-a5f784799df3",
-      "name": "Cada mañana a las 8:3",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -496,
-        2928
-      ]
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "89e879ec-9e37-483e-b73e-2a15ba04ded6",
-        "options": {}
-      },
-      "id": "f07fe23c-f66b-4c9d-9fa3-9534aaa9f0b9",
-      "name": "Webhook - Eventos2",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [
-        -512,
-        2448
-      ],
-      "webhookId": "89e879ec-9e37-483e-b73e-2a15ba04ded6"
-    },
-    {
-      "parameters": {
-        "jsCode": "const raw = $input.item.json.body || $input.item.json;\nreturn { json: { ...raw } };"
-      },
-      "id": "ae870132-20db-4772-8d3d-02b7d0724376",
-      "name": "Normalizar Payload2",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -288,
-        2448
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.event }}",
-              "value2": "completed"
-            }
-          ]
-        }
-      },
-      "id": "6b1d2fc0-f532-402f-b08f-4e4b76c0bcb2",
-      "name": "¿Es pago completado?2",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        -64,
-        2272
-      ]
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $json.clientEmail }}",
-        "subject": "🧾 Factura - Magic Studio",
-        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta charset=\"UTF-8\">\n    <style>\n        @media only screen and (max-width: 600px) {\n            .email-container {\n                margin: 10px auto !important;\n                max-width: 100% !important;\n                width: 100% !important;\n                border-radius: 16px !important;\n            }\n            .email-header {\n                padding: 30px 20px !important;\n            }\n            .email-body {\n                padding: 30px 20px !important;\n            }\n            .email-footer {\n                padding: 30px 20px !important;\n            }\n            .info-box {\n                max-width: 100% !important;\n                padding: 12px 15px !important;\n                box-sizing: border-box !important;\n            }\n            .btn-action {\n                padding: 12px 20px !important;\n                font-size: 11px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .btn-sub {\n                padding: 10px 20px !important;\n                font-size: 10px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .detail-table {\n                font-size: 13px !important;\n            }\n            .detail-table td {\n                padding: 8px 0 !important;\n            }\n        }\n    </style>\n</head>\n<body style=\"margin:0;padding:0;background:#f3f4f6;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div class=\"email-container\" style=\"max-width:520px;width:100%;margin:30px auto;background:#fff;border-radius:24px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 25px 40px -12px rgba(0,0,0,0.15);\">\n        <div class=\"email-header\" style=\"background:#1a1a1a;padding:32px;text-align:center;border-bottom:3px solid #c9a96e;\">\n            <p style=\"color:#c9a96e;margin:0;font-size:22px;font-weight:700;font-family:Georgia,serif;letter-spacing:3px;text-transform:uppercase;\">Magic Studio</p>\n            <p style=\"color:#a1a1aa;margin:6px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:4px;\">by Katy</p>\n        </div>\n        <div class=\"email-body\" style=\"padding:36px;\">\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Avda. Valladolid 10 · Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 528 678</p>\n            </div>\n            <div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;\">\n                <h2 style=\"font-size:18px;font-weight:800;color:#1a1a1a;margin:0;\">FACTURA</h2>\n                <span style=\"font-size:10px;color:#78716c;font-weight:600;background:#f3f4f6;padding:4px 12px;border-radius:20px;\">{{ $json.date }}</span>\n            </div>\n            <div style=\"border-bottom:2px dashed #e5e7eb;padding-bottom:16px;margin-bottom:16px;\">\n                <p style=\"margin:0;font-size:14px;font-weight:700;color:#1a1a1a;\">{{ $json.clientName }}</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#78716c;\">{{ $json.clientPhone }}</p>\n            </div>\n            <table class=\"detail-table\" style=\"width:100%;border-collapse:collapse;font-size:13px;\">\n                <tr style=\"background:#f9fafb;\">\n                    <th style=\"text-align:left;padding:10px 0;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#78716c;border-bottom:1px solid #e5e7eb;\">Concepto</th>\n                    <th style=\"text-align:center;padding:10px 0;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#78716c;border-bottom:1px solid #e5e7eb;\">Especialista</th>\n                    <th style=\"text-align:right;padding:10px 0;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#78716c;border-bottom:1px solid #e5e7eb;\">Importe</th>\n                </tr>\n                <tr>\n                    <td style=\"padding:14px 0;border-bottom:1px solid #f3f4f6;font-weight:600;color:#1a1a1a;\">{{ $json.service }}</td>\n                    <td style=\"padding:14px 0;border-bottom:1px solid #f3f4f6;text-align:center;color:#78716c;\">{{ $json.employee }}</td>\n                    <td style=\"padding:14px 0;border-bottom:1px solid #f3f4f6;text-align:right;font-weight:700;color:#1a1a1a;\">{{ $json.price }}€</td>\n                </tr>\n            </table>\n            <div style=\"margin-top:16px;padding-top:16px;border-top:2px solid #1a1a1a;display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:#1a1a1a;\">\n                <span>TOTAL</span>\n                <span>{{ $json.price }}€</span>\n            </div>\n            <div style=\"margin-top:8px;text-align:right;font-size:10px;color:#22c55e;font-weight:700;\">✓ Pagado</div>\n            <div style=\"margin-top:28px;padding-top:16px;border-top:1px solid #e5e7eb;text-align:center;\">\n                <a href=\"https://magic-nails-reservas.vercel.app\" class=\"btn-action\" style=\"display:inline-block;padding:12px 28px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;\">Reservar de nuevo</a>\n                <div style=\"font-size:10px;color:#a8a29e;line-height:1.6;\">\n                <p style=\"margin:0;\">Magic Studio by Katy · Avda. Valladolid 10 · Soria</p>\n                <p style=\"margin:2px 0 0;font-size:10px;color:#a8a29e;\">📞 623 528 678</p>\n                <p style=\"margin:2px 0 0;\">{{ $json.date }} · {{ $json.time }}</p>\n            </div>\n        </div>\n    </div>\n</body>\n</html>",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "id": "b251a70b-51b4-4876-9b1c-d56a6083aafc",
-      "name": "Email - Factura2",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        160,
-        2208
-      ],
-      "webhookId": "d070e2fd-dbef-4975-bdf2-0213c319423d",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "6jQSY3sPZd4AHnwE",
-          "name": "Katy Recordatorios"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.event }}",
-              "value2": "new"
-            }
-          ]
-        }
-      },
-      "id": "596d64fc-290c-4d79-9129-7759a878e8ba",
-      "name": "¿Es nueva?2",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        160,
-        2400
-      ]
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $json.clientEmail }}",
-        "subject": "✨ Confirmación de tu cita en Magic Studio",
-        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta charset=\"UTF-8\">\n    <style>\n        @media only screen and (max-width: 600px) {\n            .email-container {\n                margin: 10px auto !important;\n                max-width: 100% !important;\n                width: 100% !important;\n                border-radius: 16px !important;\n            }\n            .email-header {\n                padding: 30px 20px !important;\n            }\n            .email-body {\n                padding: 30px 20px !important;\n            }\n            .email-footer {\n                padding: 30px 20px !important;\n            }\n            .info-box {\n                max-width: 100% !important;\n                padding: 12px 15px !important;\n                box-sizing: border-box !important;\n            }\n            .btn-action {\n                padding: 12px 20px !important;\n                font-size: 11px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .btn-sub {\n                padding: 10px 20px !important;\n                font-size: 10px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .detail-table {\n                font-size: 13px !important;\n            }\n            .detail-table td {\n                padding: 8px 0 !important;\n            }\n        }\n    </style>\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div class=\"email-container\" style=\"max-width:600px;width:100%;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div class=\"email-header\" style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">by Katy</p>\n        </div>\n        <div class=\"email-body\" style=\"padding:45px 40px;\">\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Avda. Valladolid 10 · Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 528 678</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a1a;text-align:center;\">¡Hola, {{ $json.clientName }}!</h2>\n            <p style=\"font-size:16px;line-height:1.7;color:#44403c;text-align:center;margin-bottom:30px;\">Tu cita para <strong style=\"color:#1a1a1a;\">{{ $json.service }}</strong> ha sido confirmada. ¡Te esperamos!</p>\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:20px;padding:30px;margin-bottom:35px;\">\n                <p style=\"margin:0 0 15px 0;font-size:11px;color:#c9a96e;font-weight:700;text-transform:uppercase;letter-spacing:2px;text-align:center;\">Detalles de tu cita</p>\n                <table class=\"detail-table\" style=\"width:100%;border-collapse:collapse;font-size:15px;\">\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Fecha</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.date }}</td></tr>\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Hora</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:700;color:#c9a96e;font-size:18px;\">{{ $json.time }}h</td></tr>\n                    <tr><td style=\"padding:10px 0;color:#78716c;\">Especialista</td><td style=\"padding:10px 0;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.employee }}</td></tr>\n                </table>\n            </div>\n            <p style=\"font-size:14px;color:#78716c;margin-bottom:10px;text-align:center;\">Importe: <strong style=\"color:#1a1a1a;\">{{ $json.price }}€</strong> (pago en estudio)</p>\n            <div style=\"border-top:1px solid #f5f5f4;padding-top:30px;text-align:center;\">\n                <p style=\"font-size:13px;color:#78716c;margin-bottom:20px;\">¿Necesitas cambios o cancelar?</p>\n                <a href=\"https://magic-nails-reservas.vercel.app/modificar?id={{ $json.id }}\" class=\"btn-action\" style=\"display:inline-block;padding:14px 28px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:4px;\">Modificar</a>\n                <a href=\"https://magic-nails-reservas.vercel.app/cancelar?id={{ $json.id }}&cancel=1\" class=\"btn-action\" style=\"display:inline-block;padding:13px 27px;background:transparent;color:#ef4444;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #ef4444;margin:4px;\">Cancelar</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://magic-nails-reservas.vercel.app\" class=\"btn-sub\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div class=\"email-footer\" style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio by Katy</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Avda. Valladolid 10 · Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 528 678</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "id": "01f2633f-b878-425e-87a9-de51832e1ec5",
-      "name": "Email - Confirmación Nueva2",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        384,
-        2336
-      ],
-      "webhookId": "7e64ddf5-3067-4c8c-acc9-dbc794092898",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "6jQSY3sPZd4AHnwE",
-          "name": "Katy Recordatorios"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.event }}",
-              "value2": "cancellation"
-            }
-          ]
-        }
-      },
-      "id": "2cd51300-21b0-44f2-8b6f-c6eea5781a1a",
-      "name": "¿Es cancelación?2",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        384,
-        2512
-      ]
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $json.clientEmail }}",
-        "subject": "❌ Cita cancelada - Magic Studio",
-        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta charset=\"UTF-8\">\n    <style>\n        @media only screen and (max-width: 600px) {\n            .email-container {\n                margin: 10px auto !important;\n                max-width: 100% !important;\n                width: 100% !important;\n                border-radius: 16px !important;\n            }\n            .email-header {\n                padding: 30px 20px !important;\n            }\n            .email-body {\n                padding: 30px 20px !important;\n            }\n            .email-footer {\n                padding: 30px 20px !important;\n            }\n            .info-box {\n                max-width: 100% !important;\n                padding: 12px 15px !important;\n                box-sizing: border-box !important;\n            }\n            .btn-action {\n                padding: 12px 20px !important;\n                font-size: 11px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .btn-sub {\n                padding: 10px 20px !important;\n                font-size: 10px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .detail-table {\n                font-size: 13px !important;\n            }\n            .detail-table td {\n                padding: 8px 0 !important;\n            }\n        }\n    </style>\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div class=\"email-container\" style=\"max-width:600px;width:100%;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div class=\"email-header\" style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">by Katy</p>\n        </div>\n        <div class=\"email-body\" style=\"padding:45px 40px;\">\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Avda. Valladolid 10 · Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 528 678</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a1a;text-align:center;\">Cita cancelada, {{ $json.clientName }}</h2>\n            <p style=\"font-size:16px;line-height:1.7;color:#44403c;text-align:center;margin-bottom:30px;\">Hemos procesado la cancelación de tu cita:</p>\n            <div class=\"info-box\" style=\"background:#fff5f5;border:1px solid #fecaca;border-left:4px solid #ef4444;border-radius:20px;padding:30px;margin-bottom:35px;\">\n                <table class=\"detail-table\" style=\"width:100%;border-collapse:collapse;font-size:15px;\">\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Servicio</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.service }}</td></tr>\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Fecha</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.date }}</td></tr>\n                    <tr><td style=\"padding:10px 0;color:#78716c;\">Hora</td><td style=\"padding:10px 0;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.time }}h</td></tr>\n                </table>\n            </div>\n            <p style=\"font-size:14px;color:#78716c;text-align:center;\">Si deseas una nueva cita, escríbenos por WhatsApp al 623 528 678.</p>\n            <div style=\"text-align:center;margin-top:25px;\">\n                <a href=\"https://magic-nails-reservas.vercel.app\" class=\"btn-action\" style=\"display:inline-block;padding:14px 32px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:12px;text-transform:uppercase;letter-spacing:1px;\">Reservar de nuevo</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://magic-nails-reservas.vercel.app\" class=\"btn-sub\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div class=\"email-footer\" style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio by Katy</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Avda. Valladolid 10 · Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 528 678</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "id": "418a361b-fac6-4e83-89d1-29b80cc3b71d",
-      "name": "Email - Cancelación2",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        608,
-        2576
-      ],
-      "webhookId": "495e80cc-29fa-4937-a288-05ebe31a2291",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "6jQSY3sPZd4AHnwE",
-          "name": "Katy Recordatorios"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.event }}",
-              "value2": "modification"
-            }
-          ]
-        }
-      },
-      "id": "49fa0314-c5f7-4e25-9931-69daaefff1a3",
-      "name": "¿Es modificación?2",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        608,
-        2416
-      ]
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $json.clientEmail }}",
-        "subject": "✏️ Tu cita en Magic Studio ha sido actualizada",
-        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta charset=\"UTF-8\">\n    <style>\n        @media only screen and (max-width: 600px) {\n            .email-container {\n                margin: 10px auto !important;\n                max-width: 100% !important;\n                width: 100% !important;\n                border-radius: 16px !important;\n            }\n            .email-header {\n                padding: 30px 20px !important;\n            }\n            .email-body {\n                padding: 30px 20px !important;\n            }\n            .email-footer {\n                padding: 30px 20px !important;\n            }\n            .info-box {\n                max-width: 100% !important;\n                padding: 12px 15px !important;\n                box-sizing: border-box !important;\n            }\n            .btn-action {\n                padding: 12px 20px !important;\n                font-size: 11px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .btn-sub {\n                padding: 10px 20px !important;\n                font-size: 10px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .detail-table {\n                font-size: 13px !important;\n            }\n            .detail-table td {\n                padding: 8px 0 !important;\n            }\n        }\n    </style>\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div class=\"email-container\" style=\"max-width:600px;width:100%;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div class=\"email-header\" style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">by Katy</p>\n        </div>\n        <div class=\"email-body\" style=\"padding:45px 40px;\">\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Avda. Valladolid 10 · Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 528 678</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a1a;text-align:center;\">Tu cita ha sido actualizada</h2>\n            <p style=\"font-size:16px;line-height:1.7;color:#44403c;text-align:center;margin-bottom:30px;\">Hola, <strong>{{ $json.clientName }}</strong>. Los datos de tu cita han cambiado:</p>\n            <div class=\"info-box\" style=\"background:#fffbeb;border:1px solid #c9a96e;border-left:4px solid #f59e0b;border-radius:20px;padding:30px;margin-bottom:35px;\">\n                <table class=\"detail-table\" style=\"width:100%;border-collapse:collapse;font-size:15px;\">\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Servicio</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.service }}</td></tr>\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Fecha</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.date }}</td></tr>\n                    <tr><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;color:#78716c;\">Hora</td><td style=\"padding:10px 0;border-bottom:1px solid #f5f5f4;text-align:right;font-weight:700;color:#f59e0b;font-size:18px;\">{{ $json.time }}h</td></tr>\n                    <tr><td style=\"padding:10px 0;color:#78716c;\">Especialista</td><td style=\"padding:10px 0;text-align:right;font-weight:600;color:#1a1a1a;\">{{ $json.employee }}</td></tr>\n                </table>\n            </div>\n            <div style=\"border-top:1px solid #f5f5f4;padding-top:30px;text-align:center;\">\n                <p style=\"font-size:13px;color:#78716c;margin-bottom:20px;\">¿Necesitas cambios o cancelar?</p>\n                <a href=\"https://magic-nails-reservas.vercel.app/modificar?id={{ $json.id }}\" class=\"btn-action\" style=\"display:inline-block;padding:14px 28px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:4px;\">Modificar</a>\n                <a href=\"https://magic-nails-reservas.vercel.app/cancelar?id={{ $json.id }}&cancel=1\" class=\"btn-action\" style=\"display:inline-block;padding:13px 27px;background:transparent;color:#ef4444;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #ef4444;margin:4px;\">Cancelar</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://magic-nails-reservas.vercel.app\" class=\"btn-sub\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div class=\"email-footer\" style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio by Katy</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Avda. Valladolid 10 · Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 528 678</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "id": "f1bfa7f3-5b00-415c-af26-9db4daabc077",
-      "name": "Email - Modificación2",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        832,
-        2352
-      ],
-      "webhookId": "7ac4c9f1-8425-4aa3-84ef-ae8083c7ae60",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "6jQSY3sPZd4AHnwE",
-          "name": "Katy Recordatorios"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "authentication": "serviceAccount",
-        "operation": "getAll",
-        "projectId": "crm-lqf-2026",
-        "collection": "=artifacts/magic-studio-default/public/data/appointments",
-        "returnAll": true
-      },
-      "id": "283939b4-493e-4bd8-af8e-8dbd7fca31e7",
-      "name": "Firestore - Obtener Citas2",
-      "type": "n8n-nodes-base.googleFirebaseCloudFirestore",
-      "typeVersion": 1,
-      "position": [
-        -272,
-        2928
-      ],
-      "credentials": {
-        "googleApi": {
-          "id": "ovzhJx6VZgJHFXIf",
-          "name": "Katy Firebase"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const now = new Date();\nconst offset = now.getTimezoneOffset();\nconst madridOffset = 120; // CEST (UTC+2)\nconst diff = offset + madridOffset;\nconst local = new Date(now.getTime() + diff * 60000);\nlocal.setDate(local.getDate() + 1);\nconst dateStr = local.getFullYear() + '-' +\n  String(local.getMonth() + 1).padStart(2, '0') + '-' +\n  String(local.getDate()).padStart(2, '0');\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  const id = apt._id || apt.id;\n  if (!id) return;\n  apt.id = id;\n  if (!apt.clientEmail) return;\n  if (apt.status === 'cancelled' || apt.status === 'noshow') return;\n  if (apt.date !== dateStr) return;\n  result.push({ json: apt });\n});\nreturn result;"
-      },
-      "id": "62adeebf-141c-452c-8ad6-a224a1ec52b9",
-      "name": "Filtrar Citas de Mañana2",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -48,
-        2928
-      ]
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $json.clientEmail }}",
-        "subject": "✨ Recordatorio: Tu cita de mañana en Magic Studio",
-        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta charset=\"UTF-8\">\n    <style>\n        @media only screen and (max-width: 600px) {\n            .email-container {\n                margin: 10px auto !important;\n                max-width: 100% !important;\n                width: 100% !important;\n                border-radius: 16px !important;\n            }\n            .email-header {\n                padding: 30px 20px !important;\n            }\n            .email-body {\n                padding: 30px 20px !important;\n            }\n            .email-footer {\n                padding: 30px 20px !important;\n            }\n            .info-box {\n                max-width: 100% !important;\n                padding: 12px 15px !important;\n                box-sizing: border-box !important;\n            }\n            .btn-action {\n                padding: 12px 20px !important;\n                font-size: 11px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .btn-sub {\n                padding: 10px 20px !important;\n                font-size: 10px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .detail-table {\n                font-size: 13px !important;\n            }\n            .detail-table td {\n                padding: 8px 0 !important;\n            }\n        }\n    </style>\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div class=\"email-container\" style=\"max-width:600px;width:100%;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div class=\"email-header\" style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">by Katy</p>\n        </div>\n        <div class=\"email-body\" style=\"padding:45px 40px;\">\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Avda. Valladolid 10 · Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 528 678</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:15px;color:#1a1a1a;text-align:center;\">¡Mañana te esperamos!</h2>\n            <p style=\"font-size:15px;line-height:1.6;color:#44403c;text-align:center;margin-bottom:30px;\">Hola <strong>{{ $json.clientName }}</strong>, te recordamos tu cita:</p>\n            <div class=\"info-box\" style=\"background:#1a1a1a;border-radius:20px;padding:30px;margin-bottom:35px;color:#fff;\">\n                <p style=\"margin:0 0 20px 0;font-size:10px;color:#c9a96e;font-weight:700;text-transform:uppercase;letter-spacing:2px;text-align:center;\">Confirmación de Horario</p>\n                <table class=\"detail-table\" style=\"width:100%;border-collapse:collapse;font-size:15px;\">\n                    <tr><td style=\"padding:10px 0;color:#a1a1aa;\">Tratamiento</td><td style=\"padding:10px 0;text-align:right;font-weight:600;color:#fff;\">{{ $json.service }}</td></tr>\n                    <tr><td style=\"padding:10px 0;color:#a1a1aa;\">Hora</td><td style=\"padding:10px 0;text-align:right;font-weight:700;color:#c9a96e;font-size:18px;\">{{ $json.time }}h</td></tr>\n                </table>\n            </div>\n            <div style=\"text-align:center;\">\n                <a href=\"https://magic-nails-reservas.vercel.app\" class=\"btn-action\" style=\"display:inline-block;padding:12px 25px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:4px;\">Reservar cita</a>\n                <a href=\"https://magic-nails-reservas.vercel.app/modificar?id={{ $json.id }}\" class=\"btn-action\" style=\"display:inline-block;padding:14px 28px;background:#1a1a1a;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin:4px;\">Modificar</a>\n                <a href=\"https://magic-nails-reservas.vercel.app/cancelar?id={{ $json.id }}&cancel=1\" class=\"btn-action\" style=\"display:inline-block;padding:11px 25px;background:transparent;color:#ef4444;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #ef4444;margin:4px;\">Anular</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://magic-nails-reservas.vercel.app\" class=\"btn-sub\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div class=\"email-footer\" style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio by Katy</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Avda. Valladolid 10 · Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 528 678</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "id": "b8485c94-a2ae-4f52-8ef4-b46d1523fa79",
-      "name": "Email - Recordatorio2",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        176,
-        2928
-      ],
-      "webhookId": "337122c7-abca-4175-9d17-300164205c97",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "6jQSY3sPZd4AHnwE",
-          "name": "Katy Recordatorios"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "content": "**PANEL AV.VALLADOLID (NUEVO)**\n",
+        "content": "**PANEL AV. MARIANO VICÉN (SUPABASE + WHATSAPP + GMAIL)**\n",
         "height": 1072,
-        "width": 1936
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -640,
-        2064
-      ],
-      "typeVersion": 1,
-      "id": "0cbd60b8-adb6-4a44-808b-b382dea2b8a4",
-      "name": "Sticky Note"
-    },
-    {
-      "parameters": {
-        "content": "**PANEL AV.MARIANO VICEN (VIEJO - SUPABASE)**\n",
-        "height": 1072,
-        "width": 1936,
+        "width": 2200,
         "color": 6
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -640,
-        3216
-      ],
-      "typeVersion": 1,
-      "id": "f24c3a34-3892-43b9-9e07-0822d7b8f130",
-      "name": "Sticky Note1"
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "appointments",
-        "returnAll": true
-      },
-      "id": "9292bd65-b8bd-423e-bd36-f384da46b5cd",
-      "name": "Supabase - Obtener Citas (Ayer)2",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        -256,
-        3856
-      ],
-      "credentials": {
-        "supabaseApi": {
-          "id": "kT2NeOVCsCmfhHA8",
-          "name": "Supabase account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "appointments",
-        "returnAll": true
-      },
-      "id": "80904e71-265c-4b2f-b3eb-65f5b7980e81",
-      "name": "Supabase - Obtener Citas2",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        -256,
-        4080
-      ],
-      "credentials": {
-        "supabaseApi": {
-          "id": "kT2NeOVCsCmfhHA8",
-          "name": "Supabase account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $json.clientEmail }}",
-        "subject": "✨ ¿Qué tal tu experiencia en Magic Studio?",
-        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta charset=\"UTF-8\">\n    <style>\n        @media only screen and (max-width: 600px) {\n            .email-container {\n                margin: 10px auto !important;\n                max-width: 100% !important;\n                width: 100% !important;\n                border-radius: 16px !important;\n            }\n            .email-header {\n                padding: 30px 20px !important;\n            }\n            .email-body {\n                padding: 30px 20px !important;\n            }\n            .email-footer {\n                padding: 30px 20px !important;\n            }\n            .info-box {\n                max-width: 100% !important;\n                padding: 12px 15px !important;\n                box-sizing: border-box !important;\n            }\n            .btn-action {\n                padding: 12px 20px !important;\n                font-size: 11px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .btn-sub {\n                padding: 10px 20px !important;\n                font-size: 10px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .detail-table {\n                font-size: 13px !important;\n            }\n            .detail-table td {\n                padding: 8px 0 !important;\n            }\n        }\n    </style>\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div class=\"email-container\" style=\"max-width:600px;width:100%;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div class=\"email-header\" style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">Vicen</p>\n        </div>\n        <div class=\"email-body\" style=\"padding:45px 40px;text-align:center;\">\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Av de Mariano Vicén, 7 · 42003 Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 40 03 98</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a1a;\">¡Hola, {{ $json.clientName }}!</h2>\n            <p style=\"font-size:16px;line-height:1.7;color:#44403c;margin-bottom:15px;\">Esperamos que disfrutaras de tu <strong style=\"color:#1a1a1a;\">{{ $json.service }}</strong>.</p>\n            <p style=\"font-size:15px;line-height:1.7;color:#78716c;margin-bottom:35px;\">¿Te tomas un minuto para valorarnos?</p>\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:20px;padding:40px 30px;margin-bottom:35px;\">\n                <p style=\"margin:0 0 20px 0;font-size:15px;color:#1a1a1a;font-weight:600;\">¿Cómo fue tu experiencia?</p>\n                <div style=\"font-size:24px;color:#c9a96e;margin-bottom:30px;letter-spacing:8px;\">★ ★ ★ ★ ★</div>\n                <a href=\"https://g.page/r/CZ2KyrZFA9xwEBM/review\" class=\"btn-action\" style=\"display:inline-block;padding:15px 40px;background:#1a1a1a;color:#c9a96e;text-decoration:none;border-radius:50px;font-weight:bold;font-size:13px;text-transform:uppercase;letter-spacing:1px;border:1px solid #c9a96e;\">Dejar mi reseña</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://reservas-magic-vicen.vercel.app\" class=\"btn-sub\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div class=\"email-footer\" style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio Vicen</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Av de Mariano Vicén, 7 · 42003 Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 40 03 98</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "id": "921b12df-8136-431d-80cc-07ccf68dbb64",
-      "name": "Email - Pedir Reseña",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
         192,
-        3840
+        2800
       ],
-      "webhookId": "b66f78b3-8e5c-4d64-bba7-ae3fec4e6794",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "6jQSY3sPZd4AHnwE",
-          "name": "Katy Recordatorios"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "triggerAtHour": 12
-            }
-          ]
-        }
-      },
-      "id": "dfff37bb-1c08-4f85-9b9f-18d9016aef9a",
-      "name": "Cada día a las 12:3",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -480,
-        3856
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const yesterdayStr = $now.minus({days: 1}).toISODate();\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  if (apt.date === yesterdayStr) {\n    const email = apt.clientEmail || apt.client_email;\n    if (email) {\n      apt.clientEmail = email;\n      apt.clientName = apt.clientName || apt.client_name;\n      apt.clientPhone = apt.clientPhone || apt.client_phone;\n      apt.isPaid = apt.isPaid !== undefined ? apt.isPaid : apt.is_paid;\n      result.push({ json: apt });\n    }\n  }\n});\nreturn result;"
-      },
-      "id": "00c3be2b-77b1-41bc-927c-f3abc02c99e0",
-      "name": "Filtrar: Citas de Ayer3",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -32,
-        3856
-      ]
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "triggerAtHour": 8
-            }
-          ]
-        }
-      },
-      "id": "cb6e19e1-a2ad-4d45-bfbe-98ea92ff922b",
-      "name": "Cada mañana a las 8:4",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        -480,
-        4080
-      ]
+      "typeVersion": 1,
+      "id": "cc444895-e5e1-4b5a-9016-1c750fb10158",
+      "name": "Sticky Note - Mariano Vicén"
     },
     {
       "parameters": {
@@ -531,13 +22,13 @@
         "path": "73794b5a-65e9-494f-bd50-9c461b78d93e",
         "options": {}
       },
-      "id": "bbb9cdb1-59d7-4750-83df-e6122344cbf7",
+      "id": "0d69aa41-3e07-4fde-b076-ea68ccdef86a",
       "name": "Webhook - Eventos",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -496,
-        3600
+        336,
+        3184
       ],
       "webhookId": "73794b5a-65e9-494f-bd50-9c461b78d93e"
     },
@@ -545,13 +36,13 @@
       "parameters": {
         "jsCode": "let raw = $input.item.json.body || $input.item.json;\nif (typeof raw === 'string') {\n  try { raw = JSON.parse(raw); } catch (e) {}\n}\nreturn { json: { ...raw } };"
       },
-      "id": "7997e2d2-4c8b-4b73-bc8f-22d6beaee463",
+      "id": "d3a80b85-49cb-4af3-bf7e-dfbb6af49e99",
       "name": "Normalizar Payload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -272,
-        3600
+        560,
+        3184
       ]
     },
     {
@@ -565,13 +56,13 @@
           ]
         }
       },
-      "id": "ddc39b14-c8f0-4956-bd7a-9c8aab8e9004",
+      "id": "1ba5c798-4d33-4b1b-bacb-96dbaad783ee",
       "name": "¿Es pago completado?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        -48,
-        3424
+        784,
+        3008
       ]
     },
     {
@@ -583,13 +74,13 @@
           "appendAttribution": false
         }
       },
-      "id": "57a196cb-34d8-4755-ad19-cf4ff1818e03",
+      "id": "db03b4ed-90d2-4f22-8a04-feed254aa531",
       "name": "Email - Factura",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        176,
-        3360
+        1008,
+        2944
       ],
       "webhookId": "d070e2fd-dbef-4975-bdf2-0213c319423d",
       "credentials": {
@@ -610,13 +101,13 @@
           ]
         }
       },
-      "id": "7751c1d7-c842-4019-91d7-c4735c3849da",
+      "id": "cf05a971-2da0-4071-b16e-43bf841fdf77",
       "name": "¿Es nueva?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        176,
-        3552
+        1008,
+        3136
       ]
     },
     {
@@ -628,19 +119,175 @@
           "appendAttribution": false
         }
       },
-      "id": "ae1e6a03-8408-4d4e-ad99-27dd8ccc48b7",
+      "id": "bc2acf15-ba47-4367-8b31-46b87ff91748",
       "name": "Email - Confirmación Nueva",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        400,
-        3488
+        1328,
+        2976
       ],
       "webhookId": "7e64ddf5-3067-4c8c-acc9-dbc794092898",
       "credentials": {
         "gmailOAuth2": {
           "id": "6jQSY3sPZd4AHnwE",
           "name": "Katy Recordatorios"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "phoneNumberId": "1079456835251411",
+        "recipientPhoneNumber": "=34{{ $json.clientPhone }}",
+        "template": "magic_confirmacion|es",
+        "components": {
+          "component": [
+            {
+              "bodyParameters": {
+                "parameter": [
+                  {
+                    "text": "={{ $json.clientName }}"
+                  },
+                  {
+                    "text": "Magic Studio Vicén"
+                  },
+                  {
+                    "text": "={{ $json.service }}"
+                  },
+                  {
+                    "text": "={{ $json.date }}"
+                  },
+                  {
+                    "text": "={{ $json.time }}"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "button",
+              "sub_type": "url",
+              "buttonParameters": {
+                "parameter": {
+                  "type": "text",
+                  "text": "={{ $json.id }}"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d",
+      "name": "WhatsApp - Confirmación",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1328,
+        3136
+      ],
+      "webhookId": "d187b1eb-362b-41ee-a1a7-f12922f91204",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "4c7zz7Ip3eiv3zgk",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1i3ItNB8b33Ql6y_6aQeH5f4z4klLZ-dL8hve4n40fwQ",
+          "mode": "list",
+          "cachedResultName": "FACTURACIÓN CONSUMO WHATS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i3ItNB8b33Ql6y_6aQeH5f4z4klLZ-dL8hve4n40fwQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1553297411,
+          "mode": "list",
+          "cachedResultName": "Frida",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i3ItNB8b33Ql6y_6aQeH5f4z4klLZ-dL8hve4n40fwQ/edit#gid=1553297411"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "FECHA": "={{ $('Webhook - Eventos').item.json.body.date }}",
+            "TELÉFONO ": "={{ $('Webhook - Eventos').item.json.body.clientPhone }}",
+            "TIPO ": "={{ $json.messaging_product }}",
+            "CLÍNICA ": "Magic Vicen",
+            "RECORDATORIO/CONFIRMACION": "CONFIRMACION"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "FECHA",
+              "displayName": "FECHA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CLÍNICA ",
+              "displayName": "CLÍNICA ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TELÉFONO ",
+              "displayName": "TELÉFONO ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TIPO ",
+              "displayName": "TIPO ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "RECORDATORIO/CONFIRMACION",
+              "displayName": "RECORDATORIO/CONFIRMACION",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "f1e2d3c4-b5a6-4f7e-8d9c-0b1a2c3d4e5f",
+      "name": "Registrar Consumo en Excel (Confirmación)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        1552,
+        3136
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "h9H5Nr0Q86QxLx3F",
+          "name": "Google Sheets account"
         }
       }
     },
@@ -655,13 +302,13 @@
           ]
         }
       },
-      "id": "a959d326-0fea-49e0-936f-69d67ec6705e",
+      "id": "cf70f5b6-1e74-4bd7-92a1-81e320b2e7bf",
       "name": "¿Es cancelación?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        400,
-        3664
+        1232,
+        3344
       ]
     },
     {
@@ -673,13 +320,13 @@
           "appendAttribution": false
         }
       },
-      "id": "81546af6-811c-46e6-ac83-7f87f1f1711c",
+      "id": "e71b7737-3d1e-43fd-a2b9-b538a4cd9fb7",
       "name": "Email - Cancelación",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        624,
-        3728
+        1456,
+        3408
       ],
       "webhookId": "495e80cc-29fa-4937-a288-05ebe31a2291",
       "credentials": {
@@ -700,13 +347,13 @@
           ]
         }
       },
-      "id": "5bc4ca70-1a5c-4a59-b8d9-0de52e0e6459",
+      "id": "5886193e-53ab-4018-921d-44a5719224d9",
       "name": "¿Es modificación?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        624,
-        3568
+        1456,
+        3248
       ]
     },
     {
@@ -718,13 +365,13 @@
           "appendAttribution": false
         }
       },
-      "id": "b35ef350-f9a0-42e3-9cee-e62a31ad13b8",
+      "id": "b388a34b-b8ae-4dd9-8a24-69caf3408d39",
       "name": "Email - Modificación",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        848,
-        3504
+        1680,
+        3248
       ],
       "webhookId": "7ac4c9f1-8425-4aa3-84ef-ae8083c7ae60",
       "credentials": {
@@ -736,15 +383,55 @@
     },
     {
       "parameters": {
-        "jsCode": "const now = new Date();\nconst offset = now.getTimezoneOffset();\nconst madridOffset = 120; // CEST (UTC+2)\nconst diff = offset + madridOffset;\nconst local = new Date(now.getTime() + diff * 60000);\nlocal.setDate(local.getDate() + 1);\nconst dateStr = local.getFullYear() + '-' +\n  String(local.getMonth() + 1).padStart(2, '0') + '-' +\n  String(local.getDate()).padStart(2, '0');\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  const id = apt._id || apt.id;\n  if (!id) return;\n  apt.id = id;\n  const email = apt.clientEmail || apt.client_email;\n  if (!email) return;\n  apt.clientEmail = email;\n  apt.clientName = apt.clientName || apt.client_name;\n  apt.clientPhone = apt.clientPhone || apt.client_phone;\n  apt.isPaid = apt.isPaid !== undefined ? apt.isPaid : apt.is_paid;\n  if (apt.status === 'cancelled' || apt.status === 'noshow') return;\n  if (apt.date !== dateStr) return;\n  result.push({ json: apt });\n});\nreturn result;"
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
       },
-      "id": "ebe3ef64-b187-4af1-b95f-df53762e0a17",
-      "name": "Filtrar Citas de Mañana3",
+      "id": "26ae694c-8bcd-4423-9fcd-280b47849ece",
+      "name": "Cada mañana a las 8:",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        352,
+        3664
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "appointments",
+        "returnAll": true
+      },
+      "id": "85c9a24d-f8b3-4026-ba03-8ac631817598",
+      "name": "Supabase - Obtener Citas",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        576,
+        3664
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "kT2NeOVCsCmfhHA8",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst offset = now.getTimezoneOffset();\nconst madridOffset = 120; // CEST (UTC+2)\nconst diff = offset + madridOffset;\nconst local = new Date(now.getTime() + diff * 60000);\nlocal.setDate(local.getDate() + 1);\nconst dateStr = local.getFullYear() + '-' +\n  String(local.getMonth() + 1).padStart(2, '0') + '-' +\n  String(local.getDate()).padStart(2, '0');\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  const id = apt._id || apt.id;\n  if (!id) return;\n  apt.id = id;\n  const email = apt.clientEmail || apt.client_email;\n  const phone = apt.clientPhone || apt.client_phone;\n  apt.clientEmail = email || '';\n  apt.clientName = apt.clientName || apt.client_name || '';\n  apt.clientPhone = phone || '';\n  apt.isPaid = apt.isPaid !== undefined ? apt.isPaid : apt.is_paid;\n  if (apt.status === 'cancelled' || apt.status === 'noshow') return;\n  if (apt.date !== dateStr) return;\n  result.push({ json: apt });\n});\nreturn result;"
+      },
+      "id": "dcd58b06-cb1d-4f0b-b77d-15b55f33d1ed",
+      "name": "Filtrar Citas de Mañana",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -32,
-        4080
+        800,
+        3664
       ]
     },
     {
@@ -756,15 +443,252 @@
           "appendAttribution": false
         }
       },
-      "id": "03bc951e-a09f-4024-b011-9d985a9954d9",
+      "id": "2fbb308d-36c0-4c08-8890-6b3a6a33ba7f",
       "name": "Email - Recordatorio",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        192,
-        4080
+        1024,
+        3584
       ],
       "webhookId": "337122c7-abca-4175-9d17-300164205c97",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6jQSY3sPZd4AHnwE",
+          "name": "Katy Recordatorios"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "phoneNumberId": "1079456835251411",
+        "recipientPhoneNumber": "=34{{ $json.clientPhone }}",
+        "template": "recordatorio_asistencia|es",
+        "components": {
+          "component": [
+            {
+              "bodyParameters": {
+                "parameter": [
+                  {
+                    "text": "={{ $json.clientName }}"
+                  },
+                  {
+                    "text": "Magic Studio Vicén"
+                  },
+                  {
+                    "text": "={{ $json.date }}"
+                  },
+                  {
+                    "text": "={{ $json.time }}"
+                  },
+                  {
+                    "text": "={{ $json.service || ($json.services && $json.services[0] ? $json.services[0].name : '') }}"
+                  },
+                  {
+                    "text": "Av de Mariano Vicén, 7 · 42003 Soria"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "button",
+              "sub_type": "url",
+              "buttonParameters": {
+                "parameter": {
+                  "type": "text",
+                  "text": "={{ $json.id }}"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "id": "c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f",
+      "name": "WhatsApp - Recordatorio",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        3744
+      ],
+      "webhookId": "9f5866b5-71c3-4551-b586-482e81739b91",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "4c7zz7Ip3eiv3zgk",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1i3ItNB8b33Ql6y_6aQeH5f4z4klLZ-dL8hve4n40fwQ",
+          "mode": "list",
+          "cachedResultName": "FACTURACIÓN CONSUMO WHATS",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i3ItNB8b33Ql6y_6aQeH5f4z4klLZ-dL8hve4n40fwQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1553297411,
+          "mode": "list",
+          "cachedResultName": "Frida",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i3ItNB8b33Ql6y_6aQeH5f4z4klLZ-dL8hve4n40fwQ/edit#gid=1553297411"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "FECHA": "={{ $now.toFormat('dd/MM') }}",
+            "TELÉFONO ": "={{ $json.contacts[0].input }}",
+            "TIPO ": "={{ $json.messaging_product }}",
+            "CLÍNICA ": "Magic Vicen",
+            "RECORDATORIO/CONFIRMACION": "RECORDATORIO"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "FECHA",
+              "displayName": "FECHA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CLÍNICA ",
+              "displayName": "CLÍNICA ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TELÉFONO ",
+              "displayName": "TELÉFONO ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TIPO ",
+              "displayName": "TIPO ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "RECORDATORIO/CONFIRMACION",
+              "displayName": "RECORDATORIO/CONFIRMACION",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d1e2f3a4-b5c6-4d7e-8f9a-0b1c2d3e4f5a",
+      "name": "Registrar Consumo en Excel (Recordatorio)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        1248,
+        3744
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "h9H5Nr0Q86QxLx3F",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 12
+            }
+          ]
+        }
+      },
+      "id": "7845d6ec-3be1-4004-a0f9-c4abcb9ad5a0",
+      "name": "Cada día a las 12:",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        352,
+        3952
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "appointments",
+        "returnAll": true
+      },
+      "id": "349aa9af-f849-497e-b90e-23339b8961ee",
+      "name": "Supabase - Obtener Citas (Ayer)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        576,
+        3952
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "kT2NeOVCsCmfhHA8",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const yesterdayStr = $now.minus({days: 1}).toISODate();\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  if (apt.date === yesterdayStr) {\n    const email = apt.clientEmail || apt.client_email;\n    if (email) {\n      apt.clientEmail = email;\n      apt.clientName = apt.clientName || apt.client_name;\n      apt.clientPhone = apt.clientPhone || apt.client_phone;\n      apt.isPaid = apt.isPaid !== undefined ? apt.isPaid : apt.is_paid;\n      result.push({ json: apt });\n    }\n  }\n});\nreturn result;"
+      },
+      "id": "3132c1f4-0349-45ad-9dbc-4a37c5b6d18e",
+      "name": "Filtrar: Citas de Ayer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        3952
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.clientEmail }}",
+        "subject": "✨ ¿Qué tal tu experiencia en Magic Studio?",
+        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta charset=\"UTF-8\">\n    <style>\n        @media only screen and (max-width: 600px) {\n            .email-container {\n                margin: 10px auto !important;\n                max-width: 100% !important;\n                width: 100% !important;\n                border-radius: 16px !important;\n            }\n            .email-header {\n                padding: 30px 20px !important;\n            }\n            .email-body {\n                padding: 30px 20px !important;\n            }\n            .email-footer {\n                padding: 30px 20px !important;\n            }\n            .info-box {\n                max-width: 100% !important;\n                padding: 12px 15px !important;\n                box-sizing: border-box !important;\n            }\n            .btn-action {\n                padding: 12px 20px !important;\n                font-size: 11px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .btn-sub {\n                padding: 10px 20px !important;\n                font-size: 10px !important;\n                display: block !important;\n                margin: 8px auto !important;\n                width: 90% !important;\n                box-sizing: border-box !important;\n            }\n            .detail-table {\n                font-size: 13px !important;\n            }\n            .detail-table td {\n                padding: 8px 0 !important;\n            }\n        }\n    </style>\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div class=\"email-container\" style=\"max-width:600px;width:100%;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div class=\"email-header\" style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">Vicen</p>\n        </div>\n        <div class=\"email-body\" style=\"padding:45px 40px;text-align:center;\">\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Av de Mariano Vicén, 7 · 42003 Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#5b8fa0;font-weight:600;\">📞 623 40 03 98</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a1a;\">¡Hola, {{ $json.clientName }}!</h2>\n            <p style=\"font-size:16px;line-height:1.7;color:#44403c;margin-bottom:15px;\">Esperamos que disfrutaras de tu <strong style=\"color:#1a1a1a;\">{{ $json.service }}</strong>.</p>\n            <p style=\"font-size:15px;line-height:1.7;color:#78716c;margin-bottom:35px;\">¿Te tomas un minuto para valorarnos?</p>\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:20px;padding:40px 30px;margin-bottom:35px;\">\n                <p style=\"margin:0 0 20px 0;font-size:15px;color:#1a1a1a;font-weight:600;\">¿Cómo fue tu experiencia?</p>\n                <div style=\"font-size:24px;color:#c9a96e;margin-bottom:30px;letter-spacing:8px;\">★ ★ ★ ★ ★</div>\n                <a href=\"https://g.page/r/CZ2KyrZFA9xwEBM/review\" class=\"btn-action\" style=\"display:inline-block;padding:15px 40px;background:#1a1a1a;color:#c9a96e;text-decoration:none;border-radius:50px;font-weight:bold;font-size:13px;text-transform:uppercase;letter-spacing:1px;border:1px solid #c9a96e;\">Dejar mi reseña</a>\n                <div style=\"margin-top:16px;\">\n                    <a href=\"https://reservas-magic-vicen.vercel.app\" class=\"btn-sub\" style=\"display:inline-block;padding:12px 28px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Reservar de nuevo</a>\n                </div>\n            </div>\n        </div>\n        <div class=\"email-footer\" style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio Vicen</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Av de Mariano Vicén, 7 · 42003 Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 623 40 03 98</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "d01e00b6-c14c-4b71-8f78-afe5f8b20701",
+      "name": "Email - Pedir Reseña",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        3952
+      ],
+      "webhookId": "b66f78b3-8e5c-4d64-bba7-ae3fec4e6794",
       "credentials": {
         "gmailOAuth2": {
           "id": "6jQSY3sPZd4AHnwE",
@@ -774,214 +698,6 @@
     }
   ],
   "connections": {
-    "Firestore - Obtener Citas (Ayer)2": {
-      "main": [
-        [
-          {
-            "node": "Filtrar: Citas de Ayer2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Cada día a las 12:2": {
-      "main": [
-        [
-          {
-            "node": "Firestore - Obtener Citas (Ayer)2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filtrar: Citas de Ayer2": {
-      "main": [
-        [
-          {
-            "node": "Email - Pedir Reseña2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Cada mañana a las 8:3": {
-      "main": [
-        [
-          {
-            "node": "Firestore - Obtener Citas2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Webhook - Eventos2": {
-      "main": [
-        [
-          {
-            "node": "Normalizar Payload2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Normalizar Payload2": {
-      "main": [
-        [
-          {
-            "node": "¿Es pago completado?2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "¿Es pago completado?2": {
-      "main": [
-        [
-          {
-            "node": "Email - Factura2",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "¿Es nueva?2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "¿Es nueva?2": {
-      "main": [
-        [
-          {
-            "node": "Email - Confirmación Nueva2",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "¿Es cancelación?2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "¿Es cancelación?2": {
-      "main": [
-        [
-          {
-            "node": "Email - Cancelación2",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "¿Es modificación?2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "¿Es modificación?2": {
-      "main": [
-        [
-          {
-            "node": "Email - Modificación2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Firestore - Obtener Citas2": {
-      "main": [
-        [
-          {
-            "node": "Filtrar Citas de Mañana2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filtrar Citas de Mañana2": {
-      "main": [
-        [
-          {
-            "node": "Email - Recordatorio2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Supabase - Obtener Citas (Ayer)2": {
-      "main": [
-        [
-          {
-            "node": "Filtrar: Citas de Ayer3",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Supabase - Obtener Citas2": {
-      "main": [
-        [
-          {
-            "node": "Filtrar Citas de Mañana3",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Cada día a las 12:3": {
-      "main": [
-        [
-          {
-            "node": "Supabase - Obtener Citas (Ayer)2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filtrar: Citas de Ayer3": {
-      "main": [
-        [
-          {
-            "node": "Email - Pedir Reseña",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Cada mañana a las 8:4": {
-      "main": [
-        [
-          {
-            "node": "Supabase - Obtener Citas2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Webhook - Eventos": {
       "main": [
         [
@@ -1029,11 +745,27 @@
             "node": "Email - Confirmación Nueva",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "WhatsApp - Confirmación",
+            "type": "main",
+            "index": 0
           }
         ],
         [
           {
             "node": "¿Es cancelación?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp - Confirmación": {
+      "main": [
+        [
+          {
+            "node": "Registrar Consumo en Excel (Confirmación)",
             "type": "main",
             "index": 0
           }
@@ -1069,11 +801,82 @@
         ]
       ]
     },
-    "Filtrar Citas de Mañana3": {
+    "Cada mañana a las 8:": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Obtener Citas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Obtener Citas": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Citas de Mañana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Citas de Mañana": {
       "main": [
         [
           {
             "node": "Email - Recordatorio",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WhatsApp - Recordatorio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp - Recordatorio": {
+      "main": [
+        [
+          {
+            "node": "Registrar Consumo en Excel (Recordatorio)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cada día a las 12:": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Obtener Citas (Ayer)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Obtener Citas (Ayer)": {
+      "main": [
+        [
+          {
+            "node": "Filtrar: Citas de Ayer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar: Citas de Ayer": {
+      "main": [
+        [
+          {
+            "node": "Email - Pedir Reseña",
             "type": "main",
             "index": 0
           }
