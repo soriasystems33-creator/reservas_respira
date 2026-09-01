@@ -3421,6 +3421,43 @@ window.sendWebpushrNotification = async (title, message, url = window.location.h
   }
 };
 
+window.requestWebpushrPrompt = () => {
+  if (typeof webpushr === 'function') {
+    try { webpushr('prompt'); } catch (e) { console.warn(e); }
+  }
+  if (window.Notification && Notification.permission !== 'granted') {
+    Notification.requestPermission().then(() => {
+      window.updatePushBtnState();
+    });
+  }
+};
+
+window.updatePushBtnState = () => {
+  const btn = document.getElementById('btn-push-noti');
+  const txt = document.getElementById('push-noti-text');
+  if (!btn || !txt) return;
+  if (window.Notification && Notification.permission === 'granted') {
+    btn.className = "px-3.5 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 shadow-sm text-xs uppercase tracking-widest border border-emerald-300 bg-emerald-50 text-emerald-800";
+    txt.innerText = "Notificaciones Activas";
+  } else if (window.Notification && Notification.permission === 'denied') {
+    btn.className = "px-3.5 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 shadow-sm text-xs uppercase tracking-widest border border-red-200 bg-red-50 text-red-700";
+    txt.innerText = "Notificaciones Bloqueadas";
+  } else {
+    btn.className = "px-3.5 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 shadow-md active:scale-95 transition-all text-xs uppercase tracking-widest border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 cursor-pointer animate-pulse";
+    txt.innerText = "Activar Notificaciones";
+  }
+  if (window.lucide) lucide.createIcons();
+};
+
+setTimeout(() => {
+  window.updatePushBtnState();
+  if (window.Notification && Notification.permission === 'default') {
+    if (typeof webpushr === 'function') {
+      try { webpushr('prompt'); } catch (e) {}
+    }
+  }
+}, 1200);
+
 // ══════════════════════════════════════════════════════════════
 // VERSION 2026-05-11 17:36 - LÍNEA LIMPIA PARA EVITAR CACHÉ
 // ══════════════════════════════════════════════════════════════
