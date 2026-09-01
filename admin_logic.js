@@ -1069,24 +1069,61 @@ if(btnConfig) {
 if(window.lucide)lucide.createIcons()}catch(err){console.error("❌ ERROR CRÍTICO EN window.render():",err)}};
 
 // ---- APPOINTMENT LIST ----
-window.renderList=()=>{const lm=document.getElementById('list-month'),ly=document.getElementById('list-year');const now=new Date();let m=parseInt(lm?.value),y=parseInt(ly?.value);if(isNaN(m))m=now.getMonth();if(isNaN(y))y=now.getFullYear();
-const filtered=appointments.filter(a=>{if(!a.date)return false;const[yr,mo]=a.date.split('-').map(Number);return mo===(m+1)&&yr===y});
-const badge=document.getElementById('list-count-badge');if(badge)badge.innerText=`${filtered.length} Citas`;
-const tbody=document.getElementById('appointments-tbody');if(!tbody)return;
-if(filtered.length===0){tbody.innerHTML=`<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold italic uppercase">No hay citas en este mes</td></tr>`;return}
-tbody.innerHTML='';
-const mapSt={pending:'Confirmada',confirmed:'Confirmada',completed:'Pagada',cancelled:'Cancelada'};
-filtered.sort((a,b)=>`${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`)).forEach(apt=>{const tr=document.createElement('tr');
-const isHighlighted = window.highlightIds && window.highlightIds.includes(apt.id);
-tr.className=`border-b hover:bg-slate-50 cursor-pointer ${isHighlighted ? 'highlight-new' : ''}`;
-tr.onclick=(e)=>{if(!e.target.closest('button')) window.openModal(apt.id)};
-const st=apt.status||'pending';const sc=statusColors[st]||'';
-const newBadge = isHighlighted ? '<span class="inline-block ml-2 px-1.5 py-0.5 rounded text-[8px] font-black bg-amber-400 text-white animate-pulse">NUEVA</span>' : '';
-tr.innerHTML=`<td data-label="Cliente" class="p-4"><div class="font-bold text-slate-800 uppercase text-xs">${esc(apt.clientName||apt.name)||'Sin Nombre'}</div><div class="text-[10px] text-slate-400 font-mono">${esc(apt.clientPhone||apt.phone)||''}</div></td><td data-label="Servicio" class="p-4"><div class="text-xs font-black uppercase text-blue-900">${esc(apt.service)||''}</div><span class="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-black uppercase ${sc}">${mapSt[st]||st}</span>${newBadge}</td><td data-label="Especialista" class="p-4 text-xs font-bold text-slate-600">${esc(apt.employee?apt.employee.split(',').map(function(e){return e.trim()}).filter(function(e){var l=e.toLowerCase();return l!=='todas'&&l!=='ambos'&&l!=='cualquiera'}).join(', '):'?')||'?'}</td><td data-label="Fecha/Hora" class="p-4 text-xs font-black uppercase">${apt.date}<br><span class="text-teal-600">${apt.time}</span></td><td data-label="Pagado" class="p-4 text-center">${apt.isPaid?'<span class="text-green-500 font-bold text-[10px] bg-green-50 px-2 py-1 rounded-lg border border-green-100">PAGADO</span>':(st==='cancelled'?'<span class="text-red-500 font-bold text-[10px] bg-red-50 px-2 py-1 rounded-lg border border-red-100">CANCELADA</span>':'<span class="text-amber-500 font-bold text-[10px] bg-amber-50 px-2 py-1 rounded-lg border border-amber-100">PENDIENTE</span>')}</td><td data-label="Acciones" class="p-4 text-center"><div class="flex justify-center gap-2"><button onclick="window.viewAppointment('${apt.id}')" class="p-2 border rounded-xl text-slate-500 hover:bg-slate-50" title="Ver Detalles"><i data-lucide="info" class="w-4 h-4"></i></button><button onclick="window.openModal('${apt.id}')" class="p-2 border rounded-xl text-blue-500 hover:bg-blue-50" title="Editar"><i data-lucide="edit-3" class="w-4 h-4"></i></button><button onclick="window.deleteAptFromModal('${apt.id}')" class="p-2 border rounded-xl text-red-500 hover:bg-red-50" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td>`;
-tbody.appendChild(tr)});
-// Limpiar resaltado tras el render (opcional, o dejar que la animación termine)
-// window.highlightIds = []; 
-lucide.createIcons()};
+window.renderList=()=>{
+    const lm=document.getElementById('list-month'),ly=document.getElementById('list-year');
+    const searchInp=document.getElementById('appointment-search');
+    const q=(searchInp?.value||'').trim().toLowerCase();
+    const cleanQ=q.replace(/[\u200E\u200F\u200B\u200C\u200D\u202A-\u202E\uFEFF\s\-\(\)\.\+]/g,'');
+
+    let filtered = [];
+    if (q) {
+        filtered = (window.appointments || appointments || []).filter(a => {
+            const name = (a.clientName || a.name || '').toLowerCase();
+            const phone = (a.clientPhone || a.phone || '').replace(/\D/g, '');
+            const service = (a.service || '').toLowerCase();
+            const emp = (a.employee || '').toLowerCase();
+            const date = (a.date || '').toLowerCase();
+            return name.includes(q) || 
+                   (cleanQ && phone.includes(cleanQ)) || 
+                   service.includes(q) || 
+                   emp.includes(q) || 
+                   date.includes(q);
+        });
+    } else {
+        const now=new Date();
+        let m=parseInt(lm?.value),y=parseInt(ly?.value);
+        if(isNaN(m))m=now.getMonth();
+        if(isNaN(y))y=now.getFullYear();
+        filtered=(window.appointments || appointments || []).filter(a=>{
+            if(!a.date)return false;
+            const[yr,mo]=a.date.split('-').map(Number);
+            return mo===(m+1)&&yr===y;
+        });
+    }
+
+    const badge=document.getElementById('list-count-badge');
+    if(badge)badge.innerText=`${filtered.length} Citas`;
+    const tbody=document.getElementById('appointments-tbody');
+    if(!tbody)return;
+    if(filtered.length===0){
+        tbody.innerHTML=`<tr><td colspan="6" class="p-8 text-center text-slate-400 font-bold italic uppercase">${q?'No se encontraron citas':'No hay citas en este mes'}</td></tr>`;
+        return;
+    }
+    tbody.innerHTML='';
+    const mapSt={pending:'Confirmada',confirmed:'Confirmada',completed:'Pagada',cancelled:'Cancelada'};
+    filtered.sort((a,b)=>`${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`)).forEach(apt=>{
+        const tr=document.createElement('tr');
+        const isHighlighted = window.highlightIds && window.highlightIds.includes(apt.id);
+        tr.className=`border-b hover:bg-slate-50 cursor-pointer ${isHighlighted ? 'highlight-new' : ''}`;
+        tr.onclick=(e)=>{if(!e.target.closest('button')) window.openModal(apt.id)};
+        const st=apt.status||'pending';
+        const sc=statusColors[st]||'';
+        const newBadge = isHighlighted ? '<span class="inline-block ml-2 px-1.5 py-0.5 rounded text-[8px] font-black bg-amber-400 text-white animate-pulse">NUEVA</span>' : '';
+        tr.innerHTML=`<td data-label="Cliente" class="p-4"><div class="font-bold text-slate-800 uppercase text-xs">${esc(apt.clientName||apt.name)||'Sin Nombre'}</div><div class="text-[10px] text-slate-400 font-mono">${esc(apt.clientPhone||apt.phone)||''}</div></td><td data-label="Servicio" class="p-4"><div class="text-xs font-black uppercase text-blue-900">${esc(apt.service)||''}</div><span class="inline-block mt-1 px-2 py-0.5 rounded text-[9px] font-black uppercase ${sc}">${mapSt[st]||st}</span>${newBadge}</td><td data-label="Especialista" class="p-4 text-xs font-bold text-slate-600">${esc(apt.employee?apt.employee.split(',').map(function(e){return e.trim()}).filter(function(e){var l=e.toLowerCase();return l!=='todas'&&l!=='ambos'&&l!=='cualquiera'}).join(', '):'?')||'?'}</td><td data-label="Fecha/Hora" class="p-4 text-xs font-black uppercase">${apt.date}<br><span class="text-teal-600">${apt.time}</span></td><td data-label="Pagado" class="p-4 text-center">${apt.isPaid?'<span class="text-green-500 font-bold text-[10px] bg-green-50 px-2 py-1 rounded-lg border border-green-100">PAGADO</span>':(st==='cancelled'?'<span class="text-red-500 font-bold text-[10px] bg-red-50 px-2 py-1 rounded-lg border border-red-100">CANCELADA</span>':'<span class="text-amber-500 font-bold text-[10px] bg-amber-50 px-2 py-1 rounded-lg border border-amber-100">PENDIENTE</span>')}</td><td data-label="Acciones" class="p-4 text-center"><div class="flex justify-center gap-2"><button onclick="window.viewAppointment('${apt.id}')" class="p-2 border rounded-xl text-slate-500 hover:bg-slate-50" title="Ver Detalles"><i data-lucide="info" class="w-4 h-4"></i></button><button onclick="window.openModal('${apt.id}')" class="p-2 border rounded-xl text-blue-500 hover:bg-blue-50" title="Editar"><i data-lucide="edit-3" class="w-4 h-4"></i></button><button onclick="window.deleteAptFromModal('${apt.id}')" class="p-2 border rounded-xl text-red-500 hover:bg-red-50" title="Cancelar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div></td>`;
+        tbody.appendChild(tr);
+    });
+    lucide.createIcons();
+};
 
 // ---- CLIENTS ----
 window.getClientList = () => {
@@ -2006,6 +2043,7 @@ if(cancelledAt) {
 }
 if(!data.clientName)return alert("Escribe el nombre del cliente.");
 if(data.clientEmail && !data.clientEmail.includes('@')) return alert("Por favor, introduce un correo electrónico válido.");
+if(!data.clientPhone || data.clientPhone.replace(/\D/g, '').length < 9) return alert("Introduce un teléfono válido (mínimo 9 dígitos) para poder enviar confirmación por WhatsApp.");
 try{var isEdit=!!editingId;let res;if(isEdit){await updateDoc(doc(db,'artifacts',AID,'public','data','appointments',editingId),data);data.id=editingId;}
 else{data.createdAt=new Date().toISOString();if(isCancelled) data.cancelledAt = new Date().toISOString();res=await addDoc(collection(db,'artifacts',AID,'public','data','appointments'),data);data.id=res.id;}
 window.closeModal();
@@ -2022,14 +2060,15 @@ window.closeModal();
     };
     notifyWebhook(isEdit?'modification':'new', payload);
 }catch(e){alert("Error: "+e.message)}};
-window.deleteAptFromModal=async(id=null)=>{var tid=id||editingId;if(!tid)return;if(!confirm("¿Eliminar esta cita?"))return;
+window.deleteAptFromModal=async(id=null)=>{var tid=id||editingId;if(!tid)return;if(!confirm("¿Cancelar esta cita? Se marcará como cancelada."))return;
 try{var apt=appointments.find(function(a){return a.id===tid});if(apt){
   window.trackNotif({...apt,id:tid,status:'cancelled'},'cancelled');
   var cancelPayload = {
     event: 'cancellation',
-    appointment: {...apt, id: tid},
+    appointment: {...apt, id: tid, status: 'cancelled'},
     ...apt,
     id: tid,
+    status: 'cancelled',
     clientEmail: apt.clientEmail || apt.client_email,
     client_email: apt.client_email || apt.clientEmail,
     clientName: apt.clientName || apt.client_name,
@@ -2037,18 +2076,33 @@ try{var apt=appointments.find(function(a){return a.id===tid});if(apt){
   };
   notifyWebhook('cancellation', cancelPayload);
 }
-await deleteDoc(doc(db,'artifacts',AID,'public','data','appointments',tid));
-appointments=appointments.filter(function(a){return a.id!==tid});
+await updateDoc(doc(db,'artifacts',AID,'public','data','appointments',tid),{
+  status: 'cancelled',
+  cancelledAt: new Date().toISOString(),
+  cancelledBy: 'panel',
+  updatedAt: new Date().toISOString()
+});
+var localApt = appointments.find(function(a){return a.id===tid});
+if(localApt){
+  localApt.status = 'cancelled';
+  localApt.cancelledAt = new Date().toISOString();
+  localApt.cancelledBy = 'panel';
+  localApt.updatedAt = new Date().toISOString();
+}
 window.closeModal();
 if(typeof render==='function')render();
 if(typeof renderSpecialistDayView==='function'&&currentTab.startsWith('calendar_emp_'))renderSpecialistDayView();
+if(typeof window.renderList==='function')window.renderList();
 }catch(e){alert("Error: "+e.message)}};
 window.cleanPhone=function(el){
-    var v=el.value.trim();
-    v=v.replace(/^\+34/,'');           // quita +34
-    v=v.replace(/[\s\-\(\)\.]/g,'');   // quita espacios, guiones, etc.
+    if(!el) return '';
+    var v=(typeof el === 'string' ? el : (el.value || '')).trim();
+    v = v.replace(/[\u200E\u200F\u200B\u200C\u200D\u202A-\u202E\uFEFF]/g, '');
+    v = v.replace(/^\+34/,'');           // quita +34
+    v = v.replace(/[\s\-\(\)\.]/g,'');   // quita espacios, guiones, etc.
     if(v.startsWith('34')&&v.length>9) v=v.slice(2); // quita 34 si es prefijo país (11+ dígitos)
-    el.value=v;
+    if(typeof el === 'object' && el.value !== undefined) el.value=v;
+    return v;
 };
 // Forzar listener vía JS (script al final del body, DOM ya listo)
 (function(){
