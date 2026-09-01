@@ -579,12 +579,22 @@ if(empFilter){
   const dc=getDailyConfig(ds,emp.name);
   const openStr=dc.type==='closed'?'09:00':(dc.start||config.start||'09:00');
   const closeStr=dc.type==='closed'?'20:00':(dc.end||config.end||'20:00');
+  const empApts=dayApts.filter(function(a){return empInApt(a,emp.name)});
+  let empServicesCount = 0;
+  empApts.forEach(a => {
+    if (a.services && Array.isArray(a.services) && a.services.length > 0) {
+      const svcs = a.services.filter(s => (s.employee || '').toLowerCase() === emp.name.toLowerCase() || !s.employee || s.employee === 'Todas' || s.employee === 'Cualquiera');
+      empServicesCount += (svcs.length > 0 ? svcs.length : 1);
+    } else {
+      empServicesCount += 1;
+    }
+  });
+  const empAptsLabel = empServicesCount === 1 ? '1 cita' : `${empServicesCount} citas`;
   const startH=parseInt(openStr.split(':')[0],10);
   const endH=Math.ceil(parseInt(closeStr.split(':')[0],10)+(parseInt(closeStr.split(':')[1]||'0',10)>0?1:0));
   const PX=64; // px per hour
   const totalPx=(endH-startH)*PX;
   const empColor=emp.color||'#7c3aed';
-  const empApts=dayApts.filter(function(a){return empInApt(a,emp.name)});
   const empBlocks=window.loadBlocksForDate(ds,emp.name);
   const empOverride = config.specialDays?.[ds]?.[emp.id] || config.specialDays?.[ds]?.[emp.name];
   const hasBlocks = empBlocks.length > 0;
@@ -601,7 +611,7 @@ if(empFilter){
       <div style="width:12px;height:12px;border-radius:50%;background:${empColor}"></div>
       <span style="font-size:14px;font-weight:800;color:#2e2826;text-transform:uppercase;letter-spacing:.5px">${esc(emp.name)}</span>
       <span style="font-size:11px;font-weight:600;padding:2px 10px;border-radius:99px;background:#f0ebe6;color:#7a6b67">${openStr} – ${closeStr}</span>
-      <span style="font-size:11px;font-weight:700;padding:2px 10px;border-radius:99px;color:white;background:${empColor}">${empApts.length} citas</span>
+      <span style="font-size:11px;font-weight:700;padding:2px 10px;border-radius:99px;color:white;background:${empColor}">${empAptsLabel}</span>
     </div>
     <div style="display:flex;gap:8px">
       ${showRestore ? `
@@ -971,6 +981,21 @@ if(isConfig){
   let dayApts=appointments.filter(a=>a.date===ds);if(empFilter)dayApts=dayApts.filter(function(a){return empInApt(a,empFilter)});
   const active=dayApts.filter(a=>a.status!=='cancelled');const pend=active.filter(a=>a.status==='pending').length;
   
+  let totalServicesCount = 0;
+  active.forEach(a => {
+    if (a.services && Array.isArray(a.services) && a.services.length > 0) {
+      if (empFilter) {
+        const empSvcs = a.services.filter(s => (s.employee || '').toLowerCase() === empFilter.toLowerCase() || !s.employee || s.employee === 'Todas' || s.employee === 'Cualquiera');
+        totalServicesCount += (empSvcs.length > 0 ? empSvcs.length : 1);
+      } else {
+        totalServicesCount += a.services.length;
+      }
+    } else {
+      totalServicesCount += 1;
+    }
+  });
+  const aptsLabel = totalServicesCount === 1 ? '1 Cita' : `${totalServicesCount} Citas`;
+
   const pi=pend>0?`<div class="absolute top-1 right-1 w-2.5 h-2.5 bg-yellow-400 rounded-full animate-pulse shadow-sm border border-white"></div>`:'';
   
   if (closed) {
@@ -1009,10 +1034,10 @@ if(isConfig){
     const blocksBadge = hasPartialBlocks ? `<div class="text-[8px] text-orange-600 font-black mt-1 uppercase flex items-center gap-0.5"><i data-lucide="lock" class="w-2.5 h-2.5"></i> ${empBlocks.length} Bloqueo${empBlocks.length>1?'s':''}</div>` : '';
     
     div.innerHTML=`<div class="font-black text-slate-700 relative flex items-center">${d} ${pi}</div>
-                   <div class="text-[8px] text-blue-500 font-black mt-1 uppercase">${active.length} Citas</div>
+                   <div class="text-[8px] text-blue-500 font-black mt-1 uppercase">${aptsLabel}</div>
                    ${blocksBadge}
                    <div class="w-full bg-slate-100 h-1 rounded-full mt-2 overflow-hidden">
-                     <div class="h-full bg-blue-500 transition-all" style="width:${Math.min(100,active.length*15)}%"></div>
+                     <div class="h-full bg-blue-500 transition-all" style="width:${Math.min(100,totalServicesCount*12)}%"></div>
                    </div>`;
   }
   
