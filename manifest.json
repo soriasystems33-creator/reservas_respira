@@ -1,13 +1,13 @@
 {
-  "name": "Magic Studio Vicen",
-  "short_name": "Magic Studio",
-  "description": "Panel de gestión de citas para Magic Studio Vicen",
-  "start_url": "/",
+  "name": "MAGIC-VICEN",
+  "short_name": "MAGIC-VICEN",
+  "description": "Panel de gestión de citas para Magic Studio Vicén",
+  "start_url": "/admin.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#faf7f4",
-  "theme_color": "#7c3aed",
+  "theme_color": "#c47e85",
   "categories": ["business", "productivity"],
   "icons": [
     { "src": "/magic.jpg", "sizes": "192x192", "type": "image/jpeg" },
