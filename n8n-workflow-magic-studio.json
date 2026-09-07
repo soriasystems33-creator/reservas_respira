@@ -409,7 +409,8 @@
           "id": "6jQSY3sPZd4AHnwE",
           "name": "Katy Recordatorios"
         }
-      }
+      },
+      "continueOnFail": true
     },
     {
       "parameters": {
@@ -469,7 +470,8 @@
           "id": "4c7zz7Ip3eiv3zgk",
           "name": "WhatsApp account"
         }
-      }
+      },
+      "continueOnFail": true
     },
     {
       "parameters": {
@@ -568,7 +570,8 @@
           "id": "h9H5Nr0Q86QxLx3F",
           "name": "Google Sheets account"
         }
-      }
+      },
+      "continueOnFail": true
     },
     {
       "parameters": {
@@ -872,5 +875,13 @@
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "1f20af6484e867d032857a1d4b47feed5a47287b3ff16a2cb91c5cd653183432"
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "timezone": "Europe/Madrid"
   }
 }
