@@ -105,6 +105,59 @@ function _notifyTable(table) {
   }
 }
 
+async function _prepareSettingsPayload(refId, data) {
+  var id = refId || 'main';
+  var res = await supabase.from('settings').select('*').eq('id', id).maybeSingle();
+  var existing = res.data || {};
+  var currentWeekly = (existing.weekly && typeof existing.weekly === 'object') ? Object.assign({}, existing.weekly) : {};
+
+  var payload = { id: id };
+
+  if (data.start !== undefined) payload.start = data.start;
+  if (data.end !== undefined) payload.end = data.end;
+  if (data.specialDays !== undefined || data.special_days !== undefined) {
+    payload.special_days = data.specialDays !== undefined ? data.specialDays : data.special_days;
+  }
+
+  var hasWeeklyUpdate = false;
+  for (var k in data) {
+    if (k.startsWith('weekly_') || k.startsWith('weekly__')) {
+      var normKey = 'weekly_' + k.replace(/^weekly_+/, '');
+      currentWeekly[normKey] = data[k];
+      hasWeeklyUpdate = true;
+    }
+  }
+
+  if (data.weekly !== undefined) {
+    for (var d in data.weekly) {
+      currentWeekly[d] = data.weekly[d];
+    }
+    hasWeeklyUpdate = true;
+  }
+
+  if (hasWeeklyUpdate || Object.keys(currentWeekly).length > 0) {
+    payload.weekly = currentWeekly;
+  }
+
+  return payload;
+}
+
+function _formatSettingsDoc(d) {
+  if (!d) return null;
+  var camel = _snakeToCamel(d);
+  camel.specialDays = camel.specialDays || camel.special_days || {};
+
+  if (camel.weekly && typeof camel.weekly === 'object') {
+    for (var k in camel.weekly) {
+      if (k.startsWith('weekly_') || k.startsWith('weekly__')) {
+        var normKey = 'weekly_' + k.replace(/^weekly_+/, '');
+        camel[normKey] = camel.weekly[k];
+      }
+    }
+  }
+  return camel;
+}
+
 function addDoc(ref, data) {
   return supabase.from(ref.table).insert(_camelToSnake(data)).select().single().then(function(r) {
     if (r.error) throw r.error;
@@ -114,6 +167,14 @@ function addDoc(ref, data) {
 }
 
 function setDoc(ref, data, opts) {
+  if (ref.table === 'settings') {
+    return _prepareSettingsPayload(ref.id, data).then(function(payload) {
+      return supabase.from('settings').upsert(payload).then(function(r) {
+        if (r.error) throw r.error;
+        _notifyTable('settings');
+      });
+    });
+  }
   return supabase.from(ref.table).upsert({ ..._camelToSnake(data), id: ref.id }).then(function(r) {
     if (r.error) throw r.error;
     _notifyTable(ref.table);
@@ -121,6 +182,14 @@ function setDoc(ref, data, opts) {
 }
 
 function updateDoc(ref, data) {
+  if (ref.table === 'settings') {
+    return _prepareSettingsPayload(ref.id, data).then(function(payload) {
+      return supabase.from('settings').update(payload).eq('id', ref.id || 'main').then(function(r) {
+        if (r.error) throw r.error;
+        _notifyTable('settings');
+      });
+    });
+  }
   return supabase.from(ref.table).update(_camelToSnake(data)).eq('id', ref.id).then(function(r) {
     if (r.error) throw r.error;
     _notifyTable(ref.table);
@@ -147,7 +216,7 @@ function onSnapshot(ref, cb) {
         if (r.error) { console.error('[supabase]', r.error); return; }
         cb({
           docs: (r.data || []).map(function(d) {
-            var camel = _snakeToCamel(d);
+            var camel = table === 'settings' ? _formatSettingsDoc(d) : _snakeToCamel(d);
             return { id: d.id, data: function() { return camel; }, exists: true };
           })
         });
@@ -160,7 +229,7 @@ function onSnapshot(ref, cb) {
           return;
         }
         var snapData = r.data || null;
-        var camelData = snapData ? _snakeToCamel(snapData) : null;
+        var camelData = snapData ? (table === 'settings' ? _formatSettingsDoc(snapData) : _snakeToCamel(snapData)) : null;
         cb({
           data: function() { return camelData; },
           exists: !!snapData
