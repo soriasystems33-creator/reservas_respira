@@ -370,7 +370,9 @@ const getDailyConfig=(dateStr,entity='global')=>{try{
 
 // ---- NAV & TAB ----
 window.changeDate=offset=>{if(typeof offset!=='number')return;if(specialistViewLevel==='month'||specialistViewLevel==='global-day')currentViewDate.setMonth(currentViewDate.getMonth()+offset);else currentViewDate.setDate(currentViewDate.getDate()+offset);currentViewDate=new Date(currentViewDate.getTime());if(specialistViewLevel==='global-day')window.renderGlobalDay();else window.render()};
-window.setTab=tab=>{window.closeSidebar();currentTab=tab;['calendar','appointments','billing','config','clients','global-day','services_mgmt','employees_mgmt','gastos','notifications','tpv'].forEach(v=>{const el=document.getElementById(`view-${v}`);if(el)el.classList.add('hidden')});
+window.setTab=tab=>{
+try{localStorage.setItem('panel_active_tab',tab)}catch(e){}
+window.closeSidebar();currentTab=tab;['calendar','appointments','billing','config','clients','global-day','services_mgmt','employees_mgmt','gastos','notifications','tpv'].forEach(v=>{const el=document.getElementById(`view-${v}`);if(el)el.classList.add('hidden')});
 const nc=document.getElementById('nav-controls');
 if(tab==='calendar_all'){specialistViewLevel='month';document.getElementById('view-calendar').classList.remove('hidden');nc.classList.remove('hidden')}
 else if(tab.startsWith('calendar_emp_')){specialistViewLevel='month';document.getElementById('view-calendar').classList.remove('hidden');nc.classList.remove('hidden')}
@@ -2266,6 +2268,7 @@ window.dismissLocalNotif=function(id,type){
 loadLocalNotifs();
 
 // ---- SUPABASE INIT ----
+let _authInitialized = false;
 const init=async()=>{
 setStatus('loading','Iniciando Supabase...');
 try{
@@ -2281,9 +2284,14 @@ document.getElementById('login-screen').classList.add('hidden');
 document.getElementById('app-container').classList.remove('hidden');
 setStatus('ok','Conectado ✓');
 console.log('✅ Auth OK, UID:',user.uid);
-startListeners();
-setTimeout(()=>window.setTab('calendar_all'),100);
+if(!_authInitialized){
+  _authInitialized=true;
+  startListeners();
+  const savedTab=localStorage.getItem('panel_active_tab')||'calendar_all';
+  setTimeout(()=>window.setTab(savedTab),100);
+}
 } else {
+_authInitialized=false;
 document.getElementById('login-screen').classList.remove('hidden');
 document.getElementById('app-container').classList.add('hidden');
 setStatus('loading','Desconectado');
@@ -2296,7 +2304,7 @@ alert('Error al iniciar Supabase: '+e.message);
 }};
 window.doLogin=()=>{var email=document.getElementById('login-email').value.trim();var pass=document.getElementById('login-password').value;var errEl=document.getElementById('login-error');var btn=document.getElementById('login-btn');if(!email||!pass){errEl.textContent='Introduce correo y contraseña';errEl.classList.remove('hidden');return}
 errEl.classList.add('hidden');btn.disabled=true;btn.textContent='Entrando...';signInWithEmailAndPassword(auth,email,pass).then(function(){btn.textContent='Iniciar Sesión';btn.disabled=false}).catch(function(e){var m=e.code||'';if(m.includes('too-many-requests')){errEl.textContent='⚠️ Bloqueado por actividad inusual. Espera 10-15 min o restablece tu contraseña.'}else if(m.includes('wrong-password')||m.includes('user-not-found')||m.includes('invalid-credential')){errEl.textContent='Usuario o contraseña incorrectos'}else{errEl.textContent='Error: '+e.message};errEl.classList.remove('hidden');btn.textContent='Iniciar Sesión';btn.disabled=false})};
-window.doLogout=()=>{document.getElementById('login-btn').disabled=false;document.getElementById('login-btn').textContent='Iniciar Sesión';auth.signOut().catch(function(e){console.error('Logout error:',e)})};
+window.doLogout=()=>{_authInitialized=false;try{localStorage.removeItem('panel_active_tab')}catch(e){}document.getElementById('login-btn').disabled=false;document.getElementById('login-btn').textContent='Iniciar Sesión';auth.signOut().catch(function(e){console.error('Logout error:',e)})};
 window.toggleSidebar=()=>{
   var s=document.getElementById('sidebar');var o=document.getElementById('sidebar-overlay');var h=document.getElementById('hamburger-btn');
   var isOpen=s.classList.toggle('open');o.classList.toggle('open',isOpen);
