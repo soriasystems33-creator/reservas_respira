@@ -1531,11 +1531,25 @@
 
             <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Descripción</label><input type="text" id="svc-desc" class="w-full p-2.5 border rounded-xl outline-none font-medium" style="background:var(--cream);border-color:var(--brown-light);color:var(--brown)"></div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1">
 
-                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Categoría</label><select id="svc-category" class="w-full p-2.5 border rounded-xl font-medium" style="background:white;border-color:var(--brown-light);color:var(--brown)"></select></div>
+                <label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Categoría</label>
 
-                <div class="space-y-1"><label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Empleadas</label><select id="svc-employee" multiple class="w-full p-2.5 border rounded-xl font-medium min-h-[120px]" style="background:white;border-color:var(--brown-light);color:var(--brown)"></select><p class="text-[8px] opacity-50 mt-1" style="color:var(--brown-mid)">Selecciona varias con Ctrl+clic. "Todas" = cualquier empleada.</p></div>
+                <select id="svc-category" class="w-full p-2.5 border rounded-xl font-medium" style="background:white;border-color:var(--brown-light);color:var(--brown)"></select>
+
+            </div>
+
+            <div class="space-y-1">
+
+                <label class="text-[10px] font-bold uppercase" style="color:var(--brown-mid)">Empleadas asignadas</label>
+
+                <div id="svc-employee-container" class="p-3 border rounded-xl bg-white max-h-[150px] overflow-y-auto space-y-1.5" style="border-color:var(--brown-light)">
+
+                    <!-- Checkboxes generados dinámicamente -->
+
+                </div>
+
+                <p class="text-[9px] opacity-70 mt-1 font-medium" style="color:var(--brown-mid)">Marca las empleadas que realizan este servicio.</p>
 
             </div>
 

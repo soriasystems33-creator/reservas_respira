@@ -81,18 +81,84 @@ window.openClosuresInfoModal=()=>{
 window.closeClosuresInfoModal=()=>document.getElementById('closures-info-modal').classList.add('hidden');
 
 // ---- SERVICES CRUD ----
-window.openServiceModal=(id=null)=>{editingServiceId=id;document.getElementById('service-modal').classList.remove('hidden');
-const t=document.getElementById('service-modal-title');t.innerText=id?'Editar Servicio':'Nuevo Servicio';
-const cs=document.getElementById('svc-category');cs.innerHTML=categoriesDB.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
-const es=document.getElementById('svc-employee');es.innerHTML='<option value="Todas">Todas</option>'+employeesDB.map(e=>`<option value="${e.name}">${e.name}</option>`).join('');
-if(id){const s=getSvcById(id);if(s){document.getElementById('svc-name').value=s.name;document.getElementById('svc-price').value=s.price;document.getElementById('svc-duration').value=s.duration;document.getElementById('svc-desc').value=s.desc||'';cs.value=s.category;
-const saved=s.employee||'Todas';if(saved==='Todas'||saved==='Ambos'||saved==='Cualquiera'||!saved){es.value=['Todas']}else{const vals=saved.split(',').map(v=>v.trim());es.value=vals;}}}
-else{['svc-name','svc-price','svc-duration','svc-desc'].forEach(i=>document.getElementById(i).value='');es.value=['Todas']}};
-window.saveService=async()=>{const es=document.getElementById('svc-employee');const selected=[...es.selectedOptions].map(o=>o.value);const empVal=selected.includes('Todas')||selected.length===0?'Todas':selected.join(',');const d={name:document.getElementById('svc-name').value.trim(),price:parseFloat(document.getElementById('svc-price').value),duration:parseInt(document.getElementById('svc-duration').value),desc:document.getElementById('svc-desc').value.trim(),category:document.getElementById('svc-category').value,employee:empVal,updatedAt:new Date().toISOString()};
-if(!d.name||!d.price||!d.duration)return alert('Completa nombre, precio y duración');
-if(editingServiceId)await updateDoc(doc(db,'artifacts',AID,'public','data','services',editingServiceId),d);
-else{d.createdAt=new Date().toISOString();await addDoc(collection(db,'artifacts',AID,'public','data','services'),d)}
-document.getElementById('service-modal').classList.add('hidden')};
+window.openServiceModal=(id=null)=>{
+  editingServiceId=id;
+  document.getElementById('service-modal').classList.remove('hidden');
+  const t=document.getElementById('service-modal-title');
+  t.innerText=id?'Editar Servicio':'Nuevo Servicio';
+  const cs=document.getElementById('svc-category');
+  cs.innerHTML=categoriesDB.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+  
+  let savedEmpStr='Todas';
+  if(id){
+    const s=getSvcById(id);
+    if(s){
+      document.getElementById('svc-name').value=s.name||'';
+      document.getElementById('svc-price').value=s.price!==undefined?s.price:'';
+      document.getElementById('svc-duration').value=s.duration||15;
+      document.getElementById('svc-desc').value=s.desc||'';
+      cs.value=s.category||'';
+      savedEmpStr=s.employee||'Todas';
+    }
+  } else {
+    ['svc-name','svc-price','svc-duration','svc-desc'].forEach(i=>document.getElementById(i).value='');
+    savedEmpStr='Todas';
+  }
+
+  const isAll=!savedEmpStr||savedEmpStr==='Todas'||savedEmpStr==='Ambos'||savedEmpStr==='Cualquiera';
+  const assignedList=isAll?[]:savedEmpStr.split(',').map(v=>v.trim().toLowerCase());
+
+  const container=document.getElementById('svc-employee-container');
+  if(container){
+    let html=`<label class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer text-xs font-bold border-b pb-2 mb-1" style="border-color:var(--brown-light);color:var(--blue-deep)"><input type="checkbox" id="svc-emp-all" value="Todas" ${isAll?'checked':''} onchange="window.toggleAllServiceEmps(this)" class="w-4 h-4 rounded text-blue-600"><span>⭐ Todas (Cualquier empleada)</span></label>`;
+    employeesDB.forEach(e=>{
+      const isChecked=!isAll && assignedList.includes(e.name.toLowerCase());
+      html+=`<label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50 cursor-pointer text-xs font-semibold" style="color:var(--brown)"><input type="checkbox" name="svc-emp-item" value="${esc(e.name)}" ${isChecked?'checked':''} onchange="window.toggleSingleServiceEmp()" class="w-4 h-4 rounded text-blue-600"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:${e.color||'#7c3aed'}"></span><span>${esc(e.name)}</span></label>`;
+    });
+    container.innerHTML=html;
+  }
+};
+
+window.toggleAllServiceEmps=(allCb)=>{
+  const itemCbs=document.querySelectorAll('input[name="svc-emp-item"]');
+  if(allCb.checked){
+    itemCbs.forEach(cb=>cb.checked=false);
+  }
+};
+
+window.toggleSingleServiceEmp=()=>{
+  const allCb=document.getElementById('svc-emp-all');
+  const itemCbs=document.querySelectorAll('input[name="svc-emp-item"]:checked');
+  if(itemCbs.length>0 && allCb){
+    allCb.checked=false;
+  } else if(itemCbs.length===0 && allCb){
+    allCb.checked=true;
+  }
+};
+
+window.saveService=async()=>{
+  const allCb=document.getElementById('svc-emp-all');
+  const checkedItems=[...document.querySelectorAll('input[name="svc-emp-item"]:checked')].map(cb=>cb.value.trim());
+  let empVal='Todas';
+  if(!allCb?.checked && checkedItems.length>0){
+    empVal=checkedItems.join(',');
+  }
+  const name=document.getElementById('svc-name').value.trim();
+  const price=parseFloat(document.getElementById('svc-price').value);
+  const duration=parseInt(document.getElementById('svc-duration').value,10);
+  const desc=document.getElementById('svc-desc').value.trim();
+  const category=document.getElementById('svc-category').value;
+  if(!name||isNaN(price)||isNaN(duration))return alert('Completa nombre, precio y duración');
+  const d={name,price,duration,desc,category,employee:empVal,updatedAt:new Date().toISOString()};
+  try{
+    if(editingServiceId)await updateDoc(doc(db,'artifacts',AID,'public','data','services',editingServiceId),d);
+    else{d.createdAt=new Date().toISOString();await addDoc(collection(db,'artifacts',AID,'public','data','services'),d)}
+    document.getElementById('service-modal').classList.add('hidden');
+  }catch(err){
+    console.error('Error saving service:',err);
+    alert('Error al guardar el servicio: '+err.message);
+  }
+};
 window.deleteService=async id=>{if(!confirm('¿Eliminar este servicio?'))return;await deleteDoc(doc(db,'artifacts',AID,'public','data','services',id))};
 let editingCategoryId=null;
 let selectedConfigDays = new Set();
