@@ -6,13 +6,13 @@
         "path": "73794b5a-65e9-494f-bd50-9c461b78d93e",
         "options": {}
       },
-      "id": "02cb754d-0b91-4747-ba99-ebd410a236e4",
-      "name": "Webhook - Eventos",
+      "id": "a2225223-490a-49f7-a35c-6609a1f020bc",
+      "name": "Webhook - Eventos1",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        336,
-        3264
+        416,
+        3248
       ],
       "webhookId": "73794b5a-65e9-494f-bd50-9c461b78d93e"
     },
@@ -20,13 +20,13 @@
       "parameters": {
         "jsCode": "let raw = $input.item.json.body || $input.item.json;\nif (typeof raw === 'string') {\n  try { raw = JSON.parse(raw); } catch (e) {}\n}\nreturn { json: { ...raw } };"
       },
-      "id": "633063d9-8a06-4ead-8a15-5f851872947f",
-      "name": "Normalizar Payload",
+      "id": "808debd3-725b-48ca-8675-d9a2cf2039f8",
+      "name": "Normalizar Payload1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        560,
-        3264
+        640,
+        3248
       ]
     },
     {
@@ -40,13 +40,13 @@
           ]
         }
       },
-      "id": "84f2c6df-94fd-4e1f-9107-ff4ac1c779be",
-      "name": "¿Es pago completado?",
+      "id": "eb3bc2a9-853d-4db0-b9c6-1e87b0cb7f2c",
+      "name": "¿Es pago completado?1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        784,
-        3088
+        864,
+        3072
       ]
     },
     {
@@ -58,15 +58,15 @@
           "appendAttribution": false
         }
       },
-      "id": "024ec44d-c32c-41e7-88bf-63b92950c0ba",
-      "name": "Email - Factura",
+      "id": "8857a033-d758-44bd-9829-ba06b56366bd",
+      "name": "Email - Factura1",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1008,
-        3024
+        1088,
+        3008
       ],
-      "webhookId": "d070e2fd-dbef-4975-bdf2-0213c319423d",
+      "webhookId": "26e2171e-cbcc-4c01-ac92-bba12de971bd",
       "credentials": {
         "gmailOAuth2": {
           "id": "6jQSY3sPZd4AHnwE",
@@ -85,13 +85,13 @@
           ]
         }
       },
-      "id": "3748c418-d050-4ec6-8688-4df817147dac",
-      "name": "¿Es nueva?",
+      "id": "58d7a473-0b10-43a7-8251-71e6af05bd82",
+      "name": "¿Es nueva?1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        1008,
-        3216
+        1088,
+        3200
       ]
     },
     {
@@ -103,21 +103,22 @@
           "appendAttribution": false
         }
       },
-      "id": "c662b8c6-cb6a-4e9d-9391-f954868d72a5",
-      "name": "Email - Confirmación Nueva",
+      "id": "ad3d5d93-d6f3-4676-8fbe-aaba5c8c6dff",
+      "name": "Email - Confirmación Nueva1",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1328,
-        3056
+        1408,
+        3040
       ],
-      "webhookId": "7e64ddf5-3067-4c8c-acc9-dbc794092898",
+      "webhookId": "adf0f662-672c-4132-8f36-a827e3916ada",
       "credentials": {
         "gmailOAuth2": {
           "id": "6jQSY3sPZd4AHnwE",
           "name": "Katy Recordatorios"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -160,13 +161,13 @@
           ]
         }
       },
-      "id": "a5a63810-6257-41e1-ac52-9ea3b67bbbcb",
-      "name": "WhatsApp - Confirmación",
+      "id": "ebbae159-7c0f-4dd8-af7c-50dc552c31e8",
+      "name": "WhatsApp - Confirmación1",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        1328,
-        3216
+        1408,
+        3200
       ],
       "webhookId": "d187b1eb-362b-41ee-a1a7-f12922f91204",
       "credentials": {
@@ -196,9 +197,9 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "FECHA": "={{ $('Webhook - Eventos').item.json.body.date }}",
-            "TELÉFONO ": "={{ $('Webhook - Eventos').item.json.body.clientPhone }}",
-            "TIPO ": "={{ $json.messaging_product }}",
+            "FECHA": "={{ $now.setZone('Europe/Madrid').toFormat('yyyy-MM-dd HH:mm') }}",
+            "TELÉFONO ": "={{ $('Normalizar Payload1').item.json.clientPhone }}",
+            "TIPO ": "={{ $json.messaging_product || 'whatsapp' }}",
             "CLÍNICA ": "Magic Vicen",
             "RECORDATORIO/CONFIRMACION": "CONFIRMACION"
           },
@@ -207,52 +208,27 @@
             {
               "id": "FECHA",
               "displayName": "FECHA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "type": "string"
             },
             {
               "id": "CLÍNICA ",
               "displayName": "CLÍNICA ",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "type": "string"
             },
             {
               "id": "TELÉFONO ",
               "displayName": "TELÉFONO ",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "type": "string"
             },
             {
               "id": "TIPO ",
               "displayName": "TIPO ",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "type": "string"
             },
             {
               "id": "RECORDATORIO/CONFIRMACION",
               "displayName": "RECORDATORIO/CONFIRMACION",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "type": "string"
             }
           ],
           "attemptToConvertTypes": false,
@@ -260,13 +236,13 @@
         },
         "options": {}
       },
-      "id": "502f85a7-0b05-4e8d-a84e-e782ad37566f",
-      "name": "Registrar Consumo en Excel (Confirmación)",
+      "id": "bd5951cc-7e39-4f5d-bca2-dbce4723a137",
+      "name": "Registrar Consumo en Excel (Confirmación)1",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.1,
       "position": [
-        1552,
-        3216
+        1632,
+        3200
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -286,13 +262,13 @@
           ]
         }
       },
-      "id": "e5e5a1f9-130e-4ca8-840f-9c728527ba3d",
-      "name": "¿Es cancelación?",
+      "id": "1381cd69-f3ca-43f1-b1a2-ac416e6586f4",
+      "name": "¿Es cancelación?1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        1232,
-        3424
+        1312,
+        3408
       ]
     },
     {
@@ -304,15 +280,15 @@
           "appendAttribution": false
         }
       },
-      "id": "70f25899-dced-4327-8631-ab605911d823",
-      "name": "Email - Cancelación",
+      "id": "ff0ed8ca-ebab-49d0-9532-7331c2fc15bf",
+      "name": "Email - Cancelación1",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1456,
-        3488
+        1552,
+        3584
       ],
-      "webhookId": "495e80cc-29fa-4937-a288-05ebe31a2291",
+      "webhookId": "256385c6-03ca-4f2a-affd-3370c773815f",
       "credentials": {
         "gmailOAuth2": {
           "id": "6jQSY3sPZd4AHnwE",
@@ -331,13 +307,13 @@
           ]
         }
       },
-      "id": "2e245e48-5272-4e95-bdb5-067ed07a4575",
-      "name": "¿Es modificación?",
+      "id": "010cbf8a-927c-4b77-b4e7-6f6c355358b5",
+      "name": "¿Es modificación?1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        1456,
-        3328
+        1536,
+        3376
       ]
     },
     {
@@ -349,15 +325,15 @@
           "appendAttribution": false
         }
       },
-      "id": "979ccc8b-d42b-477c-ae36-fe482a4ba6bb",
-      "name": "Email - Modificación",
+      "id": "b0041668-8c32-4b27-87c4-fec852115ad0",
+      "name": "Email - Modificación1",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1680,
-        3328
+        1760,
+        3360
       ],
-      "webhookId": "7ac4c9f1-8425-4aa3-84ef-ae8083c7ae60",
+      "webhookId": "0e832164-c2a3-4568-b241-c7ae1bb86879",
       "credentials": {
         "gmailOAuth2": {
           "id": "6jQSY3sPZd4AHnwE",
@@ -368,21 +344,20 @@
     {
       "parameters": {
         "operation": "getAll",
-        "tableId": "appointments",
         "returnAll": true
       },
-      "id": "ea1ca8ae-7a9b-4b56-8c13-483f3e9830fd",
-      "name": "Supabase - Obtener Citas",
+      "id": "f051e6ae-f141-4381-9055-a3b5586c695f",
+      "name": "Supabase - Obtener Citas1",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        576,
-        3744
+        656,
+        3728
       ],
       "credentials": {
         "supabaseApi": {
-          "id": "kT2NeOVCsCmfhHA8",
-          "name": "Supabase account"
+          "id": "bpQyRG3ooSXRW8fy",
+          "name": "magic vicen"
         }
       }
     },
@@ -395,22 +370,22 @@
           "appendAttribution": false
         }
       },
-      "id": "827dd6c5-082d-40ac-8a8f-e5d9d5ca4f10",
-      "name": "Email - Recordatorio",
+      "id": "10964a98-994a-4411-b097-bf4cf8f45c66",
+      "name": "Email - Recordatorio1",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1024,
-        3664
+        1104,
+        3648
       ],
-      "webhookId": "337122c7-abca-4175-9d17-300164205c97",
+      "webhookId": "240fc1bb-21a9-4bf2-b61b-663c40834d04",
       "credentials": {
         "gmailOAuth2": {
           "id": "6jQSY3sPZd4AHnwE",
           "name": "Katy Recordatorios"
         }
       },
-      "continueOnFail": true
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -456,13 +431,13 @@
           ]
         }
       },
-      "id": "0bfa357e-23de-44b5-ba9b-28257ce698ba",
-      "name": "WhatsApp - Recordatorio",
+      "id": "6dd16528-40bc-497d-ab50-1eb4390d2886",
+      "name": "WhatsApp - Recordatorio1",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1.1,
       "position": [
-        1024,
-        3824
+        1104,
+        3808
       ],
       "webhookId": "9f5866b5-71c3-4551-b586-482e81739b91",
       "credentials": {
@@ -470,8 +445,7 @@
           "id": "4c7zz7Ip3eiv3zgk",
           "name": "WhatsApp account"
         }
-      },
-      "continueOnFail": true
+      }
     },
     {
       "parameters": {
@@ -493,9 +467,9 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "FECHA": "={{ $now.toFormat('dd/MM') }}",
-            "TELÉFONO ": "={{ $json.contacts[0].input }}",
-            "TIPO ": "={{ $json.messaging_product }}",
+            "FECHA": "={{ $now.setZone('Europe/Madrid').toFormat('yyyy-MM-dd HH:mm') }}",
+            "TELÉFONO ": "={{ ($json.contacts && $json.contacts[0] ? $json.contacts[0].input : null) || $('Filtrar Citas de Mañana2').item.json.clientPhone }}",
+            "TIPO ": "={{ $json.messaging_product || 'whatsapp' }}",
             "CLÍNICA ": "Magic Vicen",
             "RECORDATORIO/CONFIRMACION": "RECORDATORIO"
           },
@@ -504,52 +478,27 @@
             {
               "id": "FECHA",
               "displayName": "FECHA",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "type": "string"
             },
             {
               "id": "CLÍNICA ",
               "displayName": "CLÍNICA ",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "type": "string"
             },
             {
               "id": "TELÉFONO ",
               "displayName": "TELÉFONO ",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "type": "string"
             },
             {
               "id": "TIPO ",
               "displayName": "TIPO ",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "type": "string"
             },
             {
               "id": "RECORDATORIO/CONFIRMACION",
               "displayName": "RECORDATORIO/CONFIRMACION",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "type": "string"
             }
           ],
           "attemptToConvertTypes": false,
@@ -557,66 +506,19 @@
         },
         "options": {}
       },
-      "id": "9c973345-40fe-4749-a9d9-1d9574e1c8f2",
-      "name": "Registrar Consumo en Excel (Recordatorio)",
+      "id": "3e22a65b-b10d-4f9a-8d23-8449cf6d45e3",
+      "name": "Registrar Consumo en Excel (Recordatorio)1",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.1,
       "position": [
-        1248,
-        3824
+        1328,
+        3808
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "h9H5Nr0Q86QxLx3F",
           "name": "Google Sheets account"
         }
-      },
-      "continueOnFail": true
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "appointments",
-        "returnAll": true
-      },
-      "id": "a6c7664a-ec88-4e39-a32b-dbf755065e67",
-      "name": "Supabase - Obtener Citas (Ayer)",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        576,
-        4032
-      ],
-      "credentials": {
-        "supabaseApi": {
-          "id": "kT2NeOVCsCmfhHA8",
-          "name": "Supabase account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "sendTo": "={{ $json.clientEmail }}",
-        "subject": "✨ ¿Qué tal tu experiencia en Magic Studio?",
-        "message": "=<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <meta charset=\"UTF-8\">\n    <style>\n        @media only screen and (max-width: 600px) {\n            .email-container { margin: 10px auto !important; max-width: 100% !important; width: 100% !important; border-radius: 16px !important; }\n            .email-header, .email-body, .email-footer { padding: 30px 20px !important; }\n            .info-box { max-width: 100% !important; padding: 12px 15px !important; box-sizing: border-box !important; }\n            .btn-action { padding: 12px 20px !important; font-size: 11px !important; display: block !important; margin: 8px auto !important; width: 90% !important; box-sizing: border-box !important; }\n            .btn-sub { padding: 10px 20px !important; font-size: 10px !important; display: block !important; margin: 8px auto !important; width: 90% !important; box-sizing: border-box !important; }\n            .detail-table { font-size: 13px !important; }\n            .detail-table td { padding: 8px 0 !important; }\n        }\n    </style>\n</head>\n<body style=\"margin:0;padding:0;background:#fafaf9;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1917;\">\n    <div class=\"email-container\" style=\"max-width:600px;width:100%;margin:20px auto;background:#fff;border-radius:30px;overflow:hidden;border:1px solid #e7e5e4;box-shadow:0 20px 25px -5px rgba(0,0,0,0.05);\">\n        <div class=\"email-header\" style=\"background:#f5e8ea;padding:40px;text-align:center;border-bottom:1px solid #f0ebe6;\">\n            <img src=\"https://magicstudiosoria.es/magic-logo.png\" alt=\"Magic Studio\" style=\"max-height:100px;width:auto;display:inline-block;\">\n            <p style=\"color:#2e2826;margin:10px 0 0 0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:5px;opacity:0.6;\">Vicen</p>\n        </div>\n        <div class=\"email-body\" style=\"padding:45px 40px;text-align:center;\">\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:12px;padding:14px 20px;margin:0 auto 25px auto;text-align:center;max-width:400px;\">\n                <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;\">📍 Av de Mariano Vicén, 7 · 42003 Soria</p>\n                <p style=\"margin:4px 0 0;font-size:12px;color:#c47e85;font-weight:600;\">📞 Consultas: 623 40 03 98</p>\n            </div>\n            <h2 style=\"font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a1a;\">¡Hola, {{ $json.clientName }}!</h2>\n            <p style=\"font-size:16px;line-height:1.7;color:#44403c;margin-bottom:15px;\">Esperamos que disfrutaras de tu <strong style=\"color:#1a1a1a;\">{{ $json.service }}</strong>.</p>\n            <p style=\"font-size:15px;line-height:1.7;color:#78716c;margin-bottom:35px;\">¿Te tomas un minuto para valorarnos?</p>\n            <div class=\"info-box\" style=\"background:#fafaf9;border:1px solid #c9a96e;border-radius:20px;padding:40px 30px;margin-bottom:35px;\">\n                <p style=\"margin:0 0 20px 0;font-size:15px;color:#1a1a1a;font-weight:600;\">¿Cómo fue tu experiencia?</p>\n                <div style=\"font-size:24px;color:#c9a96e;margin-bottom:30px;letter-spacing:8px;\">★ ★ ★ ★ ★</div>\n                <a href=\"https://g.page/r/CZ2KyrZFA9xwEBM/review\" class=\"btn-action\" style=\"display:inline-block;padding:15px 40px;background:#1a1a1a;color:#c9a96e;text-decoration:none;border-radius:50px;font-weight:bold;font-size:13px;text-transform:uppercase;letter-spacing:1px;border:1px solid #c9a96e;margin-bottom:16px;\">Dejar mi reseña</a>\n                <div style=\"margin-bottom:10px;\">\n                    <a href=\"https://magicstudiosoria.es/reservar-vicen.html\" class=\"btn-sub\" style=\"display:inline-block;padding:12px 28px;background:#c47e85;color:#fff;text-decoration:none;border-radius:50px;font-weight:bold;font-size:11px;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 15px rgba(196,126,133,0.3);\">Reservar nueva cita</a>\n                </div>\n                <div>\n                    <a href=\"https://reservas-magic-vicen.vercel.app/mis-citas?id={{ $json.id }}\" class=\"btn-sub\" style=\"display:inline-block;padding:10px 24px;background:transparent;color:#1a1a1a;text-decoration:none;border-radius:50px;font-weight:bold;font-size:10px;text-transform:uppercase;letter-spacing:1px;border:1px solid #1a1a1a;\">Ver todas mis citas</a>\n                </div>\n            </div>\n        </div>\n        <div class=\"email-footer\" style=\"background:#fafaf9;padding:40px;text-align:center;border-top:1px solid #f5f5f4;\">\n            <p style=\"margin:0;font-size:13px;font-weight:700;color:#1a1a1a;text-transform:uppercase;letter-spacing:2px;\">Magic Studio Vicen</p>\n            <p style=\"margin:10px 0;font-size:11px;color:#78716c;\">Av de Mariano Vicén, 7 · 42003 Soria</p>\n            <p style=\"margin:5px 0;font-size:11px;color:#78716c;\">📞 Consultas: 623 40 03 98</p>\n            <p style=\"margin:25px 0 0 0;font-size:9px;color:#a8a29e;text-transform:uppercase;letter-spacing:1px;\">© 2026 Magic Studio SL</p>\n        </div>\n    </div>\n</body>\n</html>",
-        "options": {
-          "appendAttribution": false
-        }
-      },
-      "id": "843fdf21-376f-4025-9ba5-abdd53787415",
-      "name": "Email - Pedir Reseña",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        1024,
-        4032
-      ],
-      "webhookId": "b66f78b3-8e5c-4d64-bba7-ae3fec4e6794",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "6jQSY3sPZd4AHnwE",
-          "name": "Katy Recordatorios"
-        }
       }
     },
     {
@@ -624,246 +526,181 @@
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 8
+              "triggerAtHour": 18
             }
           ]
         }
       },
-      "id": "e48aa5b0-a3ff-4093-9272-5159eba7395b",
-      "name": "Cada mañana a las 8:1",
+      "id": "7aa83162-460e-4c4c-8d1a-b0317e47f8f7",
+      "name": "Cada mañana a las 8:2",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.1,
       "position": [
-        352,
-        3744
+        432,
+        3728
       ]
     },
     {
       "parameters": {
-        "jsCode": "const now = new Date();\nconst offset = now.getTimezoneOffset();\nconst madridOffset = 120; // CEST (UTC+2)\nconst diff = offset + madridOffset;\nconst local = new Date(now.getTime() + diff * 60000);\nlocal.setDate(local.getDate() + 1);\nconst dateStr = local.getFullYear() + '-' +\n  String(local.getMonth() + 1).padStart(2, '0') + '-' +\n  String(local.getDate()).padStart(2, '0');\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  const id = apt._id || apt.id;\n  if (!id) return;\n  apt.id = id;\n  const email = apt.clientEmail || apt.client_email;\n  const rawPhone = String(apt.clientPhone || apt.client_phone || '').replace(/\\D/g, '');\n  apt.clientEmail = email || '';\n  apt.clientName = (apt.clientName || apt.client_name || '').trim() || 'Cliente';\n  apt.clientPhone = rawPhone;\n  apt.isPaid = apt.isPaid !== undefined ? apt.isPaid : apt.is_paid;\n  if (apt.status === 'cancelled' || apt.status === 'noshow') return;\n  if (apt.date !== dateStr) return;\n  if (!rawPhone || rawPhone.length < 9) return;\n  result.push({ json: apt });\n});\nreturn result;"
+        "jsCode": "const now = new Date();\nconst offset = now.getTimezoneOffset();\nconst madridOffset = 120; // CEST (UTC+2)\nconst diff = offset + madridOffset;\nconst local = new Date(now.getTime() + diff * 60000);\nlocal.setDate(local.getDate() + 1);\nconst dateStr = local.getFullYear() + '-' +\n  String(local.getMonth() + 1).padStart(2, '0') + '-' +\n  String(local.getDate()).padStart(2, '0');\n\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  const id = apt._id || apt.id;\n  if (!id) return;\n  apt.id = id;\n  const email = apt.clientEmail || apt.client_email;\n  const rawPhone = String(apt.clientPhone || apt.client_phone || '').replace(/\\D/g, '');\n  apt.clientEmail = email || '';\n  apt.clientName = (apt.clientName || apt.client_name || '').trim() || 'Cliente';\n  apt.clientPhone = rawPhone;\n  apt.isPaid = apt.isPaid !== undefined ? apt.isPaid : apt.is_paid;\n  if (apt.status === 'cancelled' || apt.status === 'noshow') return;\n  if (apt.date !== dateStr) return;\n  \n  if (!rawPhone || rawPhone.length < 9) return;\n  \n  result.push({ json: apt });\n});\nreturn result;"
       },
-      "id": "74dea85f-f230-4476-93d7-41dfbbf744e9",
-      "name": "Filtrar Citas de Mañana1",
+      "id": "333dee98-67b8-4afe-b0a8-97023812b7ee",
+      "name": "Filtrar Citas de Mañana2",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        800,
-        3744
-      ]
-    },
-    {
-      "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "triggerAtHour": 12
-            }
-          ]
-        }
-      },
-      "id": "7d33b118-7edb-4d4b-81b7-73a2ff99a6cb",
-      "name": "Cada día a las 12:1",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [
-        352,
-        4032
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "const yesterdayStr = $now.minus({days: 1}).toISODate();\nconst result = [];\nitems.forEach(i => {\n  const apt = i.json;\n  if (apt.date === yesterdayStr) {\n    const email = apt.clientEmail || apt.client_email;\n    if (email) {\n      apt.clientEmail = email;\n      apt.clientName = apt.clientName || apt.client_name;\n      apt.clientPhone = apt.clientPhone || apt.client_phone;\n      apt.isPaid = apt.isPaid !== undefined ? apt.isPaid : apt.is_paid;\n      result.push({ json: apt });\n    }\n  }\n});\nreturn result;"
-      },
-      "id": "29f313f6-4ac5-463d-be6c-0aacbe33addb",
-      "name": "Filtrar: Citas de Ayer1",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        800,
-        4032
+        880,
+        3728
       ]
     }
   ],
   "connections": {
-    "Webhook - Eventos": {
+    "Webhook - Eventos1": {
       "main": [
         [
           {
-            "node": "Normalizar Payload",
+            "node": "Normalizar Payload1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Normalizar Payload": {
+    "Normalizar Payload1": {
       "main": [
         [
           {
-            "node": "¿Es pago completado?",
+            "node": "¿Es pago completado?1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "¿Es pago completado?": {
+    "¿Es pago completado?1": {
       "main": [
         [
           {
-            "node": "Email - Factura",
+            "node": "Email - Factura1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "¿Es nueva?",
+            "node": "¿Es nueva?1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "¿Es nueva?": {
+    "¿Es nueva?1": {
       "main": [
         [
           {
-            "node": "Email - Confirmación Nueva",
+            "node": "Email - Confirmación Nueva1",
             "type": "main",
             "index": 0
           },
           {
-            "node": "WhatsApp - Confirmación",
+            "node": "WhatsApp - Confirmación1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "¿Es cancelación?",
+            "node": "¿Es cancelación?1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "WhatsApp - Confirmación": {
+    "WhatsApp - Confirmación1": {
       "main": [
         [
           {
-            "node": "Registrar Consumo en Excel (Confirmación)",
+            "node": "Registrar Consumo en Excel (Confirmación)1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "¿Es cancelación?": {
+    "¿Es cancelación?1": {
       "main": [
         [
           {
-            "node": "Email - Cancelación",
+            "node": "Email - Cancelación1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "¿Es modificación?",
+            "node": "¿Es modificación?1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "¿Es modificación?": {
+    "¿Es modificación?1": {
       "main": [
         [
           {
-            "node": "Email - Modificación",
+            "node": "Email - Modificación1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Supabase - Obtener Citas": {
+    "Supabase - Obtener Citas1": {
       "main": [
         [
           {
-            "node": "Filtrar Citas de Mañana1",
+            "node": "Filtrar Citas de Mañana2",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "WhatsApp - Recordatorio": {
+    "WhatsApp - Recordatorio1": {
       "main": [
         [
           {
-            "node": "Registrar Consumo en Excel (Recordatorio)",
+            "node": "Registrar Consumo en Excel (Recordatorio)1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Supabase - Obtener Citas (Ayer)": {
+    "Cada mañana a las 8:2": {
       "main": [
         [
           {
-            "node": "Filtrar: Citas de Ayer1",
+            "node": "Supabase - Obtener Citas1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Cada mañana a las 8:1": {
+    "Filtrar Citas de Mañana2": {
       "main": [
         [
           {
-            "node": "Supabase - Obtener Citas",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filtrar Citas de Mañana1": {
-      "main": [
-        [
-          {
-            "node": "Email - Recordatorio",
+            "node": "Email - Recordatorio1",
             "type": "main",
             "index": 0
           },
           {
-            "node": "WhatsApp - Recordatorio",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Cada día a las 12:1": {
-      "main": [
-        [
-          {
-            "node": "Supabase - Obtener Citas (Ayer)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filtrar: Citas de Ayer1": {
-      "main": [
-        [
-          {
-            "node": "Email - Pedir Reseña",
+            "node": "WhatsApp - Recordatorio1",
             "type": "main",
             "index": 0
           }
@@ -875,13 +712,5 @@
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "1f20af6484e867d032857a1d4b47feed5a47287b3ff16a2cb91c5cd653183432"
-  },
-  "settings": {
-    "executionOrder": "v1",
-    "saveDataSuccessExecution": "all",
-    "saveDataErrorExecution": "all",
-    "saveExecutionProgress": true,
-    "saveManualExecutions": true,
-    "timezone": "Europe/Madrid"
   }
 }
