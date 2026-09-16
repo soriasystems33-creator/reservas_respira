@@ -2211,51 +2211,96 @@ const msg=`Hola ${name}, te recordamos tu cita en UNIR el día ${date} a las ${t
 // ── NOTIFICACIONES DE ACTIVIDAD ──
 var g_localNotifs=[];
 
+window.updateNotifBadge = function(){
+    var btn = document.getElementById('tab-notifications');
+    if (!btn) return;
+    var count = g_localNotifs ? g_localNotifs.length : 0;
+    var badge = btn.querySelector('.notif-badge-pill');
+    if (count > 0) {
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'notif-badge-pill ml-auto px-2 py-0.5 text-[10px] font-black rounded-full bg-rose-500 text-white shadow-xs animate-pulse';
+            btn.appendChild(badge);
+        }
+        badge.textContent = count > 99 ? '99+' : count;
+    } else {
+        if (badge) badge.remove();
+    }
+};
+
 window.trackNotif=function(r,type){
     if(!r||!r.id)return;
     var dup=g_localNotifs.some(function(n){return n.id===r.id&&n.type===type});
     if(dup)return;
-    var svc=getSvcByName(r.service);
-    g_localNotifs.unshift({id:r.id,name:r.clientName||r.name||'Cliente',date:r.date,time:r.time,service:r.service,employee:r.employee,type:type});
+    var sName = r.service || (r.services && r.services[0] ? r.services[0].name : 'Servicio');
+    g_localNotifs.unshift({
+        id:r.id,
+        name:r.clientName||r.name||'Cliente',
+        date:r.date,
+        time:r.time,
+        service:sName,
+        employee:r.employee,
+        type:type,
+        timestamp:Date.now()
+    });
     if(g_localNotifs.length>50)g_localNotifs.length=50;
     saveLocalNotifs();
     renderLocalNotifs();
+    window.updateNotifBadge();
+};
+
+window.clearAllNotifs=function(){
+    g_localNotifs=[];
+    saveLocalNotifs();
+    renderLocalNotifs();
+    window.updateNotifBadge();
 };
 
 function saveLocalNotifs(){
     try{localStorage.setItem('magic_notifs',JSON.stringify(g_localNotifs))}catch(e){}
+    window.updateNotifBadge();
 }
 function loadLocalNotifs(){
     try{var s=localStorage.getItem('magic_notifs');if(s)g_localNotifs=JSON.parse(s)}catch(e){}
+    window.updateNotifBadge();
 }
 
 function renderLocalNotifs(){
     var c=document.getElementById('view-notifications-content');
     if(!c)return;
     if(g_localNotifs.length===0){
-        c.innerHTML='<div class="bg-white p-12 rounded-3xl border text-center"><i data-lucide="bell-off" class="w-12 h-12 text-slate-300 mx-auto mb-4"></i><p class="font-bold text-slate-400 uppercase text-sm">Sin notificaciones</p></div>';
+        c.innerHTML='<div class="bg-white p-12 rounded-3xl border text-center"><i data-lucide="bell-off" class="w-12 h-12 text-slate-300 mx-auto mb-4"></i><p class="font-bold text-slate-400 uppercase text-sm">Sin notificaciones pendientes</p><p class="text-xs text-slate-400 mt-1">Las nuevas citas, modificaciones y cancelaciones aparecerán aquí automáticamente.</p></div>';
         if(window.lucide)lucide.createIcons();
+        window.updateNotifBadge();
         return;
     }
-    c.innerHTML=g_localNotifs.map(function(r){
+    var headerHtml = '<div class="flex justify-between items-center pb-2 mb-2 border-b border-slate-100">'+
+        '<span class="text-xs font-black uppercase tracking-wider text-slate-400">Actividad Reciente ('+g_localNotifs.length+')</span>'+
+        '<button onclick="window.clearAllNotifs()" class="text-xs font-bold text-rose-500 hover:text-rose-700 transition-colors flex items-center gap-1"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Borrar todas</button>'+
+    '</div>';
+
+    c.innerHTML=headerHtml + g_localNotifs.map(function(r){
         var dp=r.date?r.date.split('-'):[];
         var fd=dp.length===3?dp[2]+'/'+dp[1]+'/'+dp[0]:'-';
         var icon,bgCol,borderCol,label;
         if(r.type==='cancelled'||r.type==='cancellation'){icon='x-circle';bgCol='bg-red-500';borderCol='border-red-200';label='Cancelada'}
         else if(r.type==='modified'||r.type==='modification'){icon='edit-3';bgCol='bg-amber-500';borderCol='border-amber-200';label='Modificada'}
+        else if(r.type==='confirmed'||r.type==='confirmation'){icon='check-check';bgCol='bg-emerald-600';borderCol='border-emerald-200';label='Asistencia Confirmada'}
         else if(r.type==='completed'){icon='check-circle';bgCol='bg-green-500';borderCol='border-green-200';label='Pagada'}
-        else{icon='bell';bgCol='bg-blue-500';borderCol='border-blue-200';label='Nueva'}
-        var bg=r.type==='cancelled'||r.type==='cancellation'?'bg-red-50':r.type==='modified'||r.type==='modification'?'bg-amber-50':r.type==='completed'?'bg-green-50':'bg-blue-50';
+        else{icon='calendar-plus';bgCol='bg-blue-600';borderCol='border-blue-200';label='Nueva Reserva'}
+        var bg=r.type==='cancelled'||r.type==='cancellation'?'bg-red-50':r.type==='modified'||r.type==='modification'?'bg-amber-50':r.type==='confirmed'||r.type==='confirmation'?'bg-emerald-50':r.type==='completed'?'bg-green-50':'bg-blue-50';
         return '<div onclick="window.viewAppointment(\''+r.id+'\')" class="notif-new flex items-start gap-3 p-4 '+bg+' border '+borderCol+' rounded-2xl cursor-pointer hover:opacity-90 transition-all shadow-sm">'+
-            '<div class="p-2.5 rounded-full '+bgCol+' text-white shrink-0 animate-pulse"><i data-lucide="'+icon+'" class="w-5 h-5"></i></div>'+
+            '<div class="p-2.5 rounded-full '+bgCol+' text-white shrink-0 shadow-xs"><i data-lucide="'+icon+'" class="w-5 h-5"></i></div>'+
             '<div class="flex-1 min-w-0">'+
-            '<div class="flex items-center gap-2"><p class="font-extrabold text-sm text-slate-800 truncate">'+(r.name||'Cliente')+'</p><span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded '+bgCol+' text-white">'+label+'</span></div>'+
-            '<p class="text-xs font-bold text-slate-500 mt-0.5">'+fd+' · '+r.time+' · '+r.service+(r.employee?' · '+r.employee:'')+'</p>'+
+            '<div class="flex items-center gap-2 flex-wrap"><p class="font-extrabold text-sm text-slate-800 truncate">'+(r.name||'Cliente')+'</p><span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full '+bgCol+' text-white shadow-2xs">'+label+'</span></div>'+
+            '<p class="text-xs font-bold text-slate-600 mt-1">'+fd+' · '+r.time+' · '+(r.service||'Servicio')+(r.employee?' · <strong>'+r.employee+'</strong>':'')+'</p>'+
             '</div>'+
-            '<button onclick="event.stopPropagation();dismissLocalNotif(\''+r.id+'\',\''+r.type+'\')" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors shrink-0"><i data-lucide="x" class="w-4 h-4"></i></button>'+
+            '<button onclick="event.stopPropagation();dismissLocalNotif(\''+r.id+'\',\''+r.type+'\')" class="p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors shrink-0" title="Eliminar notificación"><i data-lucide="x" class="w-4 h-4"></i></button>'+
             '</div>';
     }).join('');
     if(window.lucide)lucide.createIcons();
+    if(typeof window.renderPushStatusCard === 'function') window.renderPushStatusCard();
+    window.updateNotifBadge();
 }
 
 window.dismissLocalNotif=function(id,type){
@@ -2266,6 +2311,9 @@ window.dismissLocalNotif=function(id,type){
 
 // Cargar notificaciones al iniciar
 loadLocalNotifs();
+if(typeof window.updateNotifBadge === 'function') window.updateNotifBadge();
+
+
 
 // ---- SUPABASE INIT ----
 let _authInitialized = false;
@@ -2720,14 +2768,70 @@ window.toggleEmpConfigMode = () => {
 };
 
 
+var _knownAptsMap = null;
+
 const startListeners=()=>{try{console.log("🛠️ startListeners() iniciando...");
 // Appointments
-onSnapshot(collection(db,'artifacts',AID,'public','data','appointments'),snap=>{appointments=snap.docs.map(d=>({id:d.id,...d.data()}));
-if(currentTab==='appointments')window.renderList();
-else if(currentTab.startsWith('calendar')){if(specialistViewLevel==='global-day')window.renderGlobalDay();else window.render();}
-else if(currentTab==='billing')window.renderAccounting();
-else if(currentTab==='clients')window.renderClients();
-populateModalSelects();});
+onSnapshot(collection(db,'artifacts',AID,'public','data','appointments'),snap=>{
+  var incomingApts = snap.docs.map(d=>({id:d.id,...d.data()}));
+  
+  if (!_knownAptsMap) {
+    _knownAptsMap = new Map();
+    incomingApts.forEach(function(a){
+      var isConf = !!(a.clientConfirmed || (a.notes && (a.notes.includes('[CONFIRMADA_CLIENTE]') || a.notes.includes('[CONFIRMED_CLIENT]') || a.notes.includes('[ASISTENCIA_OK]'))));
+      var sName = a.service || (a.services && a.services[0] ? a.services[0].name : '');
+      _knownAptsMap.set(a.id, {
+        date: a.date,
+        time: a.time,
+        status: a.status,
+        service: sName,
+        employee: a.employee,
+        clientConfirmed: isConf,
+        isPaid: !!a.isPaid
+      });
+    });
+  } else {
+    incomingApts.forEach(function(a){
+      var isConf = !!(a.clientConfirmed || (a.notes && (a.notes.includes('[CONFIRMADA_CLIENTE]') || a.notes.includes('[CONFIRMED_CLIENT]') || a.notes.includes('[ASISTENCIA_OK]'))));
+      var sName = a.service || (a.services && a.services[0] ? a.services[0].name : '');
+      var prev = _knownAptsMap.get(a.id);
+      
+      if (!prev) {
+        if (a.status !== 'cancelled') {
+          window.trackNotif(a, 'new');
+        }
+      } else {
+        if (prev.status !== 'cancelled' && a.status === 'cancelled') {
+          window.trackNotif(a, 'cancelled');
+        } else if (!prev.clientConfirmed && isConf) {
+          window.trackNotif(a, 'confirmed');
+        } else if (prev.date !== a.date || prev.time !== a.time || prev.service !== sName || prev.employee !== a.employee) {
+          window.trackNotif(a, 'modified');
+        }
+      }
+      
+      _knownAptsMap.set(a.id, {
+        date: a.date,
+        time: a.time,
+        status: a.status,
+        service: sName,
+        employee: a.employee,
+        clientConfirmed: isConf,
+        isPaid: !!a.isPaid
+      });
+    });
+  }
+
+  appointments = incomingApts;
+  window.appointments = appointments;
+  if(currentTab==='appointments')window.renderList();
+  else if(currentTab.startsWith('calendar')){if(specialistViewLevel==='global-day')window.renderGlobalDay();else window.render();}
+  else if(currentTab==='billing')window.renderAccounting();
+  else if(currentTab==='clients')window.renderClients();
+  else if(currentTab==='notifications')renderLocalNotifs();
+  if (typeof window.updateNotifBadge === 'function') window.updateNotifBadge();
+  populateModalSelects();
+});
 // Settings
 onSnapshot(doc(db,'artifacts',AID,'public','data','settings','main'),snap=>{
 var snapExists=(typeof snap.exists==='function')?snap.exists():!!snap.exists;
