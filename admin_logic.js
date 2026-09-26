@@ -61,7 +61,7 @@ const getAptServiceBlocks = (apt) => {
   });
   return blocks;
 };
-const WEBHOOK_URL="https://n8nyt.soriasystems.site/webhook/73794b5a-65e9-494f-bd50-9c461b78d93e";
+const WEBHOOK_URL="https://n8n.soriasystems.es/webhook/73794b5a-65e9-494f-bd50-9c461b78d93e";
 const notifyWebhook=(event,data)=>{if(!WEBHOOK_URL)return;try{fetch(WEBHOOK_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({event,...data})})}catch(e){console.error('[webhook]',e)}};
 const setStatus=(s,t)=>{const d=document.getElementById('status-dot');if(d)d.className=`w-2.5 h-2.5 rounded-full ${s==='ok'?'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]':s==='loading'?'bg-yellow-400 animate-pulse':'bg-red-500'}`;const l=document.getElementById('status-text');if(l)l.innerText=t};
 
