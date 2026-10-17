@@ -313,8 +313,8 @@ const getDailyConfig=(dateStr,entity='global')=>{try{
             return{type:'closed'};
         }
         const gWeekly = config?.weekly?.[day];
-        const salonStart = globalStart || gWeekly?.start || config?.start || '10:00';
-        const salonEnd = globalEnd || (gWeekly?.type === 'split' ? gWeekly?.end2 : gWeekly?.end) || config?.end || '20:00';
+        const salonStart = globalStart || gWeekly?.start || config?.start || (day === 6 ? '10:00' : '09:00');
+        const salonEnd = globalEnd || (gWeekly?.type === 'split' ? gWeekly?.end2 : gWeekly?.end) || config?.end || (day === 6 ? '14:00' : '20:00');
         if (weeklyType === 'split') {
             let s1 = weeklyStart, e1 = weeklyEnd, s2 = weeklyStart2, e2 = weeklyEnd2;
             if (globalStart) {
@@ -1426,20 +1426,22 @@ if (warningEl) {
 };
 window.setConfigEntity=e=>{configEntity=e;window.renderStandardInputs();window.renderConfigEntityTabs();renderMonthGrid('config-calendar-body',true)};
 window.renderStandardInputs=()=>{const c=document.getElementById('standard-inputs-container');if(!c)return;
-if(!config)config={start:'10:00',end:'20:00',specialDays:{}};
+if(!config)config={start:'09:00',end:'20:00',specialDays:{}};
 if(!config.weekly)config.weekly={};
 const days=[{id:1,name:'Lunes'},{id:2,name:'Martes'},{id:3,name:'Miércoles'},{id:4,name:'Jueves'},{id:5,name:'Viernes'},{id:6,name:'Sábado'},{id:0,name:'Domingo'}];
 let cw=config.weekly,title="Horario GLOBAL del Centro",bg="bg-slate-100";
 if(configEntity!=='global'){const key=`weekly_${configEntity}`;if(!config[key])config[key]={};cw=config[key];title=`Horario: ${configEntity}`;bg="bg-purple-50"}
 let html=`<div class="col-span-full mb-4 space-y-4"><div class="${bg} p-4 rounded-2xl border-2 text-center"><h3 class="font-black text-slate-700 uppercase">${title}</h3></div></div><div class="col-span-1 md:col-span-2 space-y-3">`;
 days.forEach(d=>{
-  const gd=config.weekly[d.id]||{start:(d.id===6?'10:00':(config.start||'10:00')),end:(d.id===6?'14:00':(config.end||'20:00')),closed:(d.id===0),type:'complete'};
-  let ds=gd.start||'10:00',de=gd.end||'20:00',ds2=gd.start2||'15:00',de2=gd.end2||'20:00',closed=gd.closed,type=gd.type||'complete';
+  const defStart = d.id === 6 ? '10:00' : (config.start || '09:00');
+  const defEnd = d.id === 6 ? '14:00' : (config.end || '20:00');
+  const gd=config.weekly[d.id]||{start:defStart,end:defEnd,closed:(d.id===0),type:'complete'};
+  let ds=gd.start||defStart,de=gd.end||defEnd,ds2=gd.start2||'15:00',de2=gd.end2||'20:00',closed=gd.closed,type=gd.type||'complete';
   if(configEntity!=='global'){
     if(cw[d.id]){
-      ds=cw[d.id].start;de=cw[d.id].end;closed=cw[d.id].closed;type=cw[d.id].type||'complete';ds2=cw[d.id].start2||'15:00';de2=cw[d.id].end2||'20:00';
+      ds=cw[d.id].start||defStart;de=cw[d.id].end||defEnd;closed=cw[d.id].closed;type=cw[d.id].type||'complete';ds2=cw[d.id].start2||'15:00';de2=cw[d.id].end2||'20:00';
     } else {
-      ds=gd.start;de=gd.end;closed=gd.closed;type=gd.type||'complete';ds2=gd.start2||'15:00';de2=gd.end2||'20:00';
+      ds=gd.start||defStart;de=gd.end||defEnd;closed=gd.closed;type=gd.type||'complete';ds2=gd.start2||'15:00';de2=gd.end2||'20:00';
     }
   }
   const dc={start:ds,end:de,closed:closed,type:type,start2:ds2,end2:de2};
@@ -1470,12 +1472,74 @@ days.forEach(d=>{
   </div>
 </div>`});
 html+='</div>';c.innerHTML=html};
-window.saveConfig=async()=>{try{const tw={};[1,2,3,4,5,6,0].forEach(id=>{const type=document.getElementById(`w-type-${id}`)?.value||'complete';const entry={start:document.getElementById(`w-start-${id}`).value,end:document.getElementById(`w-end-${id}`).value,closed:document.getElementById(`w-closed-${id}`).checked,type:type};if(type==='split'){entry.start2=document.getElementById(`w-start2-${id}`)?.value||'';entry.end2=document.getElementById(`w-end2-${id}`)?.value||''}tw[id]=entry});
-const up={};if(configEntity==='global'){up.weekly=tw;const openDay=[1,2,3,4,5,6].map(id=>tw[id]).find(x=>!x.closed)||tw[1]||{start:'10:00',end:'20:00'};up.start=openDay.start||'10:00';up.end=openDay.type==='split'?openDay.end2:(openDay.end||'20:00');config.weekly=tw;config.start=up.start;config.end=up.end}else{up[`weekly_${configEntity}`]=tw;config[`weekly_${configEntity}`]=tw}
-console.log('Guardando config...',up);
-await setDoc(doc(db,'artifacts',AID,'public','data','settings','main'),up,{merge:true});
-alert(`✅ Configuración de ${configEntity.toUpperCase()} guardada.`);
-if(currentTab==='config'){window.renderStandardInputs();renderMonthGrid('config-calendar-body',true)}
+window.saveConfig=async()=>{try{
+  const tw={};
+  [1,2,3,4,5,6,0].forEach(id=>{
+    const type=document.getElementById(`w-type-${id}`)?.value||'complete';
+    const entry={
+      start:document.getElementById(`w-start-${id}`).value,
+      end:document.getElementById(`w-end-${id}`).value,
+      closed:document.getElementById(`w-closed-${id}`).checked,
+      type:type
+    };
+    if(type==='split'){
+      entry.start2=document.getElementById(`w-start2-${id}`)?.value||'';
+      entry.end2=document.getElementById(`w-end2-${id}`)?.value||'';
+    }
+    tw[id]=entry;
+  });
+  const up={};
+  if(configEntity==='global'){
+    up.weekly=tw;
+    const openDay=[1,2,3,4,5,6].map(id=>tw[id]).find(x=>!x.closed)||tw[1]||{start:'09:00',end:'20:00'};
+    up.start=openDay.start||'09:00';
+    up.end=openDay.type==='split'?openDay.end2:(openDay.end||'20:00');
+    config.weekly=tw;
+    config.start=up.start;
+    config.end=up.end;
+    if(Array.isArray(employeesDB)&&employeesDB.length>0){
+      employeesDB.forEach(emp=>{
+        const empKey=`weekly_${emp.name}`;
+        const curEmpWeekly=config[empKey]||{};
+        const updatedEmpWeekly={};
+        [1,2,3,4,5,6,0].forEach(id=>{
+          const gDay=tw[id];
+          const eDay=curEmpWeekly[id]||{};
+          if(eDay.type==='split'){
+            updatedEmpWeekly[id]={
+              ...eDay,
+              start:gDay.start,
+              closed:gDay.closed!==undefined?gDay.closed:eDay.closed
+            };
+            if(id===6&&gDay.type==='complete'){
+              updatedEmpWeekly[id]={
+                type:'complete',
+                start:gDay.start,
+                end:gDay.end,
+                closed:gDay.closed
+              };
+            }
+          }else{
+            updatedEmpWeekly[id]={
+              type:'complete',
+              start:gDay.start,
+              end:gDay.end,
+              closed:gDay.closed
+            };
+          }
+        });
+        up[empKey]=updatedEmpWeekly;
+        config[empKey]=updatedEmpWeekly;
+      });
+    }
+  }else{
+    up[`weekly_${configEntity}`]=tw;
+    config[`weekly_${configEntity}`]=tw;
+  }
+  console.log('Guardando config...',up);
+  await setDoc(doc(db,'artifacts',AID,'public','data','settings','main'),up,{merge:true});
+  alert(`✅ Configuración de ${configEntity.toUpperCase()} guardada.`);
+  if(currentTab==='config'){window.renderStandardInputs();renderMonthGrid('config-calendar-body',true)}
 }catch(e){console.error('❌ Error guardando config:',e);alert('❌ ERROR al guardar configuración:\n\n'+e.message);}};
 window.openConfigDay=ds=>{
   selectedDayInModal=ds;
