@@ -1,5 +1,5 @@
 console.log("🚀 TFM UNIR — PANEL GESTIÓN CARGADO [2026-06-20]");
-const AID="magic-studio-default";
+const AID="Estetica Respira-studio-default";
 var db,auth;
 var appointments=[];
 var currentTab='calendar_all';
@@ -2335,11 +2335,11 @@ window.clearAllNotifs=function(){
 };
 
 function saveLocalNotifs(){
-    try{localStorage.setItem('magic_notifs',JSON.stringify(g_localNotifs))}catch(e){}
+    try{localStorage.setItem('Estetica Respira_notifs',JSON.stringify(g_localNotifs))}catch(e){}
     window.updateNotifBadge();
 }
 function loadLocalNotifs(){
-    try{var s=localStorage.getItem('magic_notifs');if(s)g_localNotifs=JSON.parse(s)}catch(e){}
+    try{var s=localStorage.getItem('Estetica Respira_notifs');if(s)g_localNotifs=JSON.parse(s)}catch(e){}
     window.updateNotifBadge();
 }
 
@@ -3663,7 +3663,7 @@ window.sendWebpushrNotification = async (title, message, url = window.location.h
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        title: title || 'Magic Studio Vicén',
+        title: title || 'Estetica Respira Studio Vicén',
         message: message || 'Actualización en el panel',
         target_url: url,
         action_buttons: [{ title: 'Ver Panel', url }]

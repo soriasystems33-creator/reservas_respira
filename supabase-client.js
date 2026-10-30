@@ -1,6 +1,6 @@
 // ============================================================
 // SUPABASE-CLIENT — Reemplazo completo de Firebase Compat SDK
-// Panel Magic Studio — https://github.com/your-org/panel-magic
+// Panel Estetica Respira Studio — https://github.com/your-org/panel-Estetica Respira
 // ============================================================
 
 // ── CONFIGURACIÓN (REEMPLAZAR con tus datos de Supabase) ──

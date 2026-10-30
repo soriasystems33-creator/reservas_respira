@@ -14,7 +14,7 @@
     <path d="M-60,40 Q-40,10 0,0 Q40,10 60,40" fill="none" stroke="#c9a96e" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
     <circle cx="-72" cy="30" r="4" fill="#d4a0a7"/>
     <circle cx="72" cy="30" r="4" fill="#d4a0a7"/>
-    <text x="0" y="120" text-anchor="middle" font-family="serif" font-size="48" font-style="italic" font-weight="600" fill="#2e2826">Magic</text>
+    <text x="0" y="120" text-anchor="middle" font-family="serif" font-size="48" font-style="italic" font-weight="600" fill="#2e2826">Estetica Respira</text>
     <text x="0" y="165" text-anchor="middle" font-family="sans-serif" font-size="28" font-weight="700" fill="#7c3aed" letter-spacing="6">STUDIO</text>
   </g>
 </svg>

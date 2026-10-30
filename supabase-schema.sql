@@ -1,5 +1,5 @@
 -- ============================================================
--- ESQUEMA SUPABASE — Panel Magic Studio
+-- ESQUEMA SUPABASE — Panel Estetica Respira Studio
 -- 7 tablas
 -- ============================================================
 

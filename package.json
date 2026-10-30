@@ -1,0 +1,20 @@
+{
+  "name": "panel-respira",
+  "version": "1.0.0",
+  "description": "Admin panel for reservations (replicated from Panel-Cuqui-Nails)",
+  "main": "admin_logic.js",
+  "scripts": {
+    "dev": "parcel index.html",
+    "build": "parcel build index.html --public-url ./"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "fullcalendar": "^6.1.8"
+  },
+  "devDependencies": {
+    "parcel": "^2.9.3"
+  }
+}

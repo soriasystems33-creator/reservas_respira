@@ -1,7 +1,7 @@
 {
-  "name": "MAGIC-VICEN",
-  "short_name": "MAGIC-VICEN",
-  "description": "Panel de gestión de citas para Magic Studio Vicén",
+  "name": "Estetica Respira",
+  "short_name": "Estetica Respira",
+  "description": "Panel de gestión de citas para Estetica Respira Studio Vicén",
   "start_url": "/admin.html",
   "scope": "/",
   "display": "standalone",
