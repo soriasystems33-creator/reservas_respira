@@ -16,9 +16,9 @@ function CancelContent() {
 
   useEffect(() => {
     if (!id) {
-      setStatus('error');
-      setErrorMsg('Enlace de cancelación incorrecto (Falta ID de la cita).');
-      setLoading(false);
+      setTimeout(() => setStatus('error'), 0);
+      setTimeout(() => setErrorMsg('Enlace de cancelación incorrecto (Falta ID de la cita).'), 0);
+      setTimeout(() => setLoading(false), 0);
       return;
     }
 
@@ -33,15 +33,15 @@ function CancelContent() {
             setStatus('confirm');
           }
         } else {
-          setStatus('error');
+          setTimeout(() => setStatus('error'), 0);
           setErrorMsg(data.error || 'La cita no existe en el sistema.');
         }
-        setLoading(false);
+        setTimeout(() => setLoading(false), 0);
       })
       .catch(e => {
-        setStatus('error');
+        setTimeout(() => setStatus('error'), 0);
         setErrorMsg('Error de conexión. Inténtalo de nuevo.');
-        setLoading(false);
+        setTimeout(() => setLoading(false), 0);
       });
   }, [id]);
 

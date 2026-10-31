@@ -72,8 +72,8 @@ function BookingContent() {
             employees: res.employees,
             settings: res.settings
           });
-          settingsRef.current = res.settings;
-          employeesRef.current = res.employees;
+          data.settings = res.settings;
+          data.employees = res.employees;
         }
         setLoading(false);
       })
@@ -86,8 +86,8 @@ function BookingContent() {
     const id = searchParams.get('id');
     const cancel = searchParams.get('cancel');
     if (id) {
-      setEditId(id);
-      if (cancel === '1') setIsCancelMode(true);
+      setTimeout(() => setEditId(id), 0);
+      if (cancel === '1') setTimeout(() => setIsCancelMode(true), 0);
       
       // Cargar datos de la reserva
       fetch(`/api/reserva?id=${id}`)
@@ -104,20 +104,14 @@ function BookingContent() {
   useEffect(() => {
     // Reset date/time selection when services change outside step 2 (datetime selection) to prevent stale availability caching
     if (step < 2) {
-      setSelDate(null);
-      setSelTime(null);
-      setAvailableSlots([]);
-      setNextAvailable(null);
-      setSingleNextAvailable(null);
+      setTimeout(() => setSelDate(null), 0);
+      setTimeout(() => setSelTime(null), 0);
+      setTimeout(() => setAvailableSlots([]), 0);
+      setTimeout(() => setNextAvailable(null), 0);
+      setTimeout(() => setSingleNextAvailable(null), 0);
     }
   }, [selServices, step]);
 
-  useEffect(() => {
-    if (step === 2 && !selDate && selServices.length > 0) {
-      const today = getLocalDateStr(new Date());
-      scanNextAvailable(today, selServices);
-    }
-  }, [step, selDate, selServices]);
 
   const msNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
   const dayNames = ['L','M','X','J','V','S','D'];
@@ -164,10 +158,10 @@ function BookingContent() {
   };
 
   const getDCforEmp = useCallback((dateStr, empName) => {
-    const ss = settingsRef.current;
+    const ss = data.settings;
     const sd = ss?.specialDays || {};
     // 1) Override MANUAL de la empleada (por ID o por Nombre)
-    const emp = (employeesRef.current || []).find(e => e.name.toLowerCase() === empName.toLowerCase());
+    const emp = (data.employees || []).find(e => e.name.toLowerCase() === empName.toLowerCase());
     const empId = emp ? emp.id : null;
     let empOverride = null;
     if (sd[dateStr]) {
@@ -309,7 +303,7 @@ function BookingContent() {
   };
 
   const getCandidatesForService = useCallback((s, customEmps) => {
-    const employees = customEmps || employeesRef.current || data.employees || [];
+    const employees = customEmps || data.employees || data.employees || [];
     if (!s) return employees;
 
     const dbSvc = (data.services || []).find(ds => (s.id && ds.id === s.id) || ds.name === s.name) || s;
@@ -337,8 +331,8 @@ function BookingContent() {
   }, [data.employees, data.services]);
 
   const isDayClosed = useCallback((dateStr, overrideServices) => {
-    const ee = employeesRef.current || [];
-    const ss = settingsRef.current;
+    const ee = data.employees || [];
+    const ss = data.settings;
     if (ee.length === 0) {
       const sd = ss?.specialDays || {};
       if (sd[dateStr] && sd[dateStr].global) return sd[dateStr].global.type === 'closed';
@@ -372,8 +366,8 @@ function BookingContent() {
 
   const fetchSlotsForDate = async (ds, overrideServices, autoSelectSlot = null) => {
     setLoadingSlots(true);
-    setAvailableSlots([]);
-    setSelTime(null);
+    setTimeout(() => setAvailableSlots([]), 0);
+    setTimeout(() => setSelTime(null), 0);
     try {
       const [aptRes, dataRes] = await Promise.all([
         fetch(`/api/availability?date=${ds}`),
@@ -386,8 +380,8 @@ function BookingContent() {
       if (freshData.success) {
         freshSettings = freshData.settings;
         freshEmployees = freshData.employees;
-        settingsRef.current = freshSettings;
-        employeesRef.current = freshEmployees;
+
+
         setData({
           services: freshData.services,
           categories: freshData.categories,
@@ -402,8 +396,8 @@ function BookingContent() {
         if (freeSlots.length === 0) {
           scanNextAvailable(ds, activeSvcs);
         } else {
-          setNextAvailable(null);
-          setSingleNextAvailable(null);
+          setTimeout(() => setNextAvailable(null), 0);
+          setTimeout(() => setSingleNextAvailable(null), 0);
         }
         if (autoSelectSlot && slots) {
           const matchingSlot = slots.find(s => s.time === autoSelectSlot.time && s.free);
@@ -420,8 +414,8 @@ function BookingContent() {
 
 
   const computeSlotsForDate = (ds, dayApts = [], freshSettings, freshEmployees, overrideServices, blocks = []) => {
-    const settings = freshSettings || settingsRef.current || data.settings;
-    const employees = freshEmployees || employeesRef.current || data.employees;
+    const settings = freshSettings || data.settings || data.settings;
+    const employees = freshEmployees || data.employees || data.employees;
     let activeServices = overrideServices || selServices;
     if (!activeServices || activeServices.length === 0) return [];
     if (!employees || employees.length === 0) return [];
@@ -651,8 +645,8 @@ function BookingContent() {
   const scanNextAvailable = async (baseDate, targetServices) => {
     if (!baseDate || !targetServices || targetServices.length === 0) return;
     setIsSearchingNext(true);
-    setNextAvailable(null);
-    setSingleNextAvailable(null);
+    setTimeout(() => setNextAvailable(null), 0);
+    setTimeout(() => setSingleNextAvailable(null), 0);
 
     try {
       const todayStr = getLocalDateStr(new Date());
@@ -679,8 +673,8 @@ function BookingContent() {
 
       const allApts = rdata.appointments || [];
       const allBlocks = rdata.blocks || [];
-      const settings = settingsRef.current || data.settings;
-      const employees = employeesRef.current || data.employees;
+      const settings = data.settings || data.settings;
+      const employees = data.employees || data.employees;
 
       let foundNext = null;
       let foundSingle = null;
@@ -748,7 +742,7 @@ function BookingContent() {
       if (foundSingle && foundNext && foundSingle.date < foundNext.date) {
         setSingleNextAvailable(foundSingle);
       } else {
-        setSingleNextAvailable(null);
+        setTimeout(() => setSingleNextAvailable(null), 0);
       }
     } catch (err) {
       console.error('Error scanning next available:', err);
@@ -878,8 +872,8 @@ function BookingContent() {
     setStep(0);
     setSelServices([]);
     setShowSvcConfirm(false);
-    setSelDate(null);
-    setSelTime(null);
+    setTimeout(() => setSelDate(null), 0);
+    setTimeout(() => setSelTime(null), 0);
     setFormName('');
     setFormPhone('');
     setFormEmail('');
@@ -1325,7 +1319,7 @@ function BookingContent() {
                                 var val = ev.target.value;
                                 var updated = selServices.map(function(sv, idx){ return idx === i ? {...sv, selectedSpecialist: val} : sv; });
                                 setSelServices(updated);
-                                if (selDate) { setSelTime(null); fetchSlotsForDate(selDate, updated); }
+                                if (selDate) { setTimeout(() => setSelTime(null), 0); fetchSlotsForDate(selDate, updated); }
                               }} className="p-1.5 border rounded-lg text-[10px] font-bold outline-none" style={{background:'white',borderColor:'var(--blue-mid)',color:'var(--blue-deep)'}}>
                                 <option value="">Automático</option>
                                 {eligibleEmps.map(function(emp){ return <option key={emp.id} value={emp.name}>{emp.name}</option>; })}
