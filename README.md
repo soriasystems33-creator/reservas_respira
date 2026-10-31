@@ -1,18 +1,6 @@
-# Panel Respira
+﻿# Reservas - Estetica Respira
 
-Admin panel (vanilla JS) replicado a partir de **Panel‑Cuqui‑Nails**. 
+Front de reservas (Next.js) de Estetica Respira. Datos en Supabase propio (variables en .env.local, ver .env.example).
 
-- Conecta a Supabase mediante las variables de entorno `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-- Usa **FullCalendar** para mostrar y gestionar reservas.
-- Está pensado para ser desplegado en un repositorio independiente.
-
-## Desarrollo
-```bash
-npm install
-npm run dev   # abre http://localhost:1234
-```
-
-## Build
-```bash
-npm run build   # genera la carpeta `dist/`
-```
+Produccion: https://reservas-respira.vercel.app
+Panel: https://panel-respira.vercel.app

@@ -1,0 +1,319 @@
+@import "tailwindcss";
+
+:root {
+  --cream: #faf7f4;
+  --cream-dark: #f0ebe6;
+  --blue: #f3ece4;
+  --blue-mid: #d99ba1;
+  --blue-deep: #a8876b;
+  --rose: #c9b29b;
+  --rose-light: #f3ece4;
+  --brown: #2e2826;
+  --brown-mid: #7a6b67;
+  --brown-light: #e0d8d5;
+  --gold: #c9a96e;
+}
+
+body {
+  background: linear-gradient(160deg, #fbf2f3 0%, #f3ece4 50%, #fbf2f3 100%);
+  min-height: 100vh;
+}
+
+.step {
+  display: none;
+}
+
+.step.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.service-card {
+  transition: all 0.2s;
+  cursor: pointer;
+  border: 2px solid var(--brown-light);
+  border-radius: 20px;
+  background: white;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(46, 40, 38, 0.05);
+}
+
+.service-card:hover {
+  border-color: var(--blue-mid);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(201, 169, 110, 0.25);
+}
+
+.service-card.selected {
+  border-color: var(--blue-deep) !important;
+  background: linear-gradient(135deg, #fbf2f3, #f3ece4);
+  box-shadow: 0 8px 24px rgba(184, 148, 90, 0.15);
+}
+
+.time-slot {
+  border: 2px solid var(--brown-light);
+  border-radius: 12px;
+  padding: 10px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: pointer;
+  background: white;
+  color: var(--brown);
+}
+
+.time-slot:hover {
+  border-color: var(--blue-deep);
+  background: #fdf9f2;
+  color: var(--blue-deep);
+}
+
+.time-slot.selected {
+  background: var(--blue-deep);
+  color: white;
+  border-color: var(--blue-deep);
+  transform: scale(1.05);
+}
+
+.time-slot.occupied {
+  background: var(--cream-dark);
+  color: var(--brown-light);
+  cursor: not-allowed;
+  border-style: dashed;
+  text-decoration: line-through;
+}
+
+.day-btn {
+  transition: all 0.15s;
+  cursor: pointer;
+  border: 2px solid var(--brown-light);
+  border-radius: 12px;
+  padding: 8px 4px;
+  text-align: center;
+  background: white;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brown);
+}
+
+.day-btn:hover:not(.day-closed):not(.day-past) {
+  border-color: var(--blue-mid);
+  background: var(--cream);
+}
+
+.day-btn.day-selected {
+  border-color: var(--blue-deep) !important;
+  background: var(--blue-deep);
+  color: white;
+}
+
+.day-btn.day-closed {
+  background: #fdf0f1;
+  color: #e5b3b8;
+  cursor: not-allowed;
+}
+
+.day-btn.day-past {
+  background: var(--cream-dark);
+  color: var(--brown-light);
+  cursor: not-allowed;
+}
+
+.day-btn.day-today:not(.day-selected) {
+  border-color: var(--blue-deep) !important;
+  color: var(--blue-deep);
+}
+
+.step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+.step-dot.active {
+  background: var(--blue-deep);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(184, 148, 90, 0.2);
+}
+
+.step-dot.done {
+  background: var(--blue-mid);
+  color: white;
+}
+
+.step-dot.pending {
+  background: var(--brown-light);
+  color: var(--brown-mid);
+}
+
+.step-line {
+  height: 2px;
+  border-radius: 2px;
+  transition: all 0.3s;
+  flex: 1;
+  margin: 0 4px;
+  align-self: center;
+  margin-bottom: 20px;
+}
+
+.step-line.done {
+  background: var(--blue-mid);
+}
+
+.step-line.pending {
+  background: var(--brown-light);
+}
+
+.card {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(46, 40, 38, 0.07);
+  border: 1px solid var(--brown-light);
+}
+
+.input-field {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--brown-light);
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s;
+  background: white;
+  color: var(--brown);
+}
+
+.input-field:focus {
+  border-color: var(--blue-deep);
+  box-shadow: 0 0 0 3px rgba(184, 148, 90, 0.12);
+}
+
+.input-field::placeholder {
+  color: var(--brown-light);
+  font-weight: 400;
+}
+
+.btn-primary {
+  background: var(--blue-deep);
+  color: white;
+  padding: 14px 28px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #42748a;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(184, 148, 90, 0.3);
+}
+
+.btn-primary:disabled {
+  background: var(--brown-light);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-back {
+  background: white;
+  color: var(--brown-mid);
+  padding: 12px 20px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 13px;
+  border: 2px solid var(--brown-light);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-back:hover {
+  border-color: var(--blue-deep);
+  color: var(--blue-deep);
+}
+
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 2px solid var(--brown-light);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+  color: var(--brown-mid);
+  white-space: nowrap;
+}
+
+.cat-pill:hover {
+  background: #fdf9f2;
+  color: var(--blue-deep);
+  border-color: var(--blue-deep);
+}
+
+.cat-pill.active {
+  background: var(--blue-deep);
+  color: white;
+  border-color: var(--blue-deep);
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brown-light);
+  border-radius: 4px;
+}
