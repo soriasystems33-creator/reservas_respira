@@ -15,7 +15,7 @@ function MisCitasContent() {
 
   useEffect(() => {
     if (!idParam) {
-      setLoading(false);
+      setTimeout(() => setLoading(false), 0);
       return;
     }
 
@@ -37,7 +37,7 @@ function MisCitasContent() {
         setErrorMsg('Error de conexión. Inténtalo de nuevo.');
         setAppointments([]);
       }
-      setLoading(false);
+      setTimeout(() => setLoading(false), 0);
     };
 
     fetchCitas();
