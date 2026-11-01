@@ -138,12 +138,20 @@ export async function POST(request) {
     const reqWeekday = reqDateObj.getDay();
 
     const activeBlocks = allBlocks.filter(b => {
-      if (b.recurrenceEnd && b.recurrenceEnd < newDate) return false;
-      if (b.recurrence === 'none') return b.date === newDate;
+      const recEnd = b.recurrenceEnd || b.recurrence_end;
+      const stDate = b.startDate || b.start_date;
+      if (recEnd && recEnd < newDate) return false;
+      if (stDate && stDate > newDate) return false;
+      if (b.recurrence && b.recurrence !== 'none' && b.date && b.date > newDate) return false;
+      if (!b.recurrence || b.recurrence === 'none') return b.date === newDate;
       if (b.recurrence === 'daily') return true;
       if (b.recurrence === 'weekly' || b.recurrence === 'biweekly') return b.weekday === reqWeekday;
       return false;
-    });
+    }).map(b => ({
+      ...b,
+      startTime: b.startTime || b.start_time,
+      endTime: b.endTime || b.end_time
+    }));
 
     const isEmpFreeAt = (empName, start, end) => {
       const empLower = empName.toLowerCase();
@@ -190,7 +198,8 @@ export async function POST(request) {
       if (conflictApt) return false;
 
       const conflictBlock = activeBlocks.some(b => {
-        if (b.employee && b.employee !== 'all' && b.employee.toLowerCase() !== empLower) return false;
+        const bEmp = (b.employee || '').toLowerCase();
+        if (bEmp && bEmp !== 'all' && bEmp !== 'todas' && bEmp !== empLower) return false;
         const bS = t2m(b.startTime);
         const bE = t2m(b.endTime);
         return start < bE && end > bS;
@@ -243,7 +252,8 @@ export async function POST(request) {
     }
 
     for (const b of activeBlocks) {
-      if (b.employee && b.employee !== 'all' && !uniqueEmps.some(en => en.toLowerCase() === b.employee.toLowerCase())) continue;
+      const bEmp = (b.employee || '').toLowerCase();
+      if (bEmp && bEmp !== 'all' && bEmp !== 'todas' && !uniqueEmps.some(en => en.toLowerCase() === bEmp)) continue;
       const bS = t2m(b.startTime);
       const bE = t2m(b.endTime);
       if (tStart < bE && tEnd > bS) {

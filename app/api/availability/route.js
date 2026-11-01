@@ -42,7 +42,13 @@ export async function GET(request) {
 
     appointments = appointments.filter(apt => apt.status !== 'cancelled');
 
-    const allBlocks = blocksRes.data || [];
+    const allBlocks = (blocksRes.data || []).map(b => ({
+      ...b,
+      startTime: b.startTime || b.start_time,
+      endTime: b.endTime || b.end_time,
+      recurrenceEnd: b.recurrenceEnd || b.recurrence_end,
+      startDate: b.startDate || b.start_date
+    }));
 
     if (date) {
       const reqDate = new Date(date + 'T12:00:00');
@@ -51,8 +57,8 @@ export async function GET(request) {
       const blocks = allBlocks.filter(b => {
         if (b.recurrenceEnd && b.recurrenceEnd < date) return false;
         if (b.startDate && b.startDate > date) return false;
-        if (b.recurrence !== 'none' && b.date && b.date > date) return false;
-        if (b.recurrence === 'none') return b.date === date;
+        if (b.recurrence && b.recurrence !== 'none' && b.date && b.date > date) return false;
+        if (!b.recurrence || b.recurrence === 'none') return b.date === date;
         if (b.recurrence === 'daily') return true;
         if (b.recurrence === 'weekly') return b.weekday === reqWeekday;
         if (b.recurrence === 'biweekly') return b.weekday === reqWeekday;

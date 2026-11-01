@@ -249,9 +249,10 @@ function BookingContent() {
     // 3) Horario semanal individual
     let hasWeekly = false, weeklyClosed = false, weeklyStart = null, weeklyEnd = null, weeklyType = null, weeklyStart2 = null, weeklyEnd2 = null;
     const key = 'weekly_' + empName;
-    if (ss && ss[key] && ss[key][day]) {
+    const empWeeklyObj = ss ? (ss[key] || ss.weekly?.[key]) : null;
+    if (empWeeklyObj && empWeeklyObj[day]) {
       hasWeekly = true;
-      const w = ss[key][day];
+      const w = empWeeklyObj[day];
       if (w.closed) weeklyClosed = true;
       else {
         weeklyType = w.type || 'standard';
@@ -544,9 +545,12 @@ function BookingContent() {
       if (hasApt) return true;
 
       const hasBlock = blocks.some(b => {
-        if (b.employee && b.employee !== 'all' && b.employee.toLowerCase() !== empLower) return false;
-        const bS = t2m(b.startTime);
-        const bE = t2m(b.endTime);
+        const bEmp = (b.employee || '').toLowerCase();
+        if (bEmp && bEmp !== 'all' && bEmp !== 'todas' && bEmp !== empLower) return false;
+        const bStart = b.startTime || b.start_time;
+        const bEnd = b.endTime || b.end_time;
+        const bS = t2m(bStart);
+        const bE = t2m(bEnd);
         return start < bE && end > bS;
       });
       if (hasBlock) return true;
