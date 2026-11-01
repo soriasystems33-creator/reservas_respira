@@ -7,24 +7,16 @@ import {
   Clock,
   ChevronRight,
   ChevronLeft,
-  ChevronDown,
-  ChevronUp,
   ArrowLeft,
   Check,
   CheckCircle2,
   MapPin,
-  Star,
   Share2,
   Heart,
   Search,
-  ShieldCheck,
   Navigation,
-  ExternalLink,
-  Image as ImageIcon,
   X,
-  Info,
   Phone,
-  Tag,
   Calendar,
   MessageCircle,
   Loader2,
@@ -32,8 +24,7 @@ import {
   Trash2,
   Ticket,
   Sun,
-  Moon,
-  Users
+  Moon
 } from 'lucide-react';
 
 export default function BookingPage() {
@@ -50,14 +41,6 @@ export default function BookingPage() {
     </Suspense>
   );
 }
-
-// Fotografías sectoriales de alta calidad curadas para Respira (Wellness, Estética, Masaje y Manicura)
-const RESPIRA_GALLERY = [
-  'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80'
-];
 
 const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 const MONTH_NAMES = [
@@ -86,7 +69,6 @@ function BookingFunnelContent() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isSaved, setIsSaved] = useState(false);
   const [shareToast, setShareToast] = useState(false);
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const hoursSectionRef = useRef(null);
   const servicesSectionRef = useRef(null);
 
@@ -113,7 +95,6 @@ function BookingFunnelContent() {
 
   // 9. DETECCIÓN DE CANCELACIÓN O MODIFICACIÓN POR URL
   const searchParams = useSearchParams();
-  const editId = searchParams.get('id') || searchParams.get('modificar');
   const cancelId = searchParams.get('cancelar') || (searchParams.get('cancel') === '1' ? searchParams.get('id') : null);
 
   // Cargar datos iniciales desde /api/data
@@ -161,17 +142,6 @@ function BookingFunnelContent() {
       const [y, m, d] = dStr.split('-').map(Number);
       const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
       return date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-    } catch {
-      return dStr;
-    }
-  };
-
-  const formatDateLong = (dStr) => {
-    if (!dStr) return '';
-    try {
-      const [y, m, d] = dStr.split('-').map(Number);
-      const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
-      return date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     } catch {
       return dStr;
     }
@@ -916,12 +886,12 @@ function BookingFunnelContent() {
   return (
     <div className="min-h-screen bg-[#faf7f4] pb-28 md:pb-16 text-stone-900 font-sans selection:bg-[#6b8a5a] selection:text-white">
       
-      {/* 1. HERO COVER SECTION (High-end Wellness & Spa Aesthetics) */}
-      <div className="relative h-72 sm:h-80 md:h-[390px] w-full overflow-hidden bg-stone-950">
+      {/* 1. HERO COVER SECTION */}
+      <div className="relative h-64 sm:h-72 md:h-80 w-full overflow-hidden bg-stone-900">
         <img
-          src={RESPIRA_GALLERY[0]}
+          src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=80"
           alt="Centro de estética Respira"
-          className="w-full h-full object-cover object-center transition-transform duration-700 ease-out hover:scale-105"
+          className="w-full h-full object-cover object-center opacity-85"
         />
         {/* Ambient Vignette Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent" />
@@ -953,24 +923,6 @@ function BookingFunnelContent() {
             </button>
           </div>
         </div>
-
-        {/* Indicators */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
-          <span className="w-2 h-2 rounded-full bg-white shadow-xs"></span>
-          <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-          <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-          <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-        </div>
-
-        {/* Botón Ver Fotos Galería */}
-        <button
-          type="button"
-          onClick={() => setIsGalleryOpen(true)}
-          className="absolute bottom-4 right-4 z-10 bg-white/95 hover:bg-white text-stone-900 text-xs font-semibold px-3 py-1.5 rounded-xl shadow-md border border-stone-200 backdrop-blur-sm transition-all flex items-center gap-1.5 cursor-pointer"
-        >
-          <ImageIcon size={14} />
-          <span>Ver fotos ({RESPIRA_GALLERY.length})</span>
-        </button>
       </div>
 
       {/* 2. MAIN CONTAINER */}
@@ -984,7 +936,7 @@ function BookingFunnelContent() {
           </div>
         )}
 
-        {/* BUSINESS IDENTITY CARD (House of Prime Rib / saas Style) */}
+        {/* BUSINESS IDENTITY CARD */}
         <section className="bg-white rounded-3xl p-5 sm:p-7 border border-stone-200/90 shadow-xl space-y-5">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1.5 min-w-0">
@@ -1025,28 +977,27 @@ function BookingFunnelContent() {
             </div>
           </div>
 
-          {/* Pill Chips Row */}
+          {/* Pill Chips Row (Factual & Authentic) */}
           <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-stone-100">
-            <div className="inline-flex items-center gap-1.5 bg-stone-100 text-stone-900 text-xs font-semibold px-3 py-1.5 rounded-full">
-              <Star size={13} className="fill-amber-400 text-amber-400" />
-              <span>4.9</span>
-              <span className="text-stone-400 font-normal">(48 reseñas)</span>
-            </div>
-
             <span className="inline-flex items-center gap-1.5 bg-[#f3f7ee] text-[#6b8a5a] text-xs font-semibold px-3 py-1.5 rounded-full border border-[#7fa85f]/20">
-              <ShieldCheck size={13} />
-              <span>Salón Verificado</span>
+              <MapPin size={13} />
+              <span>Artà, Illes Balears</span>
+            </span>
+
+            <span className="inline-flex items-center gap-1.5 bg-stone-100 text-stone-800 text-xs font-semibold px-3 py-1.5 rounded-full">
+              <Clock size={13} className="text-[#6b8a5a]" />
+              <span>Cita Previa Online</span>
             </span>
 
             <span className="inline-flex items-center gap-1.5 bg-stone-100 text-stone-800 text-xs font-semibold px-3 py-1.5 rounded-full">
               <MessageCircle size={13} className="text-[#6b8a5a]" />
-              <span>WhatsApp Directo</span>
+              <span>WhatsApp: 688 69 22 95</span>
             </span>
           </div>
 
           {/* Description Capsule */}
           <div className="bg-[#faf7f4] border border-stone-200/80 rounded-2xl p-4 text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
-            Espacio de bienestar, salud y belleza en Artà. Tratamientos faciales avanzados, masajes relajantes, manicura, pedicura y cuidado integral con Magdalena, Lola y Debi.
+            Centro de estética y bienestar en Artà. Consulta la lista de tratamientos y reserva tu cita online en tiempo real.
           </div>
 
           {/* 4 Quick Actions (Call, GPS, WhatsApp, Hours) */}
@@ -1075,7 +1026,7 @@ function BookingFunnelContent() {
               rel="noopener noreferrer"
               className="flex flex-col items-center justify-center p-3 rounded-2xl bg-stone-50 hover:bg-[#f3f7ee] border border-stone-200/80 transition-all text-stone-800 group"
             >
-              <MessageCircle size={18} className="text-[#6b8a5a] mb-1 group-hover:scale-110 transition-transform" />
+              <MessageCircle size={18} className="text-[#6b8a5a]" />
               <span className="text-[11px] font-semibold">WhatsApp</span>
             </a>
 
@@ -1202,7 +1153,7 @@ function BookingFunnelContent() {
           </div>
         </section>
 
-        {/* 4. EQUIPO DE PROFESIONALES (Fresha Style Reference) */}
+        {/* 4. EQUIPO DE ESPECIALISTAS */}
         {data.employees.length > 0 && (
           <section className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
@@ -1211,7 +1162,7 @@ function BookingFunnelContent() {
                   Equipo de Especialistas
                 </h2>
                 <p className="text-xs text-stone-500 font-normal">
-                  Profesionales expertas para cuidar de ti en Artà.
+                  Especialistas del centro Respira en Artà.
                 </p>
               </div>
               <span className="text-xs font-semibold text-stone-400">
@@ -1236,13 +1187,8 @@ function BookingFunnelContent() {
                     <div className="min-w-0">
                       <h4 className="font-bold text-sm text-stone-900 truncate">{emp.name}</h4>
                       <p className="text-xs text-stone-500 truncate">
-                        {emp.title || (emp.name === 'Magdalena' ? 'Fundadora & Estética' : emp.name === 'Lola' ? 'Bienestar & Masaje' : 'Manicura & Belleza')}
+                        {emp.specialty || 'Especialista'}
                       </p>
-                      <div className="flex items-center justify-start sm:justify-center gap-1 text-[11px] font-semibold text-stone-700 mt-0.5">
-                        <Star size={12} className="fill-amber-400 text-amber-400" />
-                        <span>5.0</span>
-                        <span className="text-stone-400 font-normal">· {emp.name === 'Magdalena' ? '42' : emp.name === 'Lola' ? '35' : '28'} reseñas</span>
-                      </div>
                     </div>
                   </div>
 
@@ -1841,31 +1787,6 @@ function BookingFunnelContent() {
               </div>
             )}
 
-          </div>
-        </div>
-      )}
-
-      {/* 7. LIGHTBOX GALERÍA DE FOTOS DE RESPIRA */}
-      {isGalleryOpen && (
-        <div className="fixed inset-0 z-50 bg-stone-950/90 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-4 border-b border-stone-200 flex items-center justify-between">
-              <h4 className="font-bold text-sm text-stone-900">Fotos de Centro de estética Respira</h4>
-              <button
-                type="button"
-                onClick={() => setIsGalleryOpen(false)}
-                className="p-1 rounded-full text-stone-500 hover:bg-stone-100 transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="p-4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {RESPIRA_GALLERY.map((url, i) => (
-                <div key={i} className="aspect-video rounded-2xl overflow-hidden bg-stone-100 border border-stone-200">
-                  <img src={url} alt={`Tratamiento ${i + 1}`} className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       )}
