@@ -643,10 +643,13 @@ function BookingFunnelContent() {
     const orig = Number(selectedService.price || 0);
     if (!appliedVoucher) return orig;
 
-    if (appliedVoucher.type === 'gift_card' && appliedVoucher.remaining_balance != null) {
-      return Math.max(0, orig - Number(appliedVoucher.remaining_balance));
+    if (appliedVoucher.type === 'cheque') {
+      if (appliedVoucher.chequeMode === 'amount' && appliedVoucher.amount) {
+        return Math.max(0, orig - Number(appliedVoucher.amount));
+      }
+      return 0; // Servicio cubierto al 100%
     }
-    // Si es bono de sesiones o cubre el servicio al 100%
+    // Si es bono de sesiones: la sesión queda cubierta al 100%
     return 0;
   }, [selectedService, appliedVoucher]);
 
@@ -1608,9 +1611,9 @@ function BookingFunnelContent() {
                           <div className="min-w-0">
                             <span className="font-bold text-[#6b8a5a] block uppercase">{appliedVoucher.code}</span>
                             <span className="text-stone-600 text-[11px]">
-                              {appliedVoucher.type === 'gift_card' 
-                                ? `Saldo disponible: ${appliedVoucher.remaining_balance} €` 
-                                : 'Bono de tratamiento validado con éxito'}
+                              {appliedVoucher.isBono 
+                                ? `Bono de sesiones: 1 sesión de ${appliedVoucher.serviceName || 'este servicio'} (te quedan ${appliedVoucher.remainingSessions} disponibles)` 
+                                : (appliedVoucher.chequeMode === 'amount' ? `Cheque Regalo: Descuento de ${appliedVoucher.amount} €` : `Cheque Regalo: Tratamiento ${appliedVoucher.serviceName || ''} cubierto 100%`)}
                             </span>
                           </div>
                           <button
