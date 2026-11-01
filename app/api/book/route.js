@@ -1,3 +1,4 @@
+import { findVoucherByCode, validateVoucherRules, markVoucherUsed } from '@/lib/vouchers';
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
@@ -38,7 +39,7 @@ function isGeneric(name) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { clientName, clientPhone, clientEmail, notes, date, time } = body;
+    const { clientName, clientPhone, clientEmail, notes, date, time, voucherCode } = body;
 
     if (!clientName || !clientPhone || !date || !time) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
@@ -270,11 +271,31 @@ export async function POST(request) {
       }
     }
 
+    let voucherInfo = null;
+    let finalNotes = notes || '';
+    let isPaid = false;
+
+    if (voucherCode) {
+      voucherInfo = await findVoucherByCode(voucherCode);
+      const { valid, error: vErr } = validateVoucherRules(voucherInfo?.voucher, services);
+      if (!valid) {
+        return NextResponse.json({ success: false, error: vErr }, { status: 400 });
+      }
+      const vAmount = parseFloat(voucherInfo.voucher.amount) || 0;
+      const discount = Math.min(price, vAmount);
+      price = Math.max(0, parseFloat((price - discount).toFixed(2)));
+      if (price === 0) {
+        isPaid = true;
+      }
+      const vCodeTag = `[Bono ${voucherInfo.voucher.code} (-${discount.toFixed(2)}€)]`;
+      finalNotes = finalNotes ? `${finalNotes} ${vCodeTag}` : vCodeTag;
+    }
+
     const data = {
       clientName,
       clientPhone: sanitizedPhone,
       clientEmail: clientEmail || '',
-      notes: notes || '',
+      notes: finalNotes,
       services,
       service: services.map(s => s.name).join(' + '),
       employee,
@@ -283,7 +304,7 @@ export async function POST(request) {
       duration,
       price,
       status: 'confirmed',
-      isPaid: false,
+      isPaid,
       source: 'cliente',
       type: 'web'
     };
@@ -294,6 +315,14 @@ export async function POST(request) {
       .single();
 
     if (insertError) throw insertError;
+
+    if (voucherInfo && newApt) {
+      try {
+        await markVoucherUsed(voucherInfo, newApt.id);
+      } catch (vMarkErr) {
+        console.error('Error marking voucher as used:', vMarkErr);
+      }
+    }
 
     // Notify n8n webhook about the new booking
     await notifyWebhook('new', {

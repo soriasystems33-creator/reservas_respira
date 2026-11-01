@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
-import { CalendarPlus, ChevronLeft, ChevronRight, Clock, ClipboardCheck, ArrowLeft, ArrowRight, Check, PlusCircle, AlertCircle, Trash2, Sparkles, Info, CalendarX } from 'lucide-react';
+import { CalendarPlus, ChevronLeft, ChevronRight, Clock, ClipboardCheck, ArrowLeft, ArrowRight, Check, PlusCircle, AlertCircle, Trash2, Sparkles, Info, CalendarX, Ticket } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 
 export default function BookingPage() {
@@ -33,6 +33,43 @@ function BookingContent() {
   const [calViewDate, setCalViewDate] = useState(new Date());
   const [selDate, setSelDate] = useState(null);
   const [selTime, setSelTime] = useState(null);
+  const [voucherCodeInput, setVoucherCodeInput] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
+  const [voucherLoading, setVoucherLoading] = useState(false);
+  const [voucherError, setVoucherError] = useState('');
+
+  const handleApplyVoucher = async () => {
+    if (!voucherCodeInput.trim()) return;
+    setVoucherLoading(true);
+    setVoucherError('');
+    try {
+      const res = await fetch('/api/vouchers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: voucherCodeInput.trim().toUpperCase(),
+          services: selServices
+        })
+      });
+      const resData = await res.json();
+      if (resData.success && resData.voucher) {
+        setAppliedVoucher(resData.voucher);
+        setVoucherError('');
+      } else {
+        setVoucherError(resData.error || 'Bono inválido');
+        setAppliedVoucher(null);
+      }
+    } catch (e) {
+      setVoucherError('Error de conexión al validar el bono');
+    }
+    setVoucherLoading(false);
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherCodeInput('');
+    setVoucherError('');
+  };
   
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -824,7 +861,8 @@ function BookingContent() {
       date: selDate,
       time: selTime,
       duration: getTotalDur(servicesPayload),
-      price: servicesPayload.reduce((sum, s) => sum + (s.price || 0), 0)
+      price: servicesPayload.reduce((sum, s) => sum + (s.price || 0), 0),
+      voucherCode: appliedVoucher ? appliedVoucher.code : null
     };
     
     try {
@@ -1411,11 +1449,82 @@ function BookingContent() {
                   <span className="font-medium text-[#7a6b67]">Duración total</span>
                   <span className="font-bold" style={{color:'var(--blue-deep)'}}>{selSlotData?.totalDur || getTotalDur(selServices)} min</span>
                 </div>
-                <div className="flex justify-between items-center pt-2 border-t" style={{borderColor:'var(--blue)'}}>
-                  <span className="font-medium text-[#7a6b67]">Precio total</span>
-                  <span className="font-bold" style={{color:'var(--blue-deep)'}}>{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</span>
+                <div className="pt-2 border-t space-y-1.5" style={{borderColor:'var(--blue)'}}>
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-[#7a6b67]">Precio servicios</span>
+                    <span className="font-bold text-xs" style={{color:'var(--brown)'}}>{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</span>
+                  </div>
+                  {appliedVoucher && (
+                    <div className="flex justify-between items-center text-xs text-emerald-700 font-bold">
+                      <span>Bono ({appliedVoucher.code})</span>
+                      <span>-{Math.min(selServices.reduce((sum, s) => sum + (s.price || 0), 0), appliedVoucher.amount).toFixed(2)}€</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center pt-1 border-t border-dashed border-[#e0d8d5]">
+                    <span className="font-bold text-[#2e2826]">Total a pagar</span>
+                    <span className="font-black text-base" style={{color:'var(--blue-deep)'}}>
+                      {Math.max(0, selServices.reduce((sum, s) => sum + (s.price || 0), 0) - (appliedVoucher ? Math.min(selServices.reduce((sum, s) => sum + (s.price || 0), 0), appliedVoucher.amount) : 0)).toFixed(2)}€
+                      {appliedVoucher && (selServices.reduce((sum, s) => sum + (s.price || 0), 0) <= appliedVoucher.amount) && (
+                        <span className="block text-[10px] font-bold text-emerald-700">Cubierto por bono</span>
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            {/* Módulo de Bono o Cheque Regalo */}
+            <div className="card p-4 sm:p-5 mb-4 bg-white border border-[#e0d8d5] shadow-sm">
+              <div className="flex items-center gap-2 mb-2.5">
+                <Ticket className="w-4 h-4 text-[#a8876b]" />
+                <h4 className="text-xs font-black uppercase tracking-wider text-[#2e2826]">¿Tienes un bono o cheque regalo?</h4>
+              </div>
+              {!appliedVoucher ? (
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={voucherCodeInput}
+                      onChange={e => setVoucherCodeInput(e.target.value.toUpperCase())}
+                      placeholder="Código (ej. BONO-AB12CD)"
+                      className="input-field flex-1 font-mono text-xs uppercase tracking-wider"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyVoucher}
+                      disabled={voucherLoading || !voucherCodeInput.trim()}
+                      className="btn-primary px-4 py-2.5 text-xs font-bold uppercase tracking-wider shrink-0 disabled:opacity-50"
+                      style={{background:'var(--blue-deep)'}}
+                    >
+                      {voucherLoading ? 'Validando...' : 'Aplicar'}
+                    </button>
+                  </div>
+                  {voucherError && (
+                    <p className="text-xs font-semibold text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200">
+                      ⚠️ {voucherError}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-black text-emerald-900 font-mono tracking-wider">{appliedVoucher.code}</span>
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900">Aplicado</span>
+                    </div>
+                    <p className="text-[11px] text-emerald-700 font-medium">
+                      Descuento de {appliedVoucher.amount.toFixed(2)}€ aplicado a esta reserva
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRemoveVoucher}
+                    className="text-xs font-bold text-red-600 hover:text-red-800 underline px-2 py-1"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleConfirmClick} className="card p-6 mb-4">
@@ -1502,6 +1611,12 @@ function BookingContent() {
                   <span className="font-medium text-[#7a6b67]">Fecha y hora</span>
                   <span className="font-bold" style={{color:'var(--blue-deep)'}}>{selDate?.split('-').reverse().join('/')} · {selTime}h</span>
                 </div>
+                {appliedVoucher && (
+                  <div className="flex justify-between text-xs pt-2 border-t border-dashed border-[#e0d8d5] text-emerald-800 font-bold">
+                    <span>Bono / Cheque aplicado</span>
+                    <span className="font-mono">{appliedVoucher.code} (-{Math.min(selServices.reduce((sum, s) => sum + (s.price || 0), 0), appliedVoucher.amount).toFixed(2)}€)</span>
+                  </div>
+                )}
               </div>
 
               <p className="text-xs font-medium mb-6 text-[#7a6b67]">Para cancelar o modificar tu cita, utiliza el enlace que llegará a tu correo electrónico.</p>
@@ -1603,9 +1718,24 @@ function BookingContent() {
                     <span className="font-medium text-[#7a6b67]">Duración total:</span>
                     <span className="font-bold text-[#a8876b]">{selSlotData?.totalDur || getTotalDur(selServices)} min</span>
                   </div>
-                  <div className="flex justify-between text-sm font-black pt-1">
-                    <span className="text-[#2e2826]">Precio total:</span>
-                    <span className="text-[#a8876b] text-base">{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</span>
+                  <div className="flex justify-between text-xs pt-1 border-t border-dashed border-[#e0d8d5]">
+                    <span className="font-medium text-[#7a6b67]">Precio servicios:</span>
+                    <span className="font-bold text-[#2e2826]">{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</span>
+                  </div>
+                  {appliedVoucher && (
+                    <div className="flex justify-between text-xs text-emerald-700 font-bold">
+                      <span>Bono ({appliedVoucher.code}):</span>
+                      <span>-{Math.min(selServices.reduce((sum, s) => sum + (s.price || 0), 0), appliedVoucher.amount).toFixed(2)}€</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm font-black pt-1 border-t border-[#e0d8d5]">
+                    <span className="text-[#2e2826]">Total a pagar:</span>
+                    <span className="text-[#a8876b] text-base">
+                      {Math.max(0, selServices.reduce((sum, s) => sum + (s.price || 0), 0) - (appliedVoucher ? Math.min(selServices.reduce((sum, s) => sum + (s.price || 0), 0), appliedVoucher.amount) : 0)).toFixed(2)}€
+                      {appliedVoucher && (selServices.reduce((sum, s) => sum + (s.price || 0), 0) <= appliedVoucher.amount) && (
+                        <span className="block text-[10px] text-emerald-700 font-bold">Totalmente pagado</span>
+                      )}
+                    </span>
                   </div>
                 </div>
               </div>
