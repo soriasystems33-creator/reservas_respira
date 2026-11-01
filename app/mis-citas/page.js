@@ -59,15 +59,15 @@ function MisCitasContent() {
       <div className="max-w-xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-[#a8876b] uppercase tracking-wider mb-2 hover:underline">
-            <ArrowLeft className="w-3.5 h-3.5" /> Estetica Respira
+          <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-[#6b8a5a] uppercase tracking-wider mb-2 hover:underline">
+            <ArrowLeft className="w-3.5 h-3.5" /> Estética Respira
           </Link>
           <h1 className="text-3xl sm:text-4xl font-semibold italic text-[#2e2826]" style={{ fontFamily: "'Cormorant Garamond', serif" }}>
             Mis Citas
           </h1>
           {clientName && (
             <p className="text-xs font-semibold text-[#7a6b67] mt-1">
-              Hola, <span className="text-[#a8876b] font-bold">{clientName}</span> 👋
+              Hola, <span className="text-[#6b8a5a] font-bold">{clientName}</span> 👋
             </p>
           )}
         </div>
@@ -75,7 +75,7 @@ function MisCitasContent() {
         {/* Sin token / ID privado */}
         {!idParam && !loading && (
           <div className="card p-8 bg-white rounded-3xl border border-[#e0d8d5] text-center shadow-sm space-y-4">
-            <div className="w-14 h-14 bg-[#fbf2f3] rounded-full flex items-center justify-center mx-auto text-[#a8876b]">
+            <div className="w-14 h-14 bg-[#faf7f4] rounded-full flex items-center justify-center mx-auto text-[#6b8a5a]">
               <Lock className="w-7 h-7" />
             </div>
             <div>
@@ -99,7 +99,7 @@ function MisCitasContent() {
         {/* Loading State */}
         {loading && (
           <div className="p-12 text-center">
-            <div className="w-10 h-10 border-4 rounded-full animate-spin mx-auto mb-4 border-[#e0d8d5] border-t-[#a8876b]"></div>
+            <div className="w-10 h-10 border-4 rounded-full animate-spin mx-auto mb-4 border-[#e0d8d5] border-t-[#6b8a5a]"></div>
             <p className="text-xs font-bold uppercase tracking-widest text-[#7a6b67]">Cargando tus citas seguras...</p>
           </div>
         )}
@@ -111,7 +111,7 @@ function MisCitasContent() {
               <AlertCircle className="w-6 h-6" />
             </div>
             <p className="font-bold text-xs text-red-600 leading-relaxed">{errorMsg}</p>
-            <Link href="/" className="inline-block text-xs font-bold text-[#a8876b] uppercase hover:underline">
+            <Link href="/" className="inline-block text-xs font-bold text-[#6b8a5a] uppercase hover:underline">
               Ir a la página principal
             </Link>
           </div>
@@ -124,10 +124,10 @@ function MisCitasContent() {
             <div>
               <div className="flex items-center justify-between mb-3 px-1">
                 <h2 className="text-xs font-black uppercase tracking-wider text-[#7a6b67] flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-[#a8876b]" />
+                  <Calendar className="w-4 h-4 text-[#6b8a5a]" />
                   Próximas Citas ({upcomingApts.length})
                 </h2>
-                <Link href="/" className="text-[11px] font-bold text-[#a8876b] flex items-center gap-1 hover:underline">
+                <Link href="/" className="text-[11px] font-bold text-[#6b8a5a] flex items-center gap-1 hover:underline">
                   <PlusCircle className="w-3.5 h-3.5" /> Nueva cita
                 </Link>
               </div>
@@ -157,7 +157,7 @@ function MisCitasContent() {
                           </h3>
                         </div>
                         <div className="text-right shrink-0">
-                          <span className="text-base font-black text-[#a8876b]">
+                          <span className="text-base font-black text-[#6b8a5a]">
                             {apt.price ? `${apt.price}€` : ''}
                           </span>
                           <span className="text-[10px] text-[#7a6b67] block font-semibold">
@@ -185,13 +185,13 @@ function MisCitasContent() {
 
                       <div className="grid grid-cols-2 gap-2 text-xs text-[#7a6b67] pt-1">
                         <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-[#a8876b]" />
+                          <Clock className="w-3.5 h-3.5 text-[#6b8a5a]" />
                           <span className="font-bold text-[#2e2826]">
                             {apt.date?.split('-').reverse().join('/')} a las {apt.time}h
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 justify-end">
-                          <User className="w-3.5 h-3.5 text-[#a8876b]" />
+                          <User className="w-3.5 h-3.5 text-[#6b8a5a]" />
                           <span className="font-semibold text-[#2e2826] truncate">
                             {apt.employee || 'Especialista'}
                           </span>
@@ -262,7 +262,7 @@ export default function MisCitasPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-[#faf7f4]">
-        <div className="spinner border-[#e0d8d5] border-t-[#a8876b]"></div>
+        <div className="spinner border-[#e0d8d5] border-t-[#6b8a5a]"></div>
       </div>
     }>
       <MisCitasContent />

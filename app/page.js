@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 
 export default function BookingPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#faf7f4]"><div className="spinner border-[#e0d8d5] border-t-[#a8876b]"></div></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#faf7f4]"><div className="spinner border-[#e0d8d5] border-t-[#6b8a5a]"></div></div>}>
       <BookingContent />
     </Suspense>
   );
@@ -948,13 +948,13 @@ function BookingContent() {
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background:'var(--blue)'}}>
                 <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
               </div>
-              <h2 className="text-xl font-semibold italic mb-1 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Estetica Respira</h2>
-              <p className="text-sm font-bold text-[#a8876b] mb-3">Centro de transformación y belleza</p>
+              <h2 className="text-xl font-semibold italic mb-1 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Estética Respira</h2>
+              <p className="text-sm font-bold text-[#6b8a5a] mb-3">Centro de transformación y belleza</p>
               <p className="text-sm font-semibold text-[#2e2826] mb-1">📍 C/ Santa Margalida 7</p>
               <p className="text-xs font-medium text-[#7a6b67]">Artà, Illes Balears</p>
               <div className="rounded-2xl overflow-hidden mb-4 shadow-sm border border-[#e0d8d5] h-40">
                 <iframe
-                  title="Ubicación Estetica Respira"
+                  title="Ubicación Estética Respira"
                   src="https://maps.google.com/maps?q=C%2F%20Santa%20Margalida%207%2C%20Art%C3%A0%2C%20Illes%20Balears&output=embed"
                   width="100%" height="100%" style={{border:0}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
                 />
@@ -963,7 +963,7 @@ function BookingContent() {
                 href="https://www.google.com/maps/search/?api=1&query=C%2F+Santa+Margalida+7+Arta+Illes+Balears"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block text-xs font-bold text-[#a8876b] mb-4 underline underline-offset-2"
+                className="block text-xs font-bold text-[#6b8a5a] mb-4 underline underline-offset-2"
               >
                 Abrir en Google Maps →
               </a>
@@ -981,12 +981,12 @@ function BookingContent() {
       <header className="sticky top-0 z-50 border-b shadow-sm" style={{background:'rgba(250,247,244,.95)', backdropFilter:'blur(20px)', borderColor:'var(--brown-light)'}}>
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#f3ece4] overflow-hidden" onClick={() => window.location.href='/'} style={{cursor:'pointer'}}>
-              <img src="/logo-icono.png" alt="Estetica Respira" className="w-full h-full object-cover" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white shadow-xs border border-[#e0d8d5] overflow-hidden p-0.5" onClick={() => window.location.href='/'} style={{cursor:'pointer'}}>
+              <img src="/logo-icono.png" alt="Estética Respira" className="w-full h-full object-contain" />
             </div>
             <div>
-              <h1 className="text-base tracking-tight leading-none font-semibold italic text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Estetica Respira</h1>
-              <p className="text-[9px] font-bold uppercase tracking-widest text-[#a8876b]">Reserva tu cita online</p>
+              <h1 className="text-base tracking-tight leading-none font-semibold italic text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Estética Respira</h1>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-[#6b8a5a]">Reserva tu cita online</p>
             </div>
           </div>
 
@@ -995,7 +995,7 @@ function BookingContent() {
               <div className="w-2 h-2 rounded-full bg-green-500"></div>
               <div className="absolute inset-0 w-2 h-2 rounded-full bg-green-500 animate-ping opacity-75"></div>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#a8876b]">En línea</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#6b8a5a]">En línea</span>
           </div>
 
         </div>
@@ -1032,11 +1032,11 @@ function BookingContent() {
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="font-medium text-[#7a6b67]">Fecha</span>
-                    <span className="font-bold text-[#a8876b]">{existingReserva.date?.split('-').reverse().join('/')}</span>
+                    <span className="font-bold text-[#6b8a5a]">{existingReserva.date?.split('-').reverse().join('/')}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="font-medium text-[#7a6b67]">Hora</span>
-                    <span className="font-bold text-[#a8876b]">{existingReserva.time}h</span>
+                    <span className="font-bold text-[#6b8a5a]">{existingReserva.time}h</span>
                   </div>
                 </div>
 
@@ -1059,7 +1059,7 @@ function BookingContent() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                <div className="spinner mb-4 border-[#e0d8d5] border-t-[#a8876b]"></div>
+                <div className="spinner mb-4 border-[#e0d8d5] border-t-[#6b8a5a]"></div>
                 <p className="text-sm font-medium">Buscando tu reserva...</p>
               </div>
             )}
@@ -1069,14 +1069,14 @@ function BookingContent() {
         {!isCancelMode && step === 0 && (
           <div className="min-h-[80vh] flex flex-col items-center justify-center text-center py-12 animate-[fadeIn_0.5s_ease]">
             <div className="mb-8">
-              <div className="w-28 h-28 rounded-3xl mx-auto shadow-xl mb-6 overflow-hidden" style={{boxShadow:'0 16px 48px rgba(91,143,160,.2)'}}>
-                <img src="/logo-icono.png" alt="Estetica Respira" className="w-full h-full object-cover" />
+              <div className="w-28 h-28 rounded-3xl mx-auto shadow-xl mb-6 overflow-hidden bg-white p-2 border border-[#e0d8d5]" style={{boxShadow:'0 16px 48px rgba(107,138,90,.2)'}}>
+                <img src="/logo-icono.png" alt="Estética Respira" className="w-full h-full object-contain" />
               </div>
             </div>
-            <h1 className="text-5xl font-semibold italic mb-2 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Estetica Respira</h1>
-            <p className="text-base font-medium mb-2 text-[#a8876b]">Centro de transformación y belleza</p>
+            <h1 className="text-5xl font-semibold italic mb-2 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Estética Respira</h1>
+            <p className="text-base font-medium mb-2 text-[#6b8a5a]">Centro de transformación y belleza</p>
             <p className="text-sm font-medium mb-10 max-w-xs text-[#7a6b67]">Centro de transformación y belleza en Artà. Belleza, calma y equilibrio.</p>
-            <button onClick={() => setStep(1)} className="btn-primary text-base px-10 py-4 rounded-2xl shadow-xl active:scale-95" style={{boxShadow:'0 12px 32px rgba(91,143,160,.3)'}}>
+            <button onClick={() => setStep(1)} className="btn-primary text-base px-10 py-4 rounded-2xl shadow-xl active:scale-95" style={{boxShadow:'0 12px 32px rgba(107,138,90,.3)'}}>
               <CalendarPlus className="w-5 h-5" /> Reservar cita
             </button>
             <p className="text-xs font-medium mt-6 text-[#e0d8d5]">Reserva online · Sin esperas · 100% gratis</p>
@@ -1152,8 +1152,8 @@ function BookingContent() {
                           </div>
                         </div>
                         <div style={{textAlign:'right', flexShrink:0}}>
-                          <span className="text-lg font-bold text-[#a8876b]">{s.price}€</span>
-                          {isSel && <div className="text-[11px] font-bold mt-1 text-[#a8876b]">✓ Elegido</div>}
+                          <span className="text-lg font-bold text-[#6b8a5a]">{s.price}€</span>
+                          {isSel && <div className="text-[11px] font-bold mt-1 text-[#6b8a5a]">✓ Elegido</div>}
                         </div>
                       </div>
                     );
@@ -1171,9 +1171,9 @@ function BookingContent() {
               <p className="text-sm font-medium mb-3 sm:mb-4 text-[#7a6b67]">Elige día y hora disponible</p>
               
               {!selDate && nextAvailable && (
-                <div className="mb-4 p-3 sm:p-3.5 rounded-2xl border bg-gradient-to-r from-white via-[#f3ece4] to-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs" style={{ borderColor: 'var(--blue-mid)' }}>
+                <div className="mb-4 p-3 sm:p-3.5 rounded-2xl border bg-gradient-to-r from-white via-[#f3f7ee] to-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs" style={{ borderColor: 'var(--blue-mid)' }}>
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#a8876b] shrink-0" />
+                    <Sparkles className="w-4 h-4 text-[#6b8a5a] shrink-0" />
                     <span className="text-xs text-[#2e2826]">
                       Próxima cita libre más cercana: <strong>{formatFriendlyDateShort(nextAvailable.date)} a las {nextAvailable.time}h</strong> ({nextAvailable.empName})
                     </span>
@@ -1181,7 +1181,7 @@ function BookingContent() {
                   <button
                     type="button"
                     onClick={() => goToNextAvailable(nextAvailable)}
-                    className="text-xs font-bold text-[#a8876b] hover:underline flex items-center gap-1 self-end sm:self-auto cursor-pointer"
+                    className="text-xs font-bold text-[#6b8a5a] hover:underline flex items-center gap-1 self-end sm:self-auto cursor-pointer"
                   >
                     <span>Ir directo a esta cita</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -1232,15 +1232,15 @@ function BookingContent() {
               {selDate && (
                 <div id="slots-section" className="mt-4 pt-4 border-t border-[#e0d8d5]">
                   <div className="flex items-center gap-2 mb-3">
-                    <Clock className="w-4 h-4 text-[#a8876b]" />
+                    <Clock className="w-4 h-4 text-[#6b8a5a]" />
                     <h3 className="font-bold text-sm uppercase" style={{color:'var(--blue-deep)'}}>Selecciona hora</h3>
-                    <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-lg capitalize bg-[#f3ece4] text-[#a8876b]">
+                    <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-lg capitalize bg-[#f3f7ee] text-[#6b8a5a]">
                       {selDate.split('-').reverse().join('/')}
                     </span>
                   </div>
                   
                   {loadingSlots ? (
-                    <div className="flex justify-center py-4"><div className="spinner border-[#e0d8d5] border-t-[#a8876b]"></div></div>
+                    <div className="flex justify-center py-4"><div className="spinner border-[#e0d8d5] border-t-[#6b8a5a]"></div></div>
                   ) : (
                     <>
                       {availableSlots.filter(s => s.free).length === 0 ? (
@@ -1254,14 +1254,14 @@ function BookingContent() {
 
                           {/* Banner / Tarjeta de Próxima Cita Disponible */}
                           {isSearchingNext ? (
-                            <div className="p-4 rounded-2xl border bg-gradient-to-r from-white to-[#f3ece4] flex items-center justify-center gap-3 text-xs text-[#a8876b] font-semibold animate-pulse shadow-xs" style={{ borderColor: 'var(--blue-mid)' }}>
-                              <div className="w-4 h-4 border-2 border-[#e0d8d5] border-t-[#a8876b] rounded-full animate-spin" />
+                            <div className="p-4 rounded-2xl border bg-gradient-to-r from-white to-[#f3f7ee] flex items-center justify-center gap-3 text-xs text-[#6b8a5a] font-semibold animate-pulse shadow-xs" style={{ borderColor: 'var(--blue-mid)' }}>
+                              <div className="w-4 h-4 border-2 border-[#e0d8d5] border-t-[#6b8a5a] rounded-full animate-spin" />
                               <span>Buscando el próximo hueco disponible...</span>
                             </div>
                           ) : nextAvailable ? (
-                            <div className="p-4 sm:p-5 rounded-2xl border-2 shadow-sm text-left transition-all" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f3ece4 100%)', borderColor: 'var(--blue-mid)' }}>
+                            <div className="p-4 sm:p-5 rounded-2xl border-2 shadow-sm text-left transition-all" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f3f7ee 100%)', borderColor: 'var(--blue-mid)' }}>
                               <div className="flex items-center justify-between gap-2 mb-2">
-                                <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-[#a8876b]">
+                                <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-[#6b8a5a]">
                                   <Sparkles className="w-4 h-4 text-[#d99ba1]" />
                                   <span>Próxima cita disponible</span>
                                 </div>
@@ -1276,7 +1276,7 @@ function BookingContent() {
                                     {formatFriendlyDateLong(nextAvailable.date)}
                                   </p>
                                   <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-[#7a6b67]">
-                                    <span className="font-extrabold text-[#a8876b] bg-white px-2.5 py-1 rounded-lg border border-[#e0d8d5] shadow-xs">
+                                    <span className="font-extrabold text-[#6b8a5a] bg-white px-2.5 py-1 rounded-lg border border-[#e0d8d5] shadow-xs">
                                       🕒 {nextAvailable.time} h
                                     </span>
                                     <span>•</span>
@@ -1430,8 +1430,8 @@ function BookingContent() {
 
         {step === 3 && (
           <div className="step active">
-            <div className="card p-5 mb-4 bg-gradient-to-br from-[#fbf2f3] to-[#f3ece4] border-[#d99ba1]">
-              <p className="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2 text-[#a8876b]">
+            <div className="card p-5 mb-4 bg-gradient-to-br from-[#faf7f4] to-[#f3f7ee] border-[#d99ba1]">
+              <p className="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2 text-[#6b8a5a]">
                 <ClipboardCheck className="w-4 h-4" /> Resumen de tu cita
               </p>
               <div className="space-y-2 text-sm">
@@ -1440,7 +1440,7 @@ function BookingContent() {
                   <div className="text-right space-y-1">
                     {selServices.map((s, idx) => (
                       <div key={idx} className="text-xs font-bold" style={{color:'var(--brown)'}}>
-                        {s.name} <span className="text-[10px] text-[#a8876b] font-normal">({slotAssign?.[idx] || s.employee || 'Especialista'})</span>
+                        {s.name} <span className="text-[10px] text-[#6b8a5a] font-normal">({slotAssign?.[idx] || s.employee || 'Especialista'})</span>
                       </div>
                     ))}
                   </div>
@@ -1480,7 +1480,7 @@ function BookingContent() {
             {/* Módulo de Bono o Cheque Regalo */}
             <div className="card p-4 sm:p-5 mb-4 bg-white border border-[#e0d8d5] shadow-sm">
               <div className="flex items-center gap-2 mb-2.5">
-                <Ticket className="w-4 h-4 text-[#a8876b]" />
+                <Ticket className="w-4 h-4 text-[#6b8a5a]" />
                 <h4 className="text-xs font-black uppercase tracking-wider text-[#2e2826]">¿Tienes un bono o cheque regalo?</h4>
               </div>
               {!appliedVoucher ? (
@@ -1560,9 +1560,9 @@ function BookingContent() {
                   </div>
                   {showTerms && (
                     <div className="px-4 pb-4 space-y-4 text-xs text-[#7a6b67] leading-relaxed max-h-52 overflow-y-auto border-t border-[#e0d8d5] pt-4">
-                      <div><h4 className="font-bold text-[#2e2826] text-xs uppercase tracking-widest mb-2">1. Condiciones de la Cita</h4><p>La cita se confirma una vez recibida y procesada por el sistema. Estetica Respira se reserva el derecho de modificar o cancelar la cita en caso de incidencias técnicas o de agenda, informando al cliente por los medios facilitados. En caso de no presentarse sin aviso previo con al menos 3 horas de antelación, el estudio podrá requerir una confirmación previa para futuras reservas.</p></div>
+                      <div><h4 className="font-bold text-[#2e2826] text-xs uppercase tracking-widest mb-2">1. Condiciones de la Cita</h4><p>La cita se confirma una vez recibida y procesada por el sistema. Estética Respira se reserva el derecho de modificar o cancelar la cita en caso de incidencias técnicas o de agenda, informando al cliente por los medios facilitados. En caso de no presentarse sin aviso previo con al menos 3 horas de antelación, el estudio podrá requerir una confirmación previa para futuras reservas.</p></div>
                       <div><h4 className="font-bold text-[#2e2826] text-xs uppercase tracking-widest mb-2">2. Responsabilidad del Cliente</h4><p>El cliente se compromete a facilitar datos veraces y actualizados. La información sobre alergias, sensibilidades cutáneas o condiciones médicas se facilita voluntariamente; el estudio hará lo posible por atenderlas pero no puede garantizar la ausencia total de reacciones en tratamientos de belleza.</p></div>
-                      <div><h4 className="font-bold text-[#2e2826] text-xs uppercase tracking-widest mb-2">3. Protección de Datos (RGPD)</h4><p><strong>Responsable:</strong> Estetica Respira · C/ Santa Margalida 7, Artà (Illes Balears).</p><p><strong>Finalidad:</strong> Gestionar citas, enviar recordatorios, comunicar cambios o cancelaciones, enviar encuesta post-visita por email, y mantener histórico de visitas.</p><p><strong>Base legítima:</strong> Ejecución de un contrato (la cita) y consentimiento explícito.</p><p><strong>Destinatarios:</strong> No se cederán a terceros salvo obligación legal. Servicios cloud (Vercel, Google Cloud) acogidos al Privacy Framework UE-EEUU.</p><p><strong>Plazo:</strong> Durante la relación comercial y hasta 5 años después.</p><p><strong>Derechos:</strong> Acceso, rectificación, supresión, limitación, portabilidad y oposición escribiendo a <strong>reservas.esteticarespira@gmail.com</strong>. Reclamación ante la AEPD.</p><p><strong>Comunicaciones:</strong> Al facilitar email y teléfono, el cliente consiente recibir comunicaciones de su cita y un email post-visita de valoración, sin publicidad comercial.</p></div>
+                      <div><h4 className="font-bold text-[#2e2826] text-xs uppercase tracking-widest mb-2">3. Protección de Datos (RGPD)</h4><p><strong>Responsable:</strong> Estética Respira · C/ Santa Margalida 7, Artà (Illes Balears).</p><p><strong>Finalidad:</strong> Gestionar citas, enviar recordatorios, comunicar cambios o cancelaciones, enviar encuesta post-visita por email, y mantener histórico de visitas.</p><p><strong>Base legítima:</strong> Ejecución de un contrato (la cita) y consentimiento explícito.</p><p><strong>Destinatarios:</strong> No se cederán a terceros salvo obligación legal. Servicios cloud (Vercel, Google Cloud) acogidos al Privacy Framework UE-EEUU.</p><p><strong>Plazo:</strong> Durante la relación comercial y hasta 5 años después.</p><p><strong>Derechos:</strong> Acceso, rectificación, supresión, limitación, portabilidad y oposición escribiendo a <strong>reservas.esteticarespira@gmail.com</strong>. Reclamación ante la AEPD.</p><p><strong>Comunicaciones:</strong> Al facilitar email y teléfono, el cliente consiente recibir comunicaciones de su cita y un email post-visita de valoración, sin publicidad comercial.</p></div>
                     </div>
                   )}
                   <div className="flex items-start gap-3 p-4 border-t border-[#e0d8d5] bg-[#faf7f4]">
@@ -1596,11 +1596,11 @@ function BookingContent() {
         {step === 4 && (
           <div className="step active">
             <div className="card p-10 text-center">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-gradient-to-br from-[#d99ba1] to-[#a8876b]" style={{boxShadow:'0 12px 32px rgba(91,143,160,.3)'}}>
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-gradient-to-br from-[#7fa85f] to-[#6b8a5a]" style={{boxShadow:'0 12px 32px rgba(107,138,90,.3)'}}>
                 <Check className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-3xl font-semibold italic mb-2 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>¡Cita confirmada!</h2>
-              <p className="font-medium mb-6 text-[#7a6b67]">Te esperamos en Estetica Respira. Hasta pronto 🌸</p>
+              <p className="font-medium mb-6 text-[#7a6b67]">Te esperamos en Estética Respira. Hasta pronto 🌸</p>
 
               <div className="rounded-2xl p-5 text-left space-y-3 mb-8 border bg-[#faf7f4] border-[#e0d8d5]">
                 <div className="flex justify-between text-sm">
@@ -1639,13 +1639,13 @@ function BookingContent() {
             {step === 1 && selServices.length > 0 && (
               <div className="flex items-center justify-between mb-2 px-1">
                 <p className="text-xs font-medium truncate mr-3 text-[#7a6b67]">{selServices.map(s => s.name).join(' + ')} · {getTotalDur(selServices)} min</p>
-                <p className="text-sm font-bold whitespace-nowrap text-[#a8876b]">{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</p>
+                <p className="text-sm font-bold whitespace-nowrap text-[#6b8a5a]">{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</p>
               </div>
             )}
             {step === 2 && selServices.length > 0 && (
               <div className="flex items-center justify-between mb-2 px-1">
                 <p className="text-xs font-medium truncate mr-3 text-[#7a6b67]">{selServices.map(s => s.name).join(' + ')} · {getTotalDur(selServices)} min</p>
-                <p className="text-sm font-bold whitespace-nowrap text-[#a8876b]">{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</p>
+                <p className="text-sm font-bold whitespace-nowrap text-[#6b8a5a]">{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</p>
               </div>
             )}
             {step === 1 && showSvcConfirm && (
@@ -1674,9 +1674,9 @@ function BookingContent() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-md max-h-[90vh] flex flex-col bg-[#faf7f4] rounded-3xl overflow-hidden border border-[#e0d8d5] shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             {/* Header */}
-            <div className="bg-gradient-to-br from-[#fbf2f3] to-[#f3ece4] border-b border-[#d99ba1] p-4 text-center shrink-0">
+            <div className="bg-gradient-to-br from-[#faf7f4] to-[#f3f7ee] border-b border-[#d99ba1] p-4 text-center shrink-0">
               <div className="flex items-center justify-center gap-2 mb-0.5">
-                <AlertCircle className="w-5 h-5 text-[#a8876b]" />
+                <AlertCircle className="w-5 h-5 text-[#6b8a5a]" />
                 <h3 className="text-lg font-bold text-[#2e2826] italic" style={{fontFamily:"'Cormorant Garamond',serif"}}>Confirmación de tu reserva</h3>
               </div>
               <p className="text-[11px] text-[#7a6b67] font-medium">Revisa tus servicios y el local antes de confirmar</p>
@@ -1703,7 +1703,7 @@ function BookingContent() {
                       <li key={idx} className="flex justify-between items-start text-xs border-b border-dashed border-[#faf7f4] pb-1.5 last:border-0 last:pb-0">
                         <div className="pr-3">
                           <span className="font-bold text-[#2e2826] block">• {s.name}</span>
-                          <span className="text-[10px] text-[#a8876b] font-semibold block ml-2">
+                          <span className="text-[10px] text-[#6b8a5a] font-semibold block ml-2">
                             con {slotAssign?.[idx] || s.employee || 'Especialista asignada'}
                           </span>
                         </div>
@@ -1720,7 +1720,7 @@ function BookingContent() {
                   </div>
                   <div className="flex justify-between">
                     <span className="font-medium text-[#7a6b67]">Duración total:</span>
-                    <span className="font-bold text-[#a8876b]">{selSlotData?.totalDur || getTotalDur(selServices)} min</span>
+                    <span className="font-bold text-[#6b8a5a]">{selSlotData?.totalDur || getTotalDur(selServices)} min</span>
                   </div>
                   <div className="flex justify-between text-xs pt-1 border-t border-dashed border-[#e0d8d5]">
                     <span className="font-medium text-[#7a6b67]">Precio servicios:</span>
@@ -1734,7 +1734,7 @@ function BookingContent() {
                   )}
                   <div className="flex justify-between text-sm font-black pt-1 border-t border-[#e0d8d5]">
                     <span className="text-[#2e2826]">Total a pagar:</span>
-                    <span className="text-[#a8876b] text-base">
+                    <span className="text-[#6b8a5a] text-base">
                       {Math.max(0, selServices.reduce((sum, s) => sum + (s.price || 0), 0) - (appliedVoucher ? Math.min(selServices.reduce((sum, s) => sum + (s.price || 0), 0), appliedVoucher.amount) : 0)).toFixed(2)}€
                       {appliedVoucher && (selServices.reduce((sum, s) => sum + (s.price || 0), 0) <= appliedVoucher.amount) && (
                         <span className="block text-[10px] text-emerald-700 font-bold">Totalmente pagado</span>

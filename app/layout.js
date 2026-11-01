@@ -15,8 +15,13 @@ const nunito = Nunito({
 });
 
 export const metadata = {
-  title: 'Reservar cita - Estetica Respira',
-  description: 'Reserva tu cita online en Estetica Respira, centro de transformación y belleza en Artà.',
+  title: 'Estética Respira | Reserva tu cita online',
+  description: 'Reserva tu cita online en Estética Respira. Centro de transformación y belleza en Artà.',
+  icons: {
+    icon: '/logo-icono.png',
+    shortcut: '/logo-icono.png',
+    apple: '/logo-icono.png',
+  },
 };
 
 export default function RootLayout({ children }) {

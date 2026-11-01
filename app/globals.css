@@ -3,11 +3,12 @@
 :root {
   --cream: #faf7f4;
   --cream-dark: #f0ebe6;
-  --blue: #f3ece4;
-  --blue-mid: #d99ba1;
-  --blue-deep: #a8876b;
-  --rose: #c9b29b;
-  --rose-light: #f3ece4;
+  --blue: #f3f7ee;
+  --blue-mid: #7fa85f;
+  --blue-deep: #6b8a5a;
+  --sidebar-bg: #f3f7ee;
+  --rose: #d4a0a7;
+  --rose-light: #f5e8ea;
   --brown: #2e2826;
   --brown-mid: #7a6b67;
   --brown-light: #e0d8d5;
@@ -15,8 +16,10 @@
 }
 
 body {
-  background: linear-gradient(160deg, #fbf2f3 0%, #f3ece4 50%, #fbf2f3 100%);
+  background: linear-gradient(160deg, #faf7f4 0%, #f3f7ee 50%, #faf7f4 100%);
   min-height: 100vh;
+  color: var(--brown);
+  font-family: var(--font-nunito), 'Nunito', sans-serif;
 }
 
 .step {
@@ -40,7 +43,7 @@ body {
 }
 
 .service-card {
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   border: 2px solid var(--brown-light);
   border-radius: 20px;
@@ -50,19 +53,19 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  box-shadow: 0 2px 8px rgba(46, 40, 38, 0.05);
+  box-shadow: 0 2px 8px rgba(46, 40, 38, 0.04);
 }
 
 .service-card:hover {
   border-color: var(--blue-mid);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(201, 169, 110, 0.25);
+  box-shadow: 0 8px 24px rgba(107, 138, 90, 0.14);
 }
 
 .service-card.selected {
   border-color: var(--blue-deep) !important;
-  background: linear-gradient(135deg, #fbf2f3, #f3ece4);
-  box-shadow: 0 8px 24px rgba(184, 148, 90, 0.15);
+  background: linear-gradient(135deg, #ffffff, #f3f7ee);
+  box-shadow: 0 8px 24px rgba(107, 138, 90, 0.18);
 }
 
 .time-slot {
@@ -80,7 +83,7 @@ body {
 
 .time-slot:hover {
   border-color: var(--blue-deep);
-  background: #fdf9f2;
+  background: #f3f7ee;
   color: var(--blue-deep);
 }
 
@@ -89,6 +92,7 @@ body {
   color: white;
   border-color: var(--blue-deep);
   transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(107, 138, 90, 0.25);
 }
 
 .time-slot.occupied {
@@ -114,13 +118,14 @@ body {
 
 .day-btn:hover:not(.day-closed):not(.day-past) {
   border-color: var(--blue-mid);
-  background: var(--cream);
+  background: #f3f7ee;
 }
 
 .day-btn.day-selected {
   border-color: var(--blue-deep) !important;
   background: var(--blue-deep);
   color: white;
+  box-shadow: 0 4px 12px rgba(107, 138, 90, 0.25);
 }
 
 .day-btn.day-closed {
@@ -156,7 +161,7 @@ body {
 .step-dot.active {
   background: var(--blue-deep);
   color: white;
-  box-shadow: 0 0 0 4px rgba(184, 148, 90, 0.2);
+  box-shadow: 0 0 0 4px rgba(107, 138, 90, 0.2);
 }
 
 .step-dot.done {
@@ -190,7 +195,7 @@ body {
 .card {
   background: white;
   border-radius: 24px;
-  box-shadow: 0 4px 24px rgba(46, 40, 38, 0.07);
+  box-shadow: 0 4px 24px rgba(46, 40, 38, 0.06);
   border: 1px solid var(--brown-light);
 }
 
@@ -209,7 +214,7 @@ body {
 
 .input-field:focus {
   border-color: var(--blue-deep);
-  box-shadow: 0 0 0 3px rgba(184, 148, 90, 0.12);
+  box-shadow: 0 0 0 3px rgba(107, 138, 90, 0.15);
 }
 
 .input-field::placeholder {
@@ -226,16 +231,17 @@ body {
   font-size: 14px;
   border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 4px 16px rgba(107, 138, 90, 0.25);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #42748a;
+  background: #5a774b;
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(184, 148, 90, 0.3);
+  box-shadow: 0 8px 24px rgba(107, 138, 90, 0.35);
 }
 
 .btn-primary:disabled {
@@ -263,6 +269,7 @@ body {
 .btn-back:hover {
   border-color: var(--blue-deep);
   color: var(--blue-deep);
+  background: #f3f7ee;
 }
 
 .cat-pill {
@@ -282,7 +289,7 @@ body {
 }
 
 .cat-pill:hover {
-  background: #fdf9f2;
+  background: #f3f7ee;
   color: var(--blue-deep);
   border-color: var(--blue-deep);
 }
@@ -291,6 +298,7 @@ body {
   background: var(--blue-deep);
   color: white;
   border-color: var(--blue-deep);
+  box-shadow: 0 2px 8px rgba(107, 138, 90, 0.22);
 }
 
 .spinner {

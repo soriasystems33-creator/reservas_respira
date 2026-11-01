@@ -406,15 +406,18 @@ function ModifyContent() {
     <div className="flex flex-col items-center justify-center p-4 min-h-screen" style={{background:'var(--cream)'}}>
       <div className="max-w-md w-full relative mt-6">
         <div className="text-center mb-6">
-          <h1 className="text-4xl font-semibold italic mb-1 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Estetica Respira</h1>
-          <p className="text-sm font-medium text-[#a8876b]">Centro de transformación y belleza</p>
+          <div className="w-16 h-16 rounded-2xl mx-auto mb-3 shadow-sm overflow-hidden bg-white p-1 border border-[#e0d8d5]">
+            <img src="/logo-icono.png" alt="Estética Respira" className="w-full h-full object-contain" />
+          </div>
+          <h1 className="text-4xl font-semibold italic mb-1 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Estética Respira</h1>
+          <p className="text-sm font-medium text-[#6b8a5a]">Centro de transformación y belleza</p>
         </div>
 
         <div className="card overflow-hidden bg-white rounded-[24px] shadow-[0_4px_24px_rgba(46,40,38,.07)] border border-[#e0d8d5]">
 
           {status === 'loading' && (
             <div className="p-10 text-center">
-              <div className="w-10 h-10 border-4 rounded-full animate-spin mx-auto mb-4 border-[#e0d8d5] border-t-[#a8876b]"></div>
+              <div className="w-10 h-10 border-4 rounded-full animate-spin mx-auto mb-4 border-[#e0d8d5] border-t-[#6b8a5a]"></div>
               <p className="text-xs font-bold uppercase tracking-widest text-[#7a6b67]">Buscando tu cita...</p>
             </div>
           )}
@@ -426,7 +429,7 @@ function ModifyContent() {
               </div>
               <p className="font-bold text-[#c0464f]">Esta cita ya fue cancelada y no puede modificarse.</p>
               <div className="space-y-2 mt-4">
-                <Link href={`/mis-citas${id ? `?id=${id}` : ''}`} className="block bg-[#a8876b] text-white px-6 py-3 rounded-2xl font-bold text-sm text-center shadow-sm">
+                <Link href={`/mis-citas${id ? `?id=${id}` : ''}`} className="block bg-[#6b8a5a] text-white px-6 py-3 rounded-2xl font-bold text-sm text-center shadow-sm">
                   Ver todas mis citas
                 </Link>
                 <Link href="/" className="block border border-[#e0d8d5] text-[#7a6b67] bg-white px-6 py-3 rounded-2xl font-bold text-sm text-center">
@@ -443,7 +446,7 @@ function ModifyContent() {
               </div>
               <p className="font-bold text-[#c0464f]">{errorMsg}</p>
               <div className="space-y-2 mt-4">
-                <Link href={`/mis-citas${id ? `?id=${id}` : ''}`} className="block bg-[#a8876b] text-white px-6 py-3 rounded-2xl font-bold text-sm text-center shadow-sm">
+                <Link href={`/mis-citas${id ? `?id=${id}` : ''}`} className="block bg-[#6b8a5a] text-white px-6 py-3 rounded-2xl font-bold text-sm text-center shadow-sm">
                   Ver mis citas
                 </Link>
                 <Link href="/" className="block border border-[#e0d8d5] text-[#7a6b67] bg-white px-6 py-3 rounded-2xl font-bold text-sm text-center">
@@ -464,14 +467,14 @@ function ModifyContent() {
               </div>
 
               <div className="rounded-2xl p-4 text-left space-y-2 mb-5 border bg-[#faf7f4] border-[#e0d8d5]">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-[#a8876b] mb-2">Cita actual</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-[#6b8a5a] mb-2">Cita actual</p>
                 <div className="flex justify-between text-sm">
                   <span className="font-medium text-[#7a6b67]">Servicio</span>
                   <span className="font-bold text-right max-w-[60%] text-[#2e2826]">{apt.service}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="font-medium text-[#7a6b67]">Fecha y hora</span>
-                  <span className="font-bold text-[#a8876b]">{apt.date?.split('-').reverse().join('/')} · {apt.time}h</span>
+                  <span className="font-bold text-[#6b8a5a]">{apt.date?.split('-').reverse().join('/')} · {apt.time}h</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="font-medium text-[#7a6b67]">Cliente</span>
@@ -520,14 +523,14 @@ function ModifyContent() {
                 {selDate && (
                   <div className="mt-3 pt-3 border-t border-[#e0d8d5]">
                     <div className="flex items-center gap-2 mb-2">
-                      <Clock className="w-4 h-4 text-[#a8876b]" />
+                      <Clock className="w-4 h-4 text-[#6b8a5a]" />
                       <h3 className="font-bold text-sm uppercase text-[#2e2826]">Nueva hora</h3>
-                      <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-lg bg-[#f3ece4] text-[#a8876b]">
+                      <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-lg bg-[#f3f7ee] text-[#6b8a5a]">
                         {selDate.split('-').reverse().join('/')}
                       </span>
                     </div>
                     {loadingSlots ? (
-                      <div className="flex justify-center py-4"><div className="spinner !border-[#e0d8d5] !border-t-[#a8876b]"></div></div>
+                      <div className="flex justify-center py-4"><div className="spinner !border-[#e0d8d5] !border-t-[#6b8a5a]"></div></div>
                     ) : (
                       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                         {availableSlots.length === 0 ? (
@@ -570,7 +573,7 @@ function ModifyContent() {
                 ¡Cita modificada!
               </div>
               <p className="text-sm font-medium text-[#7a6b67]">Recibirás un correo de confirmación con los nuevos detalles.</p>
-              <Link href="/" className="block mt-4 bg-[#a8876b] text-white px-6 py-3 rounded-2xl font-bold text-sm text-center">
+              <Link href="/" className="block mt-4 bg-[#6b8a5a] text-white px-6 py-3 rounded-2xl font-bold text-sm text-center">
                 Volver al inicio
               </Link>
             </div>
@@ -586,7 +589,7 @@ export default function ModifyPage() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-screen" style={{background:'var(--cream)'}}>
-        <div className="w-10 h-10 border-4 rounded-full animate-spin border-[#e0d8d5] border-t-[#a8876b]"></div>
+        <div className="w-10 h-10 border-4 rounded-full animate-spin border-[#e0d8d5] border-t-[#6b8a5a]"></div>
       </div>
     }>
       <ModifyContent />
