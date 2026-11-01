@@ -1,17 +1,18 @@
-import { Cormorant_Garamond, Nunito } from 'next/font/google';
+import { Plus_Jakarta_Sans, Nunito } from 'next/font/google';
 import './globals.css';
 
-const cormorant = Cormorant_Garamond({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  style: ['normal', 'italic'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-cormorant',
+  display: 'swap',
 });
 
 const nunito = Nunito({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-nunito',
+  display: 'swap',
 });
 
 export const metadata = {
@@ -27,7 +28,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es">
-      <body className={`${cormorant.variable} ${nunito.variable} antialiased`}>
+      <body className={`${jakarta.variable} ${nunito.variable} antialiased`}>
         {children}
       </body>
     </html>
