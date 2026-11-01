@@ -1,157 +1,152 @@
 'use client';
-import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
-import { CalendarPlus, ChevronLeft, ChevronRight, Clock, ClipboardCheck, ArrowLeft, ArrowRight, Check, PlusCircle, AlertCircle, Trash2, Sparkles, Info, CalendarX, Ticket } from 'lucide-react';
+
+import React, { useState, useEffect, useMemo, useRef, useCallback, Suspense } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import {
+  Clock,
+  ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  ChevronUp,
+  ArrowLeft,
+  Check,
+  CheckCircle2,
+  MapPin,
+  Star,
+  Share2,
+  Heart,
+  Search,
+  ShieldCheck,
+  Navigation,
+  ExternalLink,
+  Image as ImageIcon,
+  X,
+  Info,
+  Phone,
+  Tag,
+  Calendar,
+  MessageCircle,
+  Loader2,
+  Sparkles,
+  Trash2,
+  Ticket,
+  Sun,
+  Moon,
+  Users
+} from 'lucide-react';
 
 export default function BookingPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-[#faf7f4]"><div className="spinner border-[#e0d8d5] border-t-[#6b8a5a]"></div></div>}>
-      <BookingContent />
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#faf7f4]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-3 border-stone-200 border-t-[#6b8a5a] rounded-full animate-spin"></div>
+          <p className="text-xs font-semibold text-stone-500 tracking-wide uppercase">Cargando Respira...</p>
+        </div>
+      </div>
+    }>
+      <BookingFunnelContent />
     </Suspense>
   );
 }
 
-function BookingContent() {
-  const [selSlotData, setSelSlotData] = useState(null);
+// Fotografías sectoriales de alta calidad curadas para Respira (Wellness, Estética, Masaje y Manicura)
+const RESPIRA_GALLERY = [
+  'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1607779097040-26e80aa78e66?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80'
+];
 
-  const getTotalDur = function(svcs) {
-    if (!svcs || svcs.length === 0) return 0;
-    if (selSlotData && selSlotData.totalDur) return selSlotData.totalDur;
-    return svcs.reduce(function(sum, s) { return sum + parseInt(s.duration || 0, 10); }, 0);
-  };
+const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const MONTH_NAMES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+function BookingFunnelContent() {
+  // 1. DATOS PRINCIPALES DE SUPABASE
   const [data, setData] = useState({ services: [], categories: [], employees: [], settings: null });
-  const settingsRef = useRef(data.settings);
-  const employeesRef = useRef(data.employees);
   const [loading, setLoading] = useState(true);
-  const [showLocation, setShowLocation] = useState(true);
-  
-  const [step, setStep] = useState(0); // 0 = intro, 1 = service, 2 = datetime, 3 = info, 4 = success
-  const [activeCat, setActiveCat] = useState('all');
-  
-  const [selServices, setSelServices] = useState([]);
-  const [showSvcConfirm, setShowSvcConfirm] = useState(false);
-  const [calViewDate, setCalViewDate] = useState(new Date());
-  const [selDate, setSelDate] = useState(null);
-  const [selTime, setSelTime] = useState(null);
+
+  // 2. ESTADOS DEL EMBUDO (Vista General vs Modal de Reserva)
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [bookingStep, setBookingStep] = useState('datetime'); // 'datetime' | 'customer' | 'success'
+
+  // 3. SELECCIÓN DE RESERVA
+  const [selectedService, setSelectedService] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState(null); // null = Cualquiera
+  const [selectedDate, setSelectedDate] = useState(''); // YYYY-MM-DD
+  const [selectedTime, setSelectedTime] = useState(''); // HH:MM
+  const [selectedSlotData, setSelectedSlotData] = useState(null);
+
+  // 4. UI, FILTROS Y BÚSQUEDA
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isSaved, setIsSaved] = useState(false);
+  const [shareToast, setShareToast] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const hoursSectionRef = useRef(null);
+  const servicesSectionRef = useRef(null);
+
+  // 5. CALENDARIO AIRBNB
+  const [calendarViewDate, setCalendarViewDate] = useState(() => new Date());
+
+  // 6. DISPONIBILIDAD Y SLOTS
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // 7. PRÓXIMO HUECO DISPONIBLE INTELIGENTE
+  const [nextAvailableSlot, setNextAvailableSlot] = useState(null);
+  const [isSearchingNext, setIsSearchingNext] = useState(false);
+
+  // 8. FORMULARIO DE CLIENTE & VOUCHER/BONO
+  const [customerData, setCustomerData] = useState({ name: '', phone: '', email: '', notes: '', gdpr: false });
   const [voucherCodeInput, setVoucherCodeInput] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState(null);
   const [voucherLoading, setVoucherLoading] = useState(false);
   const [voucherError, setVoucherError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [completedBooking, setCompletedBooking] = useState(null);
 
-  const handleApplyVoucher = async () => {
-    if (!voucherCodeInput.trim()) return;
-    setVoucherLoading(true);
-    setVoucherError('');
-    try {
-      const res = await fetch('/api/vouchers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          code: voucherCodeInput.trim().toUpperCase(),
-          services: selServices
-        })
-      });
-      const resData = await res.json();
-      if (resData.success && resData.voucher) {
-        setAppliedVoucher(resData.voucher);
-        setVoucherError('');
-      } else {
-        setVoucherError(resData.error || 'Bono inválido');
-        setAppliedVoucher(null);
-      }
-    } catch (e) {
-      setVoucherError('Error de conexión al validar el bono');
-    }
-    setVoucherLoading(false);
-  };
-
-  const handleRemoveVoucher = () => {
-    setAppliedVoucher(null);
-    setVoucherCodeInput('');
-    setVoucherError('');
-  };
-  
-  const [availableSlots, setAvailableSlots] = useState([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
-  const [availableEmpsForSelSlot, setAvailableEmpsForSelSlot] = useState([]);
-  const [slotAssign, setSlotAssign] = useState(null);
-  const [nextAvailable, setNextAvailable] = useState(null);
-  const [singleNextAvailable, setSingleNextAvailable] = useState(null);
-  const [isSearchingNext, setIsSearchingNext] = useState(false);
-  
-  const [formName, setFormName] = useState('');
-  const [formPhone, setFormPhone] = useState('');
-  const [formEmail, setFormEmail] = useState('');
-  const [formNotes, setFormNotes] = useState('');
-  const [formEmp, setFormEmp] = useState('Cualquiera');
-  const [formGdpr, setFormGdpr] = useState(false);
-  const [showTerms, setShowTerms] = useState(false);
-  
-  const [submitting, setSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-
-  // Estados para modo edición/cancelación
+  // 9. DETECCIÓN DE CANCELACIÓN O MODIFICACIÓN POR URL
   const searchParams = useSearchParams();
-  const [editId, setEditId] = useState(null);
-  const [isCancelMode, setIsCancelMode] = useState(false);
-  const [existingReserva, setExistingReserva] = useState(null);
-  const [bookingResult, setBookingResult] = useState(null); // { success: string, error: string }
+  const editId = searchParams.get('id') || searchParams.get('modificar');
+  const cancelId = searchParams.get('cancelar') || (searchParams.get('cancel') === '1' ? searchParams.get('id') : null);
 
+  // Cargar datos iniciales desde /api/data
   useEffect(() => {
     fetch('/api/data')
       .then(res => res.json())
       .then(res => {
         if (res.success) {
           setData({
-            services: res.services,
-            categories: res.categories,
-            employees: res.employees,
-            settings: res.settings
+            services: res.services || [],
+            categories: res.categories || [],
+            employees: res.employees || [],
+            settings: res.settings || null
           });
-          data.settings = res.settings;
-          data.employees = res.employees;
         }
         setLoading(false);
       })
-      .catch(e => {
-        console.error(e);
+      .catch(err => {
+        console.error('Error fetching initial data:', err);
         setLoading(false);
       });
+  }, []);
 
-    // Detectar modo edición/cancelación
-    const id = searchParams.get('id');
-    const cancel = searchParams.get('cancel');
-    if (id) {
-      setTimeout(() => setEditId(id), 0);
-      if (cancel === '1') setTimeout(() => setIsCancelMode(true), 0);
-      
-      // Cargar datos de la reserva
-      fetch(`/api/reserva?id=${id}`)
-        .then(res => res.json())
-        .then(res => {
-          if (res.success) {
-            setExistingReserva(res);
-            // Si no es cancelación, podríamos pre-cargar el formulario aquí para edición
-          }
-        });
-    }
-  }, [searchParams]);
+  // Conversión de horas y utilidades de tiempo
+  const t2m = (t) => {
+    if (!t) return 0;
+    const p = t.split(':').map(Number);
+    return (p[0] || 0) * 60 + (p[1] || 0);
+  };
 
-  useEffect(() => {
-    // Reset date/time selection when services change outside step 2 (datetime selection) to prevent stale availability caching
-    if (step < 2) {
-      setTimeout(() => setSelDate(null), 0);
-      setTimeout(() => setSelTime(null), 0);
-      setTimeout(() => setAvailableSlots([]), 0);
-      setTimeout(() => setNextAvailable(null), 0);
-      setTimeout(() => setSingleNextAvailable(null), 0);
-    }
-  }, [selServices, step]);
-
-
-  const msNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-  const dayNames = ['L','M','X','J','V','S','D'];
+  const m2t = (m) => {
+    return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  };
 
   const getLocalDateStr = (d) => {
     const y = d.getFullYear();
@@ -160,46 +155,112 @@ function BookingContent() {
     return `${y}-${m}-${day}`;
   };
 
-  const maxDateObj = new Date();
-  maxDateObj.setMonth(new Date().getMonth() + 2);
-  const maxDateStr = getLocalDateStr(maxDateObj);
-
-  const formatFriendlyDateLong = (dateStr) => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr + 'T12:00:00');
-    const fullDays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    const dayName = fullDays[d.getDay()];
-    const mName = msNames[d.getMonth()];
-    const num = d.getDate();
-    return `${dayName}, ${num} de ${mName}`;
+  const formatDatePretty = (dStr) => {
+    if (!dStr) return '';
+    try {
+      const [y, m, d] = dStr.split('-').map(Number);
+      const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+      return date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+    } catch {
+      return dStr;
+    }
   };
 
-  const formatFriendlyDateShort = (dateStr) => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr + 'T12:00:00');
-    const shortDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-    const dayName = shortDays[d.getDay()];
-    const mName = msNames[d.getMonth()];
-    const num = d.getDate();
-    return `${dayName} ${num} ${mName.slice(0, 3)}`;
-  };
-  
-  const t2m = (t) => {
-    if (!t) return 0;
-    const p = t.split(':').map(Number);
-    return (p[0] || 0) * 60 + (p[1] || 0);
-  };
-  
-  const m2t = (m) => {
-    return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+  const formatDateLong = (dStr) => {
+    if (!dStr) return '';
+    try {
+      const [y, m, d] = dStr.split('-').map(Number);
+      const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+      return date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    } catch {
+      return dStr;
+    }
   };
 
+  // Horario semanal de Respira
+  const weeklyScheduleList = useMemo(() => {
+    return [
+      { name: 'Lunes', hours: '09:00 – 20:00', isClosed: false, dayNum: 1 },
+      { name: 'Martes', hours: '09:00 – 20:00', isClosed: false, dayNum: 2 },
+      { name: 'Miércoles', hours: '09:00 – 20:00', isClosed: false, dayNum: 3 },
+      { name: 'Jueves', hours: '09:00 – 20:00', isClosed: false, dayNum: 4 },
+      { name: 'Viernes', hours: '09:00 – 20:00', isClosed: false, dayNum: 5 },
+      { name: 'Sábado', hours: 'Cerrado', isClosed: true, dayNum: 6 },
+      { name: 'Domingo', hours: 'Cerrado', isClosed: true, dayNum: 0 }
+    ];
+  }, []);
+
+  // Estado dinámico de si está abierto hoy
+  const todayStatus = useMemo(() => {
+    const now = new Date();
+    const day = now.getDay();
+    const curMin = now.getHours() * 60 + now.getMinutes();
+
+    if (day === 0 || day === 6) {
+      return { isOpen: false, text: 'Cerrado hoy · Abre el lunes a las 09:00' };
+    }
+
+    const openMin = 9 * 60;
+    const closeMin = 20 * 60;
+
+    if (curMin < openMin) {
+      return { isOpen: false, text: 'Abre hoy a las 09:00' };
+    }
+    if (curMin >= openMin && curMin < closeMin) {
+      return { isOpen: true, text: 'Abierto hoy · Cierra a las 20:00' };
+    }
+    return { isOpen: false, text: 'Cerrado ahora · Abre mañana a las 09:00' };
+  }, []);
+
+  // Categorías de servicios únicas
+  const categories = useMemo(() => {
+    const set = new Set();
+    data.services.forEach(s => {
+      if (s.category && s.category.trim()) set.add(s.category.trim());
+    });
+    return Array.from(set);
+  }, [data.services]);
+
+  // Filtro de servicios en tiempo real
+  const filteredServices = useMemo(() => {
+    let list = data.services;
+    if (selectedCategory !== 'all') {
+      list = list.filter(s => (s.category || '').toLowerCase() === selectedCategory.toLowerCase());
+    }
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.toLowerCase().trim();
+    return list.filter(s =>
+      (s.name || '').toLowerCase().includes(q) ||
+      (s.description && s.description.toLowerCase().includes(q))
+    );
+  }, [data.services, searchQuery, selectedCategory]);
+
+  // Manejador para compartir
+  const handleShare = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Centro de estética Respira',
+          text: 'Reserva cita online en el Centro de estética Respira en Artà',
+          url: window.location.href,
+        });
+        return;
+      } catch {}
+    }
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(window.location.href);
+      setShareToast(true);
+      setTimeout(() => setShareToast(false), 2500);
+    }
+  };
+
+  // Cálculo de configuración de horarios por empleada (matching backend logic)
   const getDCforEmp = useCallback((dateStr, empName) => {
     const ss = data.settings;
     const sd = ss?.specialDays || {};
-    // 1) Override MANUAL de la empleada (por ID o por Nombre)
     const emp = (data.employees || []).find(e => e.name.toLowerCase() === empName.toLowerCase());
     const empId = emp ? emp.id : null;
+
     let empOverride = null;
     if (sd[dateStr]) {
       if (empId && sd[dateStr][empId]) {
@@ -210,8 +271,7 @@ function BookingContent() {
       }
     }
     if (empOverride && !empOverride._auto) return empOverride;
-    
-    // 2) Estado del día especial global (si está configurado, sobrescribe horarios semanales o generales)
+
     if (sd[dateStr]?.global) {
       if (sd[dateStr].global.type === 'closed') return { type: 'closed' };
       if (sd[dateStr].global.type === 'split') {
@@ -232,91 +292,29 @@ function BookingContent() {
         };
       }
     }
-    
-    let globalClosed = false, globalStart = null, globalEnd = null;
-    if (sd[dateStr]?.global) {
-      if (sd[dateStr].global.type === 'closed') globalClosed = true;
-      else if (sd[dateStr].global.type === 'custom') { globalStart = sd[dateStr].global.start; globalEnd = sd[dateStr].global.end; }
-      else if (sd[dateStr].global.type === 'split') { globalStart = sd[dateStr].global.start; globalEnd = sd[dateStr].global.end2 || sd[dateStr].global.end; }
-    }
-    
+
     const d = new Date(dateStr + 'T12:00:00');
     const day = d.getDay();
-    // 2.5) Si el día de la semana está cerrado globalmente en el horario semanal general, se cierra para todos
     if (ss?.weekly && ss.weekly[day] && ss.weekly[day].closed) {
       return { type: 'closed' };
     }
-    // 3) Horario semanal individual
-    let hasWeekly = false, weeklyClosed = false, weeklyStart = null, weeklyEnd = null, weeklyType = null, weeklyStart2 = null, weeklyEnd2 = null;
+
     const key = 'weekly_' + empName;
     const empWeeklyObj = ss ? (ss[key] || ss.weekly?.[key]) : null;
     if (empWeeklyObj && empWeeklyObj[day]) {
-      hasWeekly = true;
       const w = empWeeklyObj[day];
-      if (w.closed) weeklyClosed = true;
-      else {
-        weeklyType = w.type || 'standard';
-        weeklyStart = w.start; weeklyEnd = w.end;
-        if (weeklyType === 'split') { weeklyStart2 = w.start2; weeklyEnd2 = w.end2; }
-      }
+      if (w.closed) return { type: 'closed' };
+      return { type: w.type || 'standard', start: w.start, end: w.end, start2: w.start2, end2: w.end2 };
     }
-    // 4) Global "Cerrado" → cierra a TODOS
-    if (globalClosed) return { type: 'closed' };
-    // 5) Empleada con horario semanal → intersectar con global custom / global weekly
-    if (hasWeekly) {
-      if (weeklyClosed) return { type: 'closed' };
-      const gWeekly = ss?.weekly?.[day];
-      const salonStart = globalStart || gWeekly?.start || ss?.start || "10:00";
-      const salonEnd = globalEnd || (gWeekly?.type === 'split' ? gWeekly?.end2 : gWeekly?.end) || ss?.end || (day === 6 ? "14:00" : "20:00");
-      if (weeklyType === 'split') {
-        let s1 = weeklyStart, e1 = weeklyEnd, s2 = weeklyStart2, e2 = weeklyEnd2;
-        if (globalStart) {
-          s1 = t2m(weeklyStart) > t2m(globalStart) ? weeklyStart : globalStart;
-          e1 = t2m(weeklyEnd) < t2m(globalEnd) ? weeklyEnd : globalEnd;
-          s2 = t2m(weeklyStart2) > t2m(globalStart) ? weeklyStart2 : globalStart;
-          e2 = t2m(weeklyEnd2) < t2m(globalEnd) ? weeklyEnd2 : globalEnd;
-        } else if (gWeekly && gWeekly.type === 'split') {
-          s1 = t2m(weeklyStart) > t2m(gWeekly.start) ? weeklyStart : gWeekly.start;
-          e1 = t2m(weeklyEnd) < t2m(gWeekly.end) ? weeklyEnd : gWeekly.end;
-          s2 = t2m(weeklyStart2) > t2m(gWeekly.start2) ? weeklyStart2 : gWeekly.start2;
-          e2 = t2m(weeklyEnd2) < t2m(gWeekly.end2) ? weeklyEnd2 : gWeekly.end2;
-        } else if (gWeekly) {
-          s1 = t2m(weeklyStart) > t2m(gWeekly.start) ? weeklyStart : gWeekly.start;
-          e1 = t2m(weeklyEnd) < t2m(gWeekly.end) ? weeklyEnd : gWeekly.end;
-          s2 = t2m(weeklyStart2) > t2m(gWeekly.start2) ? weeklyStart2 : gWeekly.start;
-          e2 = t2m(weeklyEnd2) < t2m(gWeekly.end2) ? weeklyEnd2 : gWeekly.end;
-        }
-        return { type: 'split', start: s1, end: e1, start2: s2, end2: e2 };
-      }
-      if (gWeekly && gWeekly.type === 'split' && !globalStart) {
-        const s1 = t2m(weeklyStart) > t2m(gWeekly.start) ? weeklyStart : gWeekly.start;
-        const e1 = t2m(weeklyEnd) < t2m(gWeekly.end) ? weeklyEnd : gWeekly.end;
-        const s2 = t2m(weeklyStart) > t2m(gWeekly.start2) ? weeklyStart : gWeekly.start2;
-        const e2 = t2m(weeklyEnd) < t2m(gWeekly.end2) ? weeklyEnd : gWeekly.end2;
-        if (t2m(s2) < t2m(e2)) {
-          return { type: 'split', start: s1, end: e1, start2: s2, end2: e2 };
-        } else {
-          return { type: 'standard', start: s1, end: e1 };
-        }
-      }
-      const start = t2m(weeklyStart) > t2m(salonStart) ? weeklyStart : salonStart;
-      const end = t2m(weeklyEnd) < t2m(salonEnd) ? weeklyEnd : salonEnd;
-      return { type: 'standard', start, end };
+
+    if (ss?.weekly && ss.weekly[day]) {
+      const w = ss.weekly[day];
+      if (w.closed) return { type: 'closed' };
+      return { type: w.type || 'standard', start: w.start, end: w.end, start2: w.start2, end2: w.end2 };
     }
-    // 6) Global custom (empleada sin weekly)
-    if (globalStart) return { type: 'standard', start: globalStart, end: globalEnd };
-    // 7) Horario semanal global
-    if (ss?.weekly) {
-      const w2 = ss.weekly[day];
-      if (w2) {
-        if (w2.closed) return { type: 'closed' };
-        if (w2.type === 'split') return { type: 'split', start: w2.start, end: w2.end, start2: w2.start2, end2: w2.end2 };
-        return { type: 'standard', start: w2.start, end: w2.end };
-      }
-    }
-    // 8) Por defecto
-    return { type: 'standard', start: ss?.start || "10:00", end: ss?.end || (day === 6 ? "14:00" : "20:00") };
-  }, []);
+
+    return { type: 'standard', start: '09:00', end: '20:00' };
+  }, [data.settings, data.employees]);
 
   const isTimeInDC = (dc, startMin, dur) => {
     const endMin = startMin + dur;
@@ -326,22 +324,22 @@ function BookingContent() {
       const m2s = t2m(dc.start2), m2e = t2m(dc.end2);
       return (startMin >= m1s && endMin <= m1e) || (startMin >= m2s && endMin <= m2e);
     }
-    const s = t2m(dc.start || data.settings?.start || '10:00');
-    const e = t2m(dc.end || data.settings?.end || '20:00');
+    const s = t2m(dc.start || '09:00');
+    const e = t2m(dc.end || '20:00');
     return startMin >= s && endMin <= e;
   };
 
   const getDCRange = (dc) => {
-    if (dc.type === 'closed') return { s: t2m('10:00'), e: t2m('20:00') };
+    if (dc.type === 'closed') return { s: t2m('09:00'), e: t2m('20:00') };
     if (dc.type === 'split') {
       const e = dc.end2 ? dc.end2 : dc.end;
       return { s: t2m(dc.start), e: t2m(e) };
     }
-    return { s: t2m(dc.start || data.settings?.start || '10:00'), e: t2m(dc.end || data.settings?.end || '20:00') };
+    return { s: t2m(dc.start || '09:00'), e: t2m(dc.end || '20:00') };
   };
 
-  const getCandidatesForService = useCallback((s, customEmps) => {
-    const employees = customEmps || data.employees || data.employees || [];
+  const getCandidatesForService = useCallback((s, employeesList) => {
+    const employees = employeesList || data.employees || [];
     if (!s) return employees;
 
     const dbSvc = (data.services || []).find(ds => (s.id && ds.id === s.id) || ds.name === s.name) || s;
@@ -358,117 +356,45 @@ function BookingContent() {
       }
     }
 
-    const chosenSpec = s.selectedSpecialist || (s.employee && !catalogEmpStr.toLowerCase().includes(s.employee.toLowerCase()) && s.employee !== 'Todas' && s.employee !== 'Ambos' && s.employee !== 'Cualquiera' ? s.employee : '');
-    if (chosenSpec && chosenSpec.trim() !== '') {
-      const userPref = chosenSpec.trim().toLowerCase();
-      const userFiltered = eligible.filter(e => e.name.toLowerCase() === userPref);
+    if (selectedEmployee) {
+      const userFiltered = eligible.filter(e => e.name.toLowerCase() === selectedEmployee.name.toLowerCase());
       if (userFiltered.length > 0) return userFiltered;
     }
 
     return eligible.length > 0 ? eligible : employees;
-  }, [data.employees, data.services]);
+  }, [data.employees, data.services, selectedEmployee]);
 
-  const isDayClosed = useCallback((dateStr, overrideServices) => {
+  const isDayClosed = useCallback((dateStr, svc) => {
     const ee = data.employees || [];
     const ss = data.settings;
-    if (ee.length === 0) {
-      const sd = ss?.specialDays || {};
-      if (sd[dateStr] && sd[dateStr].global) return sd[dateStr].global.type === 'closed';
-      if (ss?.weekly) {
-        const d = new Date(dateStr + 'T12:00:00');
-        const w = ss.weekly[d.getDay()];
-        if (w && w.closed) return true;
-      }
-      return false;
-    }
+    if (ee.length === 0) return false;
 
     const sd = ss?.specialDays || {};
     if (sd[dateStr]?.global?.type === 'closed') return true;
+
     const d = new Date(dateStr + 'T12:00:00');
     const day = d.getDay();
     if (ss?.weekly && ss.weekly[day] && ss.weekly[day].closed) return true;
 
-    const checkSvcs = overrideServices || selServices;
-    // Si hay servicios seleccionados, comprobar si para ALGUNO de ellos todas las empleadas aptas están cerradas
-    if (checkSvcs.length > 0) {
-      const cannotPerformAnyService = checkSvcs.some(s => {
-        const candidates = getCandidatesForService(s, ee);
-        if (candidates.length === 0) return false;
+    if (svc) {
+      const candidates = getCandidatesForService(svc, ee);
+      if (candidates.length > 0) {
         return candidates.every(emp => getDCforEmp(dateStr, emp.name).type === 'closed');
-      });
-      if (cannotPerformAnyService) return true;
+      }
     }
 
     return ee.every(emp => getDCforEmp(dateStr, emp.name).type === 'closed');
-  }, [getDCforEmp, selServices, getCandidatesForService]);
+  }, [data.employees, data.settings, getCandidatesForService, getDCforEmp]);
 
-  const fetchSlotsForDate = async (ds, overrideServices, autoSelectSlot = null) => {
-    setLoadingSlots(true);
-    setTimeout(() => setAvailableSlots([]), 0);
-    setTimeout(() => setSelTime(null), 0);
-    try {
-      const [aptRes, dataRes] = await Promise.all([
-        fetch(`/api/availability?date=${ds}`),
-        fetch('/api/data')
-      ]);
-      const rdata = await aptRes.json();
-      const freshData = await dataRes.json();
-      let freshSettings = data.settings;
-      let freshEmployees = data.employees;
-      if (freshData.success) {
-        freshSettings = freshData.settings;
-        freshEmployees = freshData.employees;
+  // Cálculo de slots libres para una fecha determinada
+  const computeSlots = useCallback((ds, dayApts, settings, employees, svc, blocks = []) => {
+    if (!svc || !employees || employees.length === 0) return [];
 
-
-        setData({
-          services: freshData.services,
-          categories: freshData.categories,
-          employees: freshData.employees,
-          settings: freshData.settings
-        });
-      }
-      if (rdata.success) {
-        const slots = calculateSlots(ds, rdata.appointments || [], freshSettings, freshEmployees, overrideServices, rdata.blocks || []);
-        const activeSvcs = overrideServices || selServices;
-        const freeSlots = (slots || []).filter(s => s.free);
-        if (freeSlots.length === 0) {
-          scanNextAvailable(ds, activeSvcs);
-        } else {
-          setTimeout(() => setNextAvailable(null), 0);
-          setTimeout(() => setSingleNextAvailable(null), 0);
-        }
-        if (autoSelectSlot && slots) {
-          const matchingSlot = slots.find(s => s.time === autoSelectSlot.time && s.free);
-          if (matchingSlot) {
-            handleTimeSelect(matchingSlot);
-          }
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    setLoadingSlots(false);
-  };
-
-
-  const computeSlotsForDate = (ds, dayApts = [], freshSettings, freshEmployees, overrideServices, blocks = []) => {
-    const settings = freshSettings || data.settings || data.settings;
-    const employees = freshEmployees || data.employees || data.employees;
-    let activeServices = overrideServices || selServices;
-    if (!activeServices || activeServices.length === 0) return [];
-    if (!employees || employees.length === 0) return [];
-
-    const allCandidateEmps = [];
-    activeServices.forEach(s => {
-      getCandidatesForService(s, employees).forEach(emp => {
-        if (!allCandidateEmps.some(e => e.name === emp.name)) {
-          allCandidateEmps.push(emp);
-        }
-      });
-    });
+    const candidates = getCandidatesForService(svc, employees);
+    if (candidates.length === 0) return [];
 
     let rangeStart = null, rangeEnd = null;
-    allCandidateEmps.forEach(emp => {
+    candidates.forEach(emp => {
       const dc = getDCforEmp(ds, emp.name);
       if (dc.type !== 'closed') {
         const r = getDCRange(dc);
@@ -477,68 +403,38 @@ function BookingContent() {
       }
     });
 
-    if (rangeStart === null) {
-      const d2 = new Date(ds + 'T12:00:00');
-      const gday = d2.getDay();
-      if (settings?.weekly && settings.weekly[gday] && !settings.weekly[gday].closed) {
-        const wdc = settings.weekly[gday];
-        const r = getDCRange(wdc.type === 'split' ? { type: 'split', start: wdc.start, end: wdc.end, start2: wdc.start2, end2: wdc.end2 } : { type: 'standard', start: wdc.start, end: wdc.end });
-        rangeStart = r.s;
-        rangeEnd = r.e;
-      } else {
-        return [];
-      }
-    }
-    if (rangeStart === null || rangeStart >= rangeEnd) { return []; }
-    
+    if (rangeStart === null || rangeStart >= rangeEnd) return [];
+
     const now = new Date();
     const todayStr = getLocalDateStr(now);
     const nowMin = ds === todayStr ? now.getHours() * 60 + now.getMinutes() + 15 : 0;
-    const closedHours = settings?.specialDays?.[ds]?.closedHours || [];
-    
-    const isSlotClosedForEmp = (slotStart, slotEnd, empName, dc) => {
-      const hasDbClosed = closedHours.some(ch => {
-        const chFrom = t2m(ch.from), chTo = t2m(ch.to);
-        if (slotStart < chTo && slotEnd >= chFrom) {
-          if (ch.entity === 'global' || ch.entity.toLowerCase() === empName.toLowerCase()) return true;
-        }
-        return false;
-      });
-      if (hasDbClosed) return true;
+    const dur = parseInt(svc.duration || 30, 10);
 
+    const isSlotClosedForEmp = (slotStart, slotEnd, empName, dc) => {
       if (dc && dc.closedHours && Array.isArray(dc.closedHours)) {
-        const hasCustomClosed = dc.closedHours.some(timeStr => {
+        return dc.closedHours.some(timeStr => {
           const chMin = t2m(timeStr);
           return slotStart < (chMin + 15) && slotEnd > chMin;
         });
-        if (hasCustomClosed) return true;
       }
-
-      return false;
-    };
-
-    const aptHasEmp = (a, en) => {
-      if (!a.employee) return false;
-      const aEmp = a.employee.toLowerCase();
-      if (aEmp === 'todas' || aEmp === 'ambos' || aEmp === 'cualquiera') return true;
-      const enLower = en.toLowerCase();
-      if (aEmp === enLower) return true;
-      if (a.employee.split(',').map(e => e.trim().toLowerCase()).includes(enLower)) return true;
-      if (a.services && a.services.some(s => (s.employee || '').toLowerCase() === enLower)) return true;
       return false;
     };
 
     const isEmpBusy = (empName, start, end) => {
       const empLower = empName.toLowerCase();
       const hasApt = dayApts.some(a => {
-        if (!aptHasEmp(a, empName)) return false;
-        let aDur = parseInt(a.duration || 15, 10);
-        if (a.services && Array.isArray(a.services) && a.services.length > 0) {
-          const empServices = a.services.filter(s => (s.employee || '').toLowerCase() === empLower);
-          if (empServices.length > 0) {
-            aDur = empServices.reduce((sum, s) => sum + parseInt(s.duration || 0, 10), 0);
-          }
+        let matches = false;
+        if (a.employee) {
+          const aEmp = a.employee.toLowerCase();
+          if (aEmp === 'todas' || aEmp === 'ambos' || aEmp === 'cualquiera' || aEmp === empLower) matches = true;
+          else if (a.employee.split(',').map(e => e.trim().toLowerCase()).includes(empLower)) matches = true;
         }
+        if (a.services && Array.isArray(a.services)) {
+          if (a.services.some(s => (s.employee || '').toLowerCase() === empLower)) matches = true;
+        }
+        if (!matches) return false;
+
+        let aDur = parseInt(a.duration || 15, 10);
         const aS = t2m(a.time), aE = aS + aDur;
         return start < aE && end > aS;
       });
@@ -558,148 +454,96 @@ function BookingContent() {
       return false;
     };
 
-    const isEmpAvailableForService = (empName, startMin, dur) => {
+    const isEmpAvailable = (empName, startMin, slotDur) => {
       const dc = getDCforEmp(ds, empName);
       if (dc.type === 'closed') return false;
-      if (!isTimeInDC(dc, startMin, dur)) return false;
-      if (isSlotClosedForEmp(startMin, startMin + dur, empName, dc)) return false;
-      if (isEmpBusy(empName, startMin, startMin + dur)) return false;
+      if (!isTimeInDC(dc, startMin, slotDur)) return false;
+      if (isSlotClosedForEmp(startMin, startMin + slotDur, empName, dc)) return false;
+      if (isEmpBusy(empName, startMin, startMin + slotDur)) return false;
       return true;
     };
 
     const slots = [];
-    const minDur = Math.min(...activeServices.map(s => parseInt(s.duration || 15, 10)));
-    const totalDur = activeServices.reduce((sum, s) => sum + parseInt(s.duration || 15, 10), 0);
-
-    for (let t = rangeStart; t + minDur <= rangeEnd; t += 15) {
+    for (let t = rangeStart; t + dur <= rangeEnd; t += 15) {
       if (ds === todayStr && t <= nowMin) continue;
 
-      if (activeServices.length === 1) {
-        const s = activeServices[0];
-        const dur = parseInt(s.duration || 15, 10);
-        if (t + dur > rangeEnd) continue;
+      const freeEmps = candidates.filter(emp => isEmpAvailable(emp.name, t, dur));
+      const isFree = freeEmps.length > 0;
 
-        const candidates = getCandidatesForService(s, employees);
-        const freeEmps = candidates.filter(emp => isEmpAvailableForService(emp.name, t, dur));
-        const slotFree = freeEmps.length > 0;
-        const assign = slotFree ? [freeEmps[0].name] : null;
-
+      if (isFree) {
         slots.push({
           time: m2t(t),
-          free: slotFree,
+          free: true,
           emps: freeEmps,
-          assign: assign,
-          mode: 'single',
+          assign: [freeEmps[0].name],
           totalDur: dur
         });
-      } else {
-        // Combo de varios servicios
-        // 1. Intentar asignación secuencial con una única especialista
-        let seqFree = false;
-        let seqEmpName = null;
-        if (t + totalDur <= rangeEnd) {
-          const allEligible = employees.filter(emp => 
-            activeServices.every(s => getCandidatesForService(s, employees).some(ce => ce.name === emp.name))
-          );
-          for (const emp of allEligible) {
-            if (isEmpAvailableForService(emp.name, t, totalDur)) {
-              seqFree = true;
-              seqEmpName = emp.name;
-              break;
-            }
-          }
-        }
-
-        if (seqFree && seqEmpName) {
-          const svcAssign = activeServices.map(() => seqEmpName);
-          const empObj = employees.find(e => e.name === seqEmpName);
-          slots.push({
-            time: m2t(t),
-            free: true,
-            emps: empObj ? [empObj] : [],
-            assign: svcAssign,
-            mode: 'sequential',
-            totalDur: totalDur
-          });
-        } else {
-          // 2. Intentar asignación simultánea con distintas especialistas libres
-          const maxDur = Math.max(...activeServices.map(s => parseInt(s.duration || 15, 10)));
-          let simFree = false;
-          let simAssign = [];
-          let simEmps = [];
-
-          if (t + maxDur <= rangeEnd) {
-            const assigned = [];
-            let canSim = true;
-            for (let i = 0; i < activeServices.length; i++) {
-              const s = activeServices[i];
-              const sDur = parseInt(s.duration || 15, 10);
-              const candidates = getCandidatesForService(s, employees);
-              const availableEmp = candidates.find(emp => 
-                !assigned.includes(emp.name) && isEmpAvailableForService(emp.name, t, sDur)
-              );
-              if (availableEmp) {
-                assigned.push(availableEmp.name);
-                simEmps.push(availableEmp);
-                simAssign.push(availableEmp.name);
-              } else {
-                canSim = false;
-                break;
-              }
-            }
-            if (canSim && simAssign.length === activeServices.length) {
-              simFree = true;
-            }
-          }
-
-          if (simFree) {
-            slots.push({
-              time: m2t(t),
-              free: true,
-              emps: simEmps,
-              assign: simAssign,
-              mode: 'simultaneous',
-              totalDur: maxDur
-            });
-          } else {
-            slots.push({
-              time: m2t(t),
-              free: false,
-              emps: [],
-              assign: null,
-              totalDur: totalDur
-            });
-          }
-        }
       }
     }
-
     return slots;
+  }, [getCandidatesForService, getDCforEmp]);
+
+  // Carga de disponibilidad al seleccionar una fecha
+  const handleDateSelect = async (dateStr) => {
+    setSelectedDate(dateStr);
+    setSelectedTime('');
+    setSelectedSlotData(null);
+    setErrorMsg('');
+
+    if (!dateStr || !selectedService) {
+      setAvailableSlots([]);
+      return;
+    }
+
+    if (isDayClosed(dateStr, selectedService)) {
+      setAvailableSlots([]);
+      setErrorMsg('El salón se encuentra cerrado en esta fecha. Por favor, elige otro día disponible.');
+      scanNextAvailable(dateStr, selectedService);
+      return;
+    }
+
+    setLoadingSlots(true);
+    try {
+      const res = await fetch(`/api/availability?date=${dateStr}`);
+      const rdata = await res.json();
+      if (rdata.success) {
+        const slots = computeSlots(
+          dateStr,
+          rdata.appointments || [],
+          data.settings,
+          data.employees,
+          selectedService,
+          rdata.blocks || []
+        );
+        setAvailableSlots(slots);
+        if (slots.length === 0) {
+          setErrorMsg('No quedan huecos libres para este día con la especialista seleccionada.');
+          scanNextAvailable(dateStr, selectedService);
+        }
+      } else {
+        setErrorMsg(rdata.error || 'Error al consultar disponibilidad');
+      }
+    } catch (e) {
+      console.error(e);
+      setErrorMsg('Error de conexión al cargar horarios.');
+    } finally {
+      setLoadingSlots(false);
+    }
   };
 
-  const calculateSlots = (ds, dayApts, freshSettings, freshEmployees, overrideServices, blocks = []) => {
-    const slots = computeSlotsForDate(ds, dayApts, freshSettings, freshEmployees, overrideServices, blocks);
-    setAvailableSlots(slots);
-    return slots;
-  };
-
-  const scanNextAvailable = async (baseDate, targetServices) => {
-    if (!baseDate || !targetServices || targetServices.length === 0) return;
+  // Escaneo rápido de próximo hueco libre disponible
+  const scanNextAvailable = async (baseDate, svc) => {
+    if (!baseDate || !svc) return;
     setIsSearchingNext(true);
-    setTimeout(() => setNextAvailable(null), 0);
-    setTimeout(() => setSingleNextAvailable(null), 0);
+    setNextAvailableSlot(null);
 
     try {
-      const todayStr = getLocalDateStr(new Date());
-      const isBaseToday = baseDate === todayStr;
       const baseObj = new Date(baseDate + 'T12:00:00');
       const startObj = new Date(baseObj);
-      if (!isBaseToday) {
-        startObj.setDate(startObj.getDate() + 1);
-      }
+      startObj.setDate(startObj.getDate() + 1);
 
       const endObj = new Date(startObj);
-      endObj.setDate(endObj.getDate() + 35);
+      endObj.setDate(endObj.getDate() + 30);
 
       const fromStr = getLocalDateStr(startObj);
       const toStr = getLocalDateStr(endObj);
@@ -707,168 +551,172 @@ function BookingContent() {
       const res = await fetch(`/api/availability?from=${fromStr}&to=${toStr}`);
       const rdata = await res.json();
 
-      if (!rdata.success) {
-        setIsSearchingNext(false);
-        return;
-      }
+      if (rdata.success) {
+        const allApts = rdata.appointments || [];
+        const allBlocks = rdata.blocks || [];
 
-      const allApts = rdata.appointments || [];
-      const allBlocks = rdata.blocks || [];
-      const settings = data.settings || data.settings;
-      const employees = data.employees || data.employees;
+        for (let i = 0; i < 30; i++) {
+          const curD = new Date(startObj);
+          curD.setDate(curD.getDate() + i);
+          const curDStr = getLocalDateStr(curD);
 
-      let foundNext = null;
-      let foundSingle = null;
+          if (isDayClosed(curDStr, svc)) continue;
 
-      for (let i = 0; i < 35; i++) {
-        const curD = new Date(startObj);
-        curD.setDate(curD.getDate() + i);
-        const curDStr = getLocalDateStr(curD);
-        if (curDStr > maxDateStr) break;
+          const dayApts = allApts.filter(a => a.date === curDStr);
+          const curWeekday = curD.getDay();
+          const dayBlocks = allBlocks.filter(b => {
+            const bRecEnd = b.recurrenceEnd || b.recurrence_end;
+            const bStartD = b.startDate || b.start_date;
+            const bDate = b.date;
+            const bRec = b.recurrence;
+            if (bRecEnd && bRecEnd < curDStr) return false;
+            if (bStartD && bStartD > curDStr) return false;
+            if (bRec !== 'none' && bDate && bDate > curDStr) return false;
+            if (!bRec || bRec === 'none') return bDate === curDStr;
+            if (bRec === 'daily') return true;
+            if (bRec === 'weekly' || bRec === 'biweekly') return b.weekday === curWeekday;
+            return false;
+          });
 
-        if (isDayClosed(curDStr, targetServices)) continue;
-
-        const dayApts = allApts.filter(a => a.date === curDStr);
-        const curWeekday = curD.getDay();
-        const dayBlocks = allBlocks.filter(b => {
-          const bRecEnd = b.recurrenceEnd || b.recurrence_end;
-          const bStartD = b.startDate || b.start_date;
-          const bDate = b.date;
-          const bRec = b.recurrence;
-          if (bRecEnd && bRecEnd < curDStr) return false;
-          if (bStartD && bStartD > curDStr) return false;
-          if (bRec !== 'none' && bDate && bDate > curDStr) return false;
-          if (!bRec || bRec === 'none') return bDate === curDStr;
-          if (bRec === 'daily') return true;
-          if (bRec === 'weekly' || bRec === 'biweekly') return b.weekday === curWeekday;
-          return false;
-        });
-
-        // 1. Check full target services combo
-        if (!foundNext) {
-          const curSlots = computeSlotsForDate(curDStr, dayApts, settings, employees, targetServices, dayBlocks);
-          const firstFree = curSlots.find(s => s.free);
-          if (firstFree) {
-            foundNext = {
+          const slots = computeSlots(curDStr, dayApts, data.settings, data.employees, svc, dayBlocks);
+          if (slots.length > 0) {
+            setNextAvailableSlot({
               date: curDStr,
-              slot: firstFree,
-              time: firstFree.time,
-              empName: firstFree.assign?.[0] || firstFree.emps?.[0]?.name || 'Especialista',
-              totalDur: firstFree.totalDur
-            };
+              time: slots[0].time,
+              empName: slots[0].assign?.[0] || 'Especialista',
+              slot: slots[0]
+            });
+            break;
           }
         }
-
-        // 2. If multiple services, check if single service (first service) is available earlier
-        if (targetServices.length > 1 && !foundSingle) {
-          const singleSlots = computeSlotsForDate(curDStr, dayApts, settings, employees, [targetServices[0]], dayBlocks);
-          const firstSingleFree = singleSlots.find(s => s.free);
-          if (firstSingleFree) {
-            foundSingle = {
-              date: curDStr,
-              slot: firstSingleFree,
-              time: firstSingleFree.time,
-              empName: firstSingleFree.assign?.[0] || firstSingleFree.emps?.[0]?.name || 'Especialista',
-              totalDur: firstSingleFree.totalDur
-            };
-          }
-        }
-
-        if (foundNext && (targetServices.length === 1 || foundSingle)) {
-          break;
-        }
       }
-
-      setNextAvailable(foundNext);
-      if (foundSingle && foundNext && foundSingle.date < foundNext.date) {
-        setSingleNextAvailable(foundSingle);
-      } else {
-        setTimeout(() => setSingleNextAvailable(null), 0);
-      }
-    } catch (err) {
-      console.error('Error scanning next available:', err);
+    } catch (e) {
+      console.error('Error scanning next available slot:', e);
+    } finally {
+      setIsSearchingNext(false);
     }
-    setIsSearchingNext(false);
   };
 
-  const selectDate = (ds) => {
-    setSelDate(ds);
-    setSelSlotData(null);
-    fetchSlotsForDate(ds, selServices);
+  // Abrir embudo para un servicio
+  const handleStartBooking = (service, preferredEmployee = null) => {
+    setSelectedService(service);
+    setSelectedEmployee(preferredEmployee);
+    setSelectedDate('');
+    setSelectedTime('');
+    setSelectedSlotData(null);
+    setAvailableSlots([]);
+    setErrorMsg('');
+    setAppliedVoucher(null);
+    setVoucherCodeInput('');
+    setBookingStep('datetime');
+    setIsBookingOpen(true);
+
+    const todayStr = getLocalDateStr(new Date());
+    const [y, m] = todayStr.split('-').map(Number);
+    setCalendarViewDate(new Date(y, m - 1, 1));
+    scanNextAvailable(todayStr, service);
   };
 
-  const handleTimeSelect = (slot) => {
-    if (!slot.free) return;
-    setSelTime(slot.time);
-    setAvailableEmpsForSelSlot(slot.emps || []);
-    setSlotAssign(slot.assign || null);
-    setSelSlotData(slot);
-    // Reset the employee selection to 'Cualquiera' to avoid stale selection
-    setFormEmp('Cualquiera');
-  };
-
+  // Saltar al próximo hueco encontrado
   const goToNextAvailable = (next) => {
     if (!next) return;
-    const targetDate = next.date;
-    const dObj = new Date(targetDate + 'T12:00:00');
-    setCalViewDate(new Date(dObj.getFullYear(), dObj.getMonth(), 1));
-    setSelDate(targetDate);
-    setSelSlotData(null);
-    fetchSlotsForDate(targetDate, selServices, next.slot);
-
+    const [y, m] = next.date.split('-').map(Number);
+    setCalendarViewDate(new Date(y, m - 1, 1));
+    handleDateSelect(next.date);
     setTimeout(() => {
-      const el = document.getElementById('slots-section');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }, 250);
+      setSelectedTime(next.time);
+      setSelectedSlotData(next.slot);
+      const el = document.getElementById('funnel-slots-container');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 400);
   };
 
-  const handleConfirmClick = (e) => {
-    e.preventDefault();
-    if (!formName || !formPhone || !formEmail || !formGdpr) {
-      setErrorMsg('Rellena todos los campos obligatorios y acepta la política.');
-      return;
+  // Validar y aplicar Voucher / Bono
+  const handleApplyVoucher = async () => {
+    if (!voucherCodeInput.trim() || !selectedService) return;
+    setVoucherLoading(true);
+    setVoucherError('');
+
+    try {
+      const res = await fetch('/api/vouchers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: voucherCodeInput.trim().toUpperCase(),
+          services: [selectedService]
+        })
+      });
+      const resData = await res.json();
+      if (resData.success && resData.voucher) {
+        setAppliedVoucher(resData.voucher);
+        setVoucherError('');
+      } else {
+        setVoucherError(resData.error || 'Bono o código inválido');
+        setAppliedVoucher(null);
+      }
+    } catch (e) {
+      setVoucherError('Error al validar el bono en el servidor');
+    } finally {
+      setVoucherLoading(false);
     }
-    setErrorMsg('');
-    setShowConfirmModal(true);
   };
 
-  const submitBooking = async (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (!formName || !formPhone || !formEmail || !formGdpr) {
-      setErrorMsg('Rellena todos los campos obligatorios y acepta la política.');
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherCodeInput('');
+    setVoucherError('');
+  };
+
+  // Cálculo del precio final con descuento de bono si existe
+  const finalPrice = useMemo(() => {
+    if (!selectedService) return 0;
+    const orig = Number(selectedService.price || 0);
+    if (!appliedVoucher) return orig;
+
+    if (appliedVoucher.type === 'gift_card' && appliedVoucher.remaining_balance != null) {
+      return Math.max(0, orig - Number(appliedVoucher.remaining_balance));
+    }
+    // Si es bono de sesiones o cubre el servicio al 100%
+    return 0;
+  }, [selectedService, appliedVoucher]);
+
+  // Enviar reserva a /api/book
+  const handleConfirmBooking = async () => {
+    if (!customerData.name.trim() || !customerData.phone.trim() || !customerData.email.trim()) {
+      setErrorMsg('Por favor, completa tu nombre, teléfono y email.');
       return;
     }
+    if (!customerData.gdpr) {
+      setErrorMsg('Por favor, acepta la política de privacidad y condiciones.');
+      return;
+    }
+
+    setIsSubmitting(true);
     setErrorMsg('');
-    setSubmitting(true);
-    
-    const servicesPayload = selServices.map(s => ({ name: s.name, employee: s.employee || '', duration: s.duration || 30, price: s.price || 0 }));
-    // Asignar empleada automática si está vacía o si tiene varios nombres (comma-separated)
-    var slotEmps = availableEmpsForSelSlot || [];
-    servicesPayload.forEach(function(s, idx) {
-      const needsResolve = !s.employee || s.employee === 'Todas' || s.employee === 'Ambos' || s.employee === 'Cualquiera' || s.employee.includes(',');
-      if (needsResolve && slotEmps.length > 0) {
-        if (slotAssign && slotAssign[idx]) s.employee = slotAssign[idx];
-        else s.employee = slotEmps[0].name;
-      }
-    });
-    const allEmps = [...new Set(servicesPayload.map(s => s.employee).filter(Boolean))];
+
+    const empName = selectedSlotData?.assign?.[0] || selectedEmployee?.name || 'Todas';
+    const dur = selectedService.duration || 30;
+
     const payload = {
-      clientName: formName,
-      clientPhone: formPhone,
-      clientEmail: formEmail,
-      notes: formNotes,
-      services: servicesPayload,
-      service: servicesPayload.map(s => s.name).join(' + '),
-      employee: allEmps.join(', ') || 'Todas',
-      date: selDate,
-      time: selTime,
-      duration: getTotalDur(servicesPayload),
-      price: servicesPayload.reduce((sum, s) => sum + (s.price || 0), 0),
+      clientName: customerData.name.trim(),
+      clientPhone: customerData.phone.trim(),
+      clientEmail: customerData.email.trim(),
+      notes: customerData.notes.trim(),
+      services: [{
+        name: selectedService.name,
+        employee: empName,
+        duration: dur,
+        price: selectedService.price || 0
+      }],
+      service: selectedService.name,
+      employee: empName,
+      date: selectedDate,
+      time: selectedTime,
+      duration: dur,
+      price: selectedService.price || 0,
       voucherCode: appliedVoucher ? appliedVoucher.code : null
     };
-    
+
     try {
       const res = await fetch('/api/book', {
         method: 'POST',
@@ -876,902 +724,1152 @@ function BookingContent() {
         body: JSON.stringify(payload)
       });
       const resData = await res.json();
-      
-      if (resData.success) {
-        setShowConfirmModal(false);
-        setStep(4);
-      } else {
-        setShowConfirmModal(false);
-        setErrorMsg('Error: ' + resData.error);
-      }
-    } catch (err) {
-      setShowConfirmModal(false);
-      setErrorMsg('Error de conexión.');
-    }
-    setSubmitting(false);
-  };
 
-  const cancelReservation = async () => {
-    setSubmitting(true);
-    setBookingResult(null);
-    try {
-      const res = await fetch(`/api/book?id=${editId}`, {
-        method: 'DELETE'
-      });
-      const resData = await res.json();
       if (resData.success) {
-        setBookingResult({ success: 'Tu cita ha sido cancelada correctamente. ¡Esperamos verte en otra ocasión!' });
+        setCompletedBooking({
+          ...payload,
+          id: resData.appointment?.id || 'CITA-' + Date.now().toString().slice(-6),
+          finalPrice: finalPrice
+        });
+        setBookingStep('success');
       } else {
-        setBookingResult({ error: resData.error || 'No se ha podido cancelar la cita.' });
+        setErrorMsg(resData.error || 'No se pudo completar la reserva. Inténtalo de nuevo.');
       }
     } catch (e) {
-      setBookingResult({ error: 'Error de conexión al intentar cancelar.' });
+      setErrorMsg('Error de conexión con el servidor de reservas.');
+    } finally {
+      setIsSubmitting(false);
     }
-    setSubmitting(false);
   };
 
-  const resetBooking = () => {
-    setStep(0);
-    setSelServices([]);
-    setShowSvcConfirm(false);
-    setTimeout(() => setSelDate(null), 0);
-    setTimeout(() => setSelTime(null), 0);
-    setFormName('');
-    setFormPhone('');
-    setFormEmail('');
-    setFormNotes('');
-    setFormGdpr(false);
+  // Google Calendar Link generator
+  const googleCalendarUrl = useMemo(() => {
+    if (!completedBooking || !completedBooking.date || !completedBooking.time) return '#';
+    try {
+      const [y, m, d] = completedBooking.date.split('-').map(Number);
+      const [hh, mm] = completedBooking.time.split(':').map(Number);
+      const dur = completedBooking.duration || 45;
+      const start = new Date(Date.UTC(y, m - 1, d, hh, mm));
+      const end = new Date(start.getTime() + dur * 60000);
+      const fmt = (dt) => dt.toISOString().replace(/-|:|\.\d\d\d/g, '');
+      const dates = `${fmt(start)}/${fmt(end)}`;
+      const title = encodeURIComponent(`Cita: ${completedBooking.service} - Respira Estética`);
+      const details = encodeURIComponent(`Cita en Centro de Estética Respira.\nEspecialista: ${completedBooking.employee}\nUbicación: Carrer Ciutat, 28, 07570 Artà, Illes Balears.`);
+      const location = encodeURIComponent(`Carrer Ciutat, 28, 07570 Artà, Illes Balears`);
+      return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
+    } catch {
+      return '#';
+    }
+  }, [completedBooking]);
+
+  // Generador de días del Calendario Airbnb
+  const renderAirbnbCalendar = () => {
+    const year = calendarViewDate.getFullYear();
+    const month = calendarViewDate.getMonth();
+
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+
+    let startDayOfWeek = firstDayOfMonth.getDay() - 1;
+    if (startDayOfWeek === -1) startDayOfWeek = 6;
+
+    const totalDays = lastDayOfMonth.getDate();
+    const daysCells = [];
+
+    for (let i = 0; i < startDayOfWeek; i++) {
+      daysCells.push({ day: 0, dateStr: '', isCurrentMonth: false });
+    }
+
+    const todayStr = getLocalDateStr(new Date());
+    for (let d = 1; d <= totalDays; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      daysCells.push({ day: d, dateStr, isCurrentMonth: true });
+    }
+
+    const prevMonth = () => setCalendarViewDate(new Date(year, month - 1, 1));
+    const nextMonth = () => setCalendarViewDate(new Date(year, month + 1, 1));
+
+    return (
+      <div className="space-y-4 select-none">
+        {/* Cabecera de mes con navegación */}
+        <div className="flex items-center justify-between pb-1">
+          <h4 className="text-sm font-bold text-stone-900 tracking-tight">
+            {MONTH_NAMES[month]} {year}
+          </h4>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={prevMonth}
+              className="p-1.5 rounded-full hover:bg-stone-100 text-stone-600 transition-colors cursor-pointer"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={nextMonth}
+              className="p-1.5 rounded-full hover:bg-stone-100 text-stone-600 transition-colors cursor-pointer"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Días de la semana */}
+        <div className="grid grid-cols-7 text-center text-xs font-semibold text-stone-400">
+          <span>L</span>
+          <span>M</span>
+          <span>X</span>
+          <span>J</span>
+          <span>V</span>
+          <span>S</span>
+          <span>D</span>
+        </div>
+
+        {/* Cuadrícula de Días */}
+        <div className="grid grid-cols-7 gap-y-2 place-items-center">
+          {daysCells.map((cell, idx) => {
+            if (!cell.isCurrentMonth) {
+              return <div key={`empty-${idx}`} className="w-9 h-9" />;
+            }
+
+            const isSelected = selectedDate === cell.dateStr;
+            const isToday = cell.dateStr === todayStr;
+            const isPast = cell.dateStr < todayStr;
+            const isClosed = isDayClosed(cell.dateStr, selectedService);
+            const isDisabled = isPast || isClosed;
+
+            return (
+              <button
+                key={cell.dateStr}
+                type="button"
+                disabled={isDisabled}
+                onClick={() => handleDateSelect(cell.dateStr)}
+                className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all cursor-pointer relative ${
+                  isSelected
+                    ? 'bg-[#6b8a5a] text-white font-bold shadow-md scale-105 ring-2 ring-[#6b8a5a] ring-offset-1'
+                    : isToday && !isDisabled
+                    ? 'ring-1 ring-[#6b8a5a] font-bold text-[#6b8a5a] bg-[#f3f7ee]'
+                    : !isDisabled
+                    ? 'text-stone-800 hover:bg-[#f3f7ee] hover:text-[#6b8a5a]'
+                    : ''
+                } ${
+                  isClosed && !isSelected
+                    ? 'text-stone-300 line-through decoration-stone-300 cursor-not-allowed opacity-60'
+                    : ''
+                } ${
+                  isPast ? 'text-stone-300 opacity-40 cursor-not-allowed' : ''
+                }`}
+              >
+                <span>{cell.day}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
 
-  // Render variables
-  const filteredServices = activeCat === 'all' 
-    ? data.services 
-    : data.services.filter(s => s.category === activeCat);
+  // Agrupación de turnos en Mañana y Tarde
+  const morningSlots = useMemo(() => {
+    return availableSlots.filter(s => {
+      const min = t2m(s.time);
+      return min < 14 * 60;
+    });
+  }, [availableSlots]);
 
-  // Calendar setup
-  const y = calViewDate.getFullYear();
-  const mo = calViewDate.getMonth();
-  const firstDay = new Date(y, mo, 1);
-  const off = (firstDay.getDay() + 6) % 7;
-  const dim = new Date(y, mo + 1, 0).getDate();
-  const todayStr = getLocalDateStr(new Date());
-  
-  // 2 month limit
-  const isNextMonthDisabled = y > maxDateObj.getFullYear() || (y === maxDateObj.getFullYear() && mo >= maxDateObj.getMonth());
+  const afternoonSlots = useMemo(() => {
+    return availableSlots.filter(s => {
+      const min = t2m(s.time);
+      return min >= 14 * 60;
+    });
+  }, [availableSlots]);
+
+  // Si está en modo cancelación directa vía URL
+  if (cancelId) {
+    return (
+      <div className="min-h-screen bg-[#faf7f4] flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-stone-200 text-center space-y-4 shadow-xl">
+          <div className="w-14 h-14 rounded-full bg-rose-50 text-rose-600 mx-auto flex items-center justify-center">
+            <Trash2 size={24} />
+          </div>
+          <h2 className="text-xl font-bold text-stone-900">Gestión de Cancelación</h2>
+          <p className="text-xs text-stone-500">¿Deseas gestionar o anular tu cita en Respira?</p>
+          <div className="pt-2 flex flex-col gap-2">
+            <Link
+              href={`/cancelar?id=${cancelId}`}
+              className="py-3 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-xs font-bold transition-all shadow-md"
+            >
+              Ir a la pantalla de cancelación
+            </Link>
+            <Link
+              href="/"
+              className="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-2xl text-xs font-semibold transition-all"
+            >
+              Volver al inicio
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      {showLocation && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{background:'rgba(46,40,38,.85)', backdropFilter:'blur(4px)'}}>
-          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden animate-[fadeIn_0.3s_ease]" style={{border:'1px solid var(--brown-light)'}}>
-            <div className="p-6 text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{background:'var(--blue)'}}>
-                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-              </div>
-              <h2 className="text-xl font-semibold italic mb-1 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Estética Respira</h2>
-              <p className="text-sm font-bold text-[#6b8a5a] mb-3">Centro de transformación y belleza</p>
-              <p className="text-sm font-semibold text-[#2e2826] mb-1">📍 C/ Santa Margalida 7</p>
-              <p className="text-xs font-medium text-[#7a6b67]">Artà, Illes Balears</p>
-              <div className="rounded-2xl overflow-hidden mb-4 shadow-sm border border-[#e0d8d5] h-40">
-                <iframe
-                  title="Ubicación Estética Respira"
-                  src="https://maps.google.com/maps?q=C%2F%20Santa%20Margalida%207%2C%20Art%C3%A0%2C%20Illes%20Balears&output=embed"
-                  width="100%" height="100%" style={{border:0}} allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
-                />
-              </div>
-              <a
-                href="https://www.google.com/maps/search/?api=1&query=C%2F+Santa+Margalida+7+Arta+Illes+Balears"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-xs font-bold text-[#6b8a5a] mb-4 underline underline-offset-2"
-              >
-                Abrir en Google Maps →
-              </a>
-              <button
-                onClick={() => setShowLocation(false)}
-                className="w-full py-4 rounded-2xl font-bold text-sm text-white shadow-lg active:scale-[0.98] transition-all"
-                style={{background:'var(--blue-deep)'}}
-              >
-                Entendido, quiero reservar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      <header className="sticky top-0 z-50 border-b shadow-sm" style={{background:'rgba(250,247,244,.95)', backdropFilter:'blur(20px)', borderColor:'var(--brown-light)'}}>
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white shadow-xs border border-[#e0d8d5] overflow-hidden p-0.5" onClick={() => window.location.href='/'} style={{cursor:'pointer'}}>
-              <img src="/logo-icono.png" alt="Estética Respira" className="w-full h-full object-contain" />
-            </div>
-            <div>
-              <h1 className="text-base tracking-tight leading-none font-semibold italic text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Estética Respira</h1>
-              <p className="text-[9px] font-bold uppercase tracking-widest text-[#6b8a5a]">Reserva tu cita online</p>
-            </div>
+    <div className="min-h-screen bg-[#faf7f4] pb-28 md:pb-16 text-stone-900 font-sans selection:bg-[#6b8a5a] selection:text-white">
+      
+      {/* 1. HERO COVER SECTION (High-end Wellness & Spa Aesthetics) */}
+      <div className="relative h-72 sm:h-80 md:h-[390px] w-full overflow-hidden bg-stone-950">
+        <img
+          src={RESPIRA_GALLERY[0]}
+          alt="Centro de estética Respira"
+          className="w-full h-full object-cover object-center transition-transform duration-700 ease-out hover:scale-105"
+        />
+        {/* Ambient Vignette Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent" />
+
+        {/* Top Floating Action Bar */}
+        <div className="absolute top-4 left-4 right-4 sm:left-6 sm:right-6 flex items-center justify-between z-20">
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1.5 rounded-full bg-stone-900/60 backdrop-blur-md text-white text-xs font-semibold border border-white/10 shadow-md">
+              🌿 Respira Artà
+            </span>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/50 border border-[#e0d8d5] shadow-sm">
-            <div className="relative">
-              <div className="w-2 h-2 rounded-full bg-green-500"></div>
-              <div className="absolute inset-0 w-2 h-2 rounded-full bg-green-500 animate-ping opacity-75"></div>
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#6b8a5a]">En línea</span>
-          </div>
-
-        </div>
-      </header>
-
-      <main className="max-w-2xl mx-auto px-4 py-8 pb-32">
-        {isCancelMode && (
-          <div className="animate-[fadeIn_0.5s_ease]">
-            {bookingResult ? (
-              <div className="card p-10 text-center">
-                <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 ${bookingResult.success ? 'bg-green-100' : 'bg-red-100'}`}>
-                  {bookingResult.success ? <Check className="w-10 h-10 text-green-600" /> : <AlertCircle className="w-10 h-10 text-red-600" />}
-                </div>
-                <h2 className="text-3xl font-semibold italic mb-2 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>
-                  {bookingResult.success ? 'Cancelación Realizada' : 'No se pudo cancelar'}
-                </h2>
-                <p className="font-medium mb-8 text-[#7a6b67]">{bookingResult.success || bookingResult.error}</p>
-                <button onClick={() => window.location.href = '/'} className="btn-primary w-full justify-center">
-                  Ir a la página principal
-                </button>
-              </div>
-            ) : existingReserva ? (
-              <div className="card p-8 text-center border-red-100 bg-gradient-to-b from-white to-[#fffcfc]">
-                <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-6 text-red-500">
-                  <Trash2 className="w-8 h-8" />
-                </div>
-                <h2 className="text-3xl font-semibold italic mb-2 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>¿Anular tu cita?</h2>
-                <p className="text-sm text-[#7a6b67] mb-8">Si confirmas, tu reserva será eliminada y el hueco quedará libre para otra clienta.</p>
-
-                <div className="rounded-2xl p-6 text-left space-y-3 mb-8 border bg-white border-red-50 shadow-sm">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-medium text-[#7a6b67]">Tratamiento</span>
-                    <span className="font-bold text-[#2e2826]">{existingReserva.service}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-medium text-[#7a6b67]">Fecha</span>
-                    <span className="font-bold text-[#6b8a5a]">{existingReserva.date?.split('-').reverse().join('/')}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="font-medium text-[#7a6b67]">Hora</span>
-                    <span className="font-bold text-[#6b8a5a]">{existingReserva.time}h</span>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <button 
-                    onClick={cancelReservation}
-                    disabled={submitting}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    {submitting ? <div className="spinner !border-white/30 !border-t-white"></div> : <Trash2 className="w-5 h-5" />}
-                    Confirmar Anulación
-                  </button>
-                  <button 
-                    onClick={() => window.location.href = '/'}
-                    className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 rounded-2xl transition-all"
-                  >
-                    Mantener Cita
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                <div className="spinner mb-4 border-[#e0d8d5] border-t-[#6b8a5a]"></div>
-                <p className="text-sm font-medium">Buscando tu reserva...</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {!isCancelMode && step === 0 && (
-          <div className="min-h-[80vh] flex flex-col items-center justify-center text-center py-12 animate-[fadeIn_0.5s_ease]">
-            <div className="mb-8">
-              <div className="w-28 h-28 rounded-3xl mx-auto shadow-xl mb-6 overflow-hidden bg-white p-2 border border-[#e0d8d5]" style={{boxShadow:'0 16px 48px rgba(107,138,90,.2)'}}>
-                <img src="/logo-icono.png" alt="Estética Respira" className="w-full h-full object-contain" />
-              </div>
-            </div>
-            <h1 className="text-5xl font-semibold italic mb-2 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Estética Respira</h1>
-            <p className="text-base font-medium mb-2 text-[#6b8a5a]">Centro de transformación y belleza</p>
-            <p className="text-sm font-medium mb-10 max-w-xs text-[#7a6b67]">Centro de transformación y belleza en Artà. Belleza, calma y equilibrio.</p>
-            <button onClick={() => setStep(1)} className="btn-primary text-base px-10 py-4 rounded-2xl shadow-xl active:scale-95" style={{boxShadow:'0 12px 32px rgba(107,138,90,.3)'}}>
-              <CalendarPlus className="w-5 h-5" /> Reservar cita
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleShare}
+              className="w-10 h-10 rounded-full bg-stone-900/60 backdrop-blur-md text-white flex items-center justify-center border border-white/10 hover:bg-stone-900/80 transition-all shadow-md cursor-pointer"
+              title="Compartir enlace de reservas"
+            >
+              <Share2 size={17} />
             </button>
-            <p className="text-xs font-medium mt-6 text-[#e0d8d5]">Reserva online · Sin esperas · 100% gratis</p>
+            <button
+              type="button"
+              onClick={() => setIsSaved(!isSaved)}
+              className="w-10 h-10 rounded-full bg-stone-900/60 backdrop-blur-md text-white flex items-center justify-center border border-white/10 hover:bg-stone-900/80 transition-all shadow-md cursor-pointer"
+              title="Guardar favorito"
+            >
+              <Heart size={17} className={isSaved ? "fill-rose-500 text-rose-500" : ""} />
+            </button>
+          </div>
+        </div>
+
+        {/* Indicators */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10">
+          <span className="w-2 h-2 rounded-full bg-white shadow-xs"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+        </div>
+
+        {/* Botón Ver Fotos Galería */}
+        <button
+          type="button"
+          onClick={() => setIsGalleryOpen(true)}
+          className="absolute bottom-4 right-4 z-10 bg-white/95 hover:bg-white text-stone-900 text-xs font-semibold px-3 py-1.5 rounded-xl shadow-md border border-stone-200 backdrop-blur-sm transition-all flex items-center gap-1.5 cursor-pointer"
+        >
+          <ImageIcon size={14} />
+          <span>Ver fotos ({RESPIRA_GALLERY.length})</span>
+        </button>
+      </div>
+
+      {/* 2. MAIN CONTAINER */}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 -mt-6 sm:-mt-10 space-y-6">
+
+        {/* Share Toast */}
+        {shareToast && (
+          <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-stone-900 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-top-4">
+            <Check size={14} className="text-[#7fa85f]" />
+            <span>Enlace copiado al portapapeles</span>
           </div>
         )}
 
-        {!isCancelMode && step > 0 && step < 4 && (
-          <div className="flex items-start mb-8 px-4 animate-[fadeIn_0.3s_ease]">
-            {[1, 2, 3].map(num => (
-              <React.Fragment key={num}>
-                <div className="flex flex-col items-center gap-1">
-                  <div className={`step-dot ${step === num ? 'active' : step > num ? 'done' : 'pending'}`}>{num}</div>
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-[#7a6b67]">
-                    {num === 1 ? 'Servicio' : num === 2 ? 'Fecha/Hora' : 'Datos'}
-                  </span>
-                </div>
-                {num < 3 && <div className={`step-line ${step > num ? 'done' : 'pending'}`}></div>}
-              </React.Fragment>
-            ))}
-          </div>
-        )}
+        {/* BUSINESS IDENTITY CARD (House of Prime Rib / saas Style) */}
+        <section className="bg-white rounded-3xl p-5 sm:p-7 border border-stone-200/90 shadow-xl space-y-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1.5 min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-sans font-bold text-stone-900 tracking-tight">
+                Centro de estética Respira
+              </h1>
 
-        {step === 1 && (
-          <div className="step active">
-            <div className="card p-6">
-              <h2 className="text-2xl font-semibold italic mb-1 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>¿Qué tratamiento deseas?</h2>
-              <p className="text-sm font-medium mb-5 text-[#7a6b67]">Selecciona los servicios que deseas (puedes elegir varios)</p>
-
-              {selServices.length > 0 && (
-                <div className="mb-4 p-3 rounded-xl border" style={{borderColor:'var(--blue)',background:'linear-gradient(135deg,var(--cream),white)'}}>
-                  <p className="text-[10px] font-bold uppercase mb-2" style={{color:'var(--blue-deep)'}}>Servicios seleccionados</p>
-                  <div className="flex flex-wrap gap-2">
-                    {selServices.map((s, i) => (
-                      <span key={s.id || i} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-white border shadow-sm" style={{borderColor:'var(--blue-mid)',color:'var(--brown)'}}>
-                        {s.name}
-                        <button onClick={() => setSelServices(selServices.filter(sv => sv.id !== s.id))} className="text-red-400 hover:text-red-600 ml-0.5">
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                      </span>
-                    ))}
-                    <span className="text-[10px] font-bold self-center ml-1" style={{color:'var(--blue-deep)'}}>
-                      {getTotalDur(selServices)} min · {selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€
-                    </span>
-                  </div>
-                </div>
-              )}
-              
-              <div className="flex flex-wrap gap-2 mb-5">
-                <button className={`cat-pill ${activeCat === 'all' ? 'active' : ''}`} onClick={() => setActiveCat('all')}>Todos</button>
-                {data.categories.map(c => (
-                  <button key={c.id} className={`cat-pill ${activeCat === c.name ? 'active' : ''}`} onClick={() => setActiveCat(c.name)}>
-                    {c.name}
-                  </button>
-                ))}
+              {/* Metadata row */}
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-stone-500 font-normal">
+                <span>Carrer Ciutat, 28, Artà, Illes Balears</span>
+                <span>·</span>
+                <span className="text-[#6b8a5a] font-semibold">Salón de Belleza y Bienestar</span>
               </div>
 
-              <div className="space-y-3">
-                {filteredServices.length === 0 ? (
-                  <p className="text-center py-8 text-slate-400 text-sm">No hay servicios disponibles</p>
+              {/* Live Status Badge */}
+              <div className="pt-0.5">
+                {todayStatus.isOpen ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>{todayStatus.text}</span>
+                  </span>
                 ) : (
-                  filteredServices.map(s => {
-                    const isSel = selServices.some(sv => sv.id === s.id);
-                    return (
-                      <div key={s.id} className={`service-card ${isSel ? 'selected' : ''}`} onClick={() => {
-                        if (isSel) setSelServices(selServices.filter(sv => sv.id !== s.id));
-                        else setSelServices([...selServices, s]);
-                      }}>
-                        <div style={{flex:1}}>
-                          <h4 className="font-bold text-sm text-[#2e2826]">{s.name}</h4>
-                          {s.desc && <p className="text-xs mt-0.5 text-[#7a6b67]">{s.desc}</p>}
-                          <div className="flex gap-3 mt-2">
-                            <span className="text-[11px] font-semibold text-[#7a6b67]">⏱ {s.duration} min</span>
-                          </div>
-                        </div>
-                        <div style={{textAlign:'right', flexShrink:0}}>
-                          <span className="text-lg font-bold text-[#6b8a5a]">{s.price}€</span>
-                          {isSel && <div className="text-[11px] font-bold mt-1 text-[#6b8a5a]">✓ Elegido</div>}
-                        </div>
-                      </div>
-                    );
-                  })
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-600 bg-stone-100 px-2.5 py-0.5 rounded-full border border-stone-200">
+                    <span className="w-2 h-2 rounded-full bg-stone-400"></span>
+                    <span>{todayStatus.text}</span>
+                  </span>
                 )}
               </div>
             </div>
-          </div>
-        )}
 
-        {step === 2 && (
-          <div className="step active">
-            <div className="card p-6 mb-4">
-              <h2 className="text-2xl font-semibold italic mb-1 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Elige fecha y hora</h2>
-              <p className="text-sm font-medium mb-3 sm:mb-4 text-[#7a6b67]">Elige día y hora disponible</p>
-              
-              {!selDate && nextAvailable && (
-                <div className="mb-4 p-3 sm:p-3.5 rounded-2xl border bg-gradient-to-r from-white via-[#f3f7ee] to-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs" style={{ borderColor: 'var(--blue-mid)' }}>
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#6b8a5a] shrink-0" />
-                    <span className="text-xs text-[#2e2826]">
-                      Próxima cita libre más cercana: <strong>{formatFriendlyDateShort(nextAvailable.date)} a las {nextAvailable.time}h</strong> ({nextAvailable.empName})
-                    </span>
+            {/* Official Logo */}
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border border-stone-200 shadow-md shrink-0 bg-white p-1">
+              <img
+                src="/logo-icono.png"
+                alt="Logo Centro Respira"
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+
+          {/* Pill Chips Row */}
+          <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-stone-100">
+            <div className="inline-flex items-center gap-1.5 bg-stone-100 text-stone-900 text-xs font-semibold px-3 py-1.5 rounded-full">
+              <Star size={13} className="fill-amber-400 text-amber-400" />
+              <span>4.9</span>
+              <span className="text-stone-400 font-normal">(48 reseñas)</span>
+            </div>
+
+            <span className="inline-flex items-center gap-1.5 bg-[#f3f7ee] text-[#6b8a5a] text-xs font-semibold px-3 py-1.5 rounded-full border border-[#7fa85f]/20">
+              <ShieldCheck size={13} />
+              <span>Salón Verificado</span>
+            </span>
+
+            <span className="inline-flex items-center gap-1.5 bg-stone-100 text-stone-800 text-xs font-semibold px-3 py-1.5 rounded-full">
+              <MessageCircle size={13} className="text-[#6b8a5a]" />
+              <span>WhatsApp Directo</span>
+            </span>
+          </div>
+
+          {/* Description Capsule */}
+          <div className="bg-[#faf7f4] border border-stone-200/80 rounded-2xl p-4 text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
+            Espacio de bienestar, salud y belleza en Artà. Tratamientos faciales avanzados, masajes relajantes, manicura, pedicura y cuidado integral con Magdalena, Lola y Debi.
+          </div>
+
+          {/* 4 Quick Actions (Call, GPS, WhatsApp, Hours) */}
+          <div className="grid grid-cols-4 gap-2 pt-1">
+            <a
+              href="tel:+34688692295"
+              className="flex flex-col items-center justify-center p-3 rounded-2xl bg-stone-50 hover:bg-[#f3f7ee] border border-stone-200/80 transition-all text-stone-800 group"
+            >
+              <Phone size={18} className="text-[#6b8a5a] mb-1 group-hover:scale-110 transition-transform" />
+              <span className="text-[11px] font-semibold">Llamar</span>
+            </a>
+
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Centro+de+est%C3%A9tica+Respira+Carrer+Ciutat+28+07570+Arta"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-3 rounded-2xl bg-stone-50 hover:bg-[#f3f7ee] border border-stone-200/80 transition-all text-stone-800 group"
+            >
+              <Navigation size={18} className="text-[#6b8a5a] mb-1 group-hover:scale-110 transition-transform" />
+              <span className="text-[11px] font-semibold">Cómo llegar</span>
+            </a>
+
+            <a
+              href="https://wa.me/34688692295?text=Hola,%20quisiera%20consultar%20sobre%20una%20cita%20en%20Respira"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center p-3 rounded-2xl bg-stone-50 hover:bg-[#f3f7ee] border border-stone-200/80 transition-all text-stone-800 group"
+            >
+              <MessageCircle size={18} className="text-[#6b8a5a] mb-1 group-hover:scale-110 transition-transform" />
+              <span className="text-[11px] font-semibold">WhatsApp</span>
+            </a>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (hoursSectionRef.current) {
+                  hoursSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="flex flex-col items-center justify-center p-3 rounded-2xl bg-stone-50 hover:bg-[#f3f7ee] border border-stone-200/80 transition-all text-stone-800 group cursor-pointer"
+            >
+              <Clock size={18} className="text-[#6b8a5a] mb-1 group-hover:scale-110 transition-transform" />
+              <span className="text-[11px] font-semibold">Horarios</span>
+            </button>
+          </div>
+        </section>
+
+        {/* 3. SERVICIOS & TRATAMIENTOS SECTION */}
+        <section ref={servicesSectionRef} className="space-y-4 pt-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-sans font-bold text-stone-900 tracking-tight">
+                Servicios y Tratamientos
+              </h2>
+              <p className="text-xs text-stone-500 font-normal">
+                Selecciona tu cita para consultar huecos libres en tiempo real.
+              </p>
+            </div>
+
+            {/* Buscador */}
+            <div className="relative w-full sm:w-64">
+              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar tratamientos..."
+                className="w-full pl-9 pr-3.5 py-2 bg-white border border-stone-200 rounded-2xl text-xs text-stone-900 placeholder:text-stone-400 outline-none focus:border-[#6b8a5a] transition-colors shadow-2xs"
+              />
+            </div>
+          </div>
+
+          {/* Categorías Pills */}
+          {categories.length > 0 && (
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+              <button
+                type="button"
+                onClick={() => setSelectedCategory('all')}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+                  selectedCategory === 'all'
+                    ? 'bg-[#6b8a5a] text-white shadow-xs'
+                    : 'bg-white border border-stone-200 text-stone-600 hover:text-stone-900'
+                }`}
+              >
+                Todos ({data.services.length})
+              </button>
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+                    selectedCategory === cat
+                      ? 'bg-[#6b8a5a] text-white shadow-xs'
+                      : 'bg-white border border-stone-200 text-stone-600 hover:text-stone-900'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Lista de Servicios */}
+          <div className="space-y-3">
+            {filteredServices.length > 0 ? (
+              filteredServices.map(service => (
+                <div
+                  key={service.id}
+                  className="bg-white rounded-2xl border border-stone-200/90 p-4 sm:p-5 shadow-xs hover:border-[#6b8a5a]/50 transition-all flex items-start justify-between gap-4 group"
+                >
+                  <div className="space-y-1 min-w-0">
+                    <h3 className="font-bold text-sm sm:text-base text-stone-900 leading-tight">
+                      {service.name}
+                    </h3>
+                    {service.description && (
+                      <p className="text-xs text-stone-500 font-normal leading-relaxed line-clamp-2">
+                        {service.description}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-2 text-xs font-semibold text-stone-500 pt-1">
+                      <Clock size={13} className="text-[#6b8a5a]" />
+                      <span>{service.duration || 30} min</span>
+                      {service.category && (
+                        <>
+                          <span>·</span>
+                          <span className="text-stone-400 font-normal">{service.category}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
+
+                  <div className="text-right shrink-0 flex flex-col items-end gap-2">
+                    <span className="text-base sm:text-lg font-bold font-sans text-stone-900">
+                      {Number(service.price || 0).toFixed(2)} €
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleStartBooking(service)}
+                      className="py-2 px-4 bg-[#6b8a5a] hover:bg-[#5a774b] text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer active:scale-98"
+                    >
+                      Reservar
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="bg-white rounded-2xl border border-stone-200 p-8 text-center space-y-2">
+                <p className="text-sm font-semibold text-stone-800">No se encontraron tratamientos</p>
+                <p className="text-xs text-stone-500">Prueba con otro término de búsqueda o categoría.</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* 4. EQUIPO DE PROFESIONALES (Fresha Style Reference) */}
+        {data.employees.length > 0 && (
+          <section className="space-y-4 pt-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-sans font-bold text-stone-900 tracking-tight">
+                  Equipo de Especialistas
+                </h2>
+                <p className="text-xs text-stone-500 font-normal">
+                  Profesionales expertas para cuidar de ti en Artà.
+                </p>
+              </div>
+              <span className="text-xs font-semibold text-stone-400">
+                {data.employees.length} especialistas
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {data.employees.map(emp => (
+                <div
+                  key={emp.id}
+                  className="bg-white rounded-2xl border border-stone-200/90 p-4 hover:border-[#6b8a5a]/50 transition-all flex sm:flex-col items-center justify-between sm:justify-center text-left sm:text-center gap-3 shadow-2xs"
+                >
+                  <div className="flex sm:flex-col items-center gap-3 min-w-0">
+                    <div className="w-14 h-14 rounded-full overflow-hidden bg-[#f3f7ee] border-2 border-[#7fa85f]/30 flex items-center justify-center font-bold text-[#6b8a5a] shrink-0 text-base shadow-xs">
+                      {emp.photo_url ? (
+                        <img src={emp.photo_url} alt={emp.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{emp.name.substring(0, 2).toUpperCase()}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-sm text-stone-900 truncate">{emp.name}</h4>
+                      <p className="text-xs text-stone-500 truncate">
+                        {emp.title || (emp.name === 'Magdalena' ? 'Fundadora & Estética' : emp.name === 'Lola' ? 'Bienestar & Masaje' : 'Manicura & Belleza')}
+                      </p>
+                      <div className="flex items-center justify-start sm:justify-center gap-1 text-[11px] font-semibold text-stone-700 mt-0.5">
+                        <Star size={12} className="fill-amber-400 text-amber-400" />
+                        <span>5.0</span>
+                        <span className="text-stone-400 font-normal">· {emp.name === 'Magdalena' ? '42' : emp.name === 'Lola' ? '35' : '28'} reseñas</span>
+                      </div>
+                    </div>
+                  </div>
+
                   <button
                     type="button"
-                    onClick={() => goToNextAvailable(nextAvailable)}
-                    className="text-xs font-bold text-[#6b8a5a] hover:underline flex items-center gap-1 self-end sm:self-auto cursor-pointer"
+                    onClick={() => {
+                      if (data.services.length > 0) {
+                        handleStartBooking(data.services[0], emp);
+                      }
+                    }}
+                    className="py-1.5 px-3 bg-[#f3f7ee] hover:bg-[#e4eedb] text-[#6b8a5a] text-xs font-semibold rounded-xl transition-all cursor-pointer shrink-0"
                   >
-                    <span>Ir directo a esta cita</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    Elegir
                   </button>
                 </div>
-              )}
-              
-              <div className="flex items-center justify-between mb-4">
-                <button onClick={() => setCalViewDate(new Date(y, mo - 1, 1))} className="p-2 rounded-xl border bg-white transition-colors border-[#e0d8d5] hover:bg-slate-50">
-                  <ChevronLeft className="w-5 h-5 text-[#7a6b67]" />
-                </button>
-                <span className="font-bold text-sm capitalize text-[#2e2826]">{msNames[mo]} {y}</span>
-                <button disabled={isNextMonthDisabled} onClick={() => setCalViewDate(new Date(y, mo + 1, 1))} className={`p-2 rounded-xl border transition-colors border-[#e0d8d5] ${isNextMonthDisabled ? 'bg-gray-100 opacity-50 cursor-not-allowed' : 'bg-white hover:bg-slate-50'}`}>
-                  <ChevronRight className="w-5 h-5 text-[#7a6b67]" />
-                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 5. UBICACIÓN & HORARIOS */}
+        <section ref={hoursSectionRef} className="space-y-4 pt-2">
+          <h2 className="text-xl font-sans font-bold text-stone-900 tracking-tight">
+            Ubicación y Horario
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Mapa Preview */}
+            <div className="bg-white rounded-3xl border border-stone-200/90 p-5 space-y-3 shadow-xs">
+              <div className="flex items-start gap-2.5">
+                <MapPin size={18} className="text-[#6b8a5a] shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm text-stone-900">Dirección del Salón</h3>
+                  <p className="text-xs text-stone-500 leading-relaxed mt-0.5">
+                    Carrer Ciutat, 28, 07570 Artà, Illes Balears
+                  </p>
+                </div>
               </div>
 
-              <div className="grid grid-cols-7 text-center text-[10px] font-bold uppercase mb-2 tracking-widest text-[#7a6b67]">
-                {dayNames.map(d => <div key={d}>{d}</div>)}
+              <div className="h-36 rounded-2xl bg-[#f3f7ee] border border-stone-200 relative overflow-hidden flex items-center justify-center">
+                <div className="text-center space-y-1">
+                  <div className="w-10 h-10 rounded-full bg-[#6b8a5a] text-white flex items-center justify-center mx-auto shadow-md">
+                    <Navigation size={18} />
+                  </div>
+                  <span className="text-xs font-bold text-stone-800 block">Abrir con GPS</span>
+                </div>
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Centro+de+est%C3%A9tica+Respira+Carrer+Ciutat+28+07570+Arta"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-0"
+                />
               </div>
-              
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {Array.from({ length: off }).map((_, i) => <div key={`e-${i}`}></div>)}
-                {Array.from({ length: dim }).map((_, i) => {
-                  const day = i + 1;
-                  const ds = `${y}-${String(mo + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                  const isPast = ds < todayStr;
-                  const isTooFar = ds > maxDateStr;
-                  const closed = !isPast && isDayClosed(ds);
-                  const isSel = selDate === ds;
-                  const isToday = ds === todayStr;
-                  
-                  const disabled = isPast || isTooFar || closed;
-                  let cls = 'day-btn';
-                  if (isPast || isTooFar) cls += ' day-past';
-                  else if (closed) cls += ' day-closed';
-                  else if (isSel) cls += ' day-selected';
-                  else if (isToday) cls += ' day-today';
-                  
+
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Centro+de+est%C3%A9tica+Respira+Carrer+Ciutat+28+07570+Arta"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full block text-center py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-900 font-semibold rounded-xl text-xs transition-colors"
+              >
+                Ver ubicación en Google Maps
+              </a>
+            </div>
+
+            {/* Horario Semanal */}
+            <div className="bg-white rounded-3xl border border-stone-200/90 p-5 space-y-3 shadow-xs">
+              <div className="flex items-center gap-2">
+                <Clock size={18} className="text-[#6b8a5a]" />
+                <h3 className="font-bold text-sm text-stone-900">Horario Semanal</h3>
+              </div>
+
+              <div className="space-y-2 pt-1 text-xs">
+                {weeklyScheduleList.map(item => {
+                  const isToday = item.dayNum === new Date().getDay();
                   return (
-                    <button key={day} disabled={disabled} onClick={() => selectDate(ds)} className={cls}>
-                      {day}
-                    </button>
+                    <div
+                      key={item.name}
+                      className={`flex items-center justify-between py-1.5 px-3 rounded-xl transition-colors ${
+                        isToday ? 'bg-[#f3f7ee] font-bold text-[#6b8a5a] border border-[#7fa85f]/30' : 'text-stone-600'
+                      }`}
+                    >
+                      <span>{item.name} {isToday && '(Hoy)'}</span>
+                      <span className={item.isClosed ? 'text-stone-400 font-medium' : 'text-stone-900 font-semibold'}>
+                        {item.hours}
+                      </span>
+                    </div>
                   );
                 })}
               </div>
+            </div>
+          </div>
+        </section>
 
-              {selDate && (
-                <div id="slots-section" className="mt-4 pt-4 border-t border-[#e0d8d5]">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Clock className="w-4 h-4 text-[#6b8a5a]" />
-                    <h3 className="font-bold text-sm uppercase" style={{color:'var(--blue-deep)'}}>Selecciona hora</h3>
-                    <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-lg capitalize bg-[#f3f7ee] text-[#6b8a5a]">
-                      {selDate.split('-').reverse().join('/')}
-                    </span>
-                  </div>
-                  
-                  {loadingSlots ? (
-                    <div className="flex justify-center py-4"><div className="spinner border-[#e0d8d5] border-t-[#6b8a5a]"></div></div>
-                  ) : (
-                    <>
-                      {availableSlots.filter(s => s.free).length === 0 ? (
-                        <div className="py-2">
-                          <div className="text-center py-3 px-4 bg-[#fbf9f5] rounded-xl border border-dashed border-[#e0d8d5] mb-3">
-                            <p className="text-[#7a6b67] font-semibold text-sm">No hay huecos libres para el {selDate.split('-').reverse().join('/')}</p>
-                            <p className="text-[11px] mt-0.5 text-slate-400">
-                              {selServices.some(s => s.selectedSpecialist) ? 'Prueba seleccionando "Automático" o revisa la siguiente fecha disponible a continuación' : 'Todos los horarios de este día están ocupados'}
-                            </p>
-                          </div>
+      </main>
 
-                          {/* Banner / Tarjeta de Próxima Cita Disponible */}
-                          {isSearchingNext ? (
-                            <div className="p-4 rounded-2xl border bg-gradient-to-r from-white to-[#f3f7ee] flex items-center justify-center gap-3 text-xs text-[#6b8a5a] font-semibold animate-pulse shadow-xs" style={{ borderColor: 'var(--blue-mid)' }}>
-                              <div className="w-4 h-4 border-2 border-[#e0d8d5] border-t-[#6b8a5a] rounded-full animate-spin" />
-                              <span>Buscando el próximo hueco disponible...</span>
+      {/* 6. MODAL / DRAWER DE RESERVA (Airbnb Style Reference) */}
+      {isBookingOpen && selectedService && (
+        <div className="fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-lg w-full max-h-[92vh] sm:max-h-[88vh] overflow-y-auto shadow-2xl border border-stone-200 flex flex-col justify-between">
+
+            {/* Top Bar */}
+            <div className="p-4 sm:p-5 border-b border-stone-200 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-md z-10">
+              <div className="flex items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setIsBookingOpen(false)}
+                  className="p-1.5 rounded-full text-stone-400 hover:text-stone-900 hover:bg-stone-100 transition-colors cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm text-stone-900 truncate">
+                    {bookingStep === 'success' ? 'Reserva Confirmada' : selectedService.name}
+                  </h3>
+                  <p className="text-[11px] text-stone-500 font-normal">
+                    {selectedService.duration || 30} min · {Number(selectedService.price || 0).toFixed(2)} €
+                  </p>
+                </div>
+              </div>
+
+              {selectedDate && bookingStep === 'datetime' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedDate('');
+                    setSelectedTime('');
+                    setAvailableSlots([]);
+                  }}
+                  className="text-xs font-semibold text-[#6b8a5a] hover:underline cursor-pointer"
+                >
+                  Cambiar fecha
+                </button>
+              )}
+            </div>
+
+            {/* Error Banner */}
+            {errorMsg && (
+              <div className="mx-5 mt-4 p-3 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs font-semibold flex items-center gap-2">
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            {/* Content Body */}
+            <div className="p-5 sm:p-6 space-y-6 flex-1">
+
+              {/* PASO 1: DATETIME & CALENDARIO AIRBNB */}
+              {bookingStep === 'datetime' && (
+                <div className="space-y-6 animate-in fade-in">
+
+                  {/* Selector de Profesional */}
+                  {data.employees.length > 1 && (
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider">
+                        Especialista preferida
+                      </label>
+                      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedEmployee(null);
+                            if (selectedDate) handleDateSelect(selectedDate);
+                          }}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                            !selectedEmployee
+                              ? 'bg-[#6b8a5a] text-white shadow-xs'
+                              : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                          }`}
+                        >
+                          Cualquiera disponible
+                        </button>
+                        {data.employees.map(emp => (
+                          <button
+                            key={emp.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedEmployee(emp);
+                              if (selectedDate) handleDateSelect(selectedDate);
+                            }}
+                            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all shrink-0 cursor-pointer ${
+                              selectedEmployee?.name === emp.name
+                                ? 'bg-[#6b8a5a] text-white shadow-xs'
+                                : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                            }`}
+                          >
+                            {emp.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Banner de Próximo Hueco Disponible */}
+                  {nextAvailableSlot && !loadingSlots && (
+                    <div className="p-3.5 rounded-2xl bg-stone-900 text-white flex items-center justify-between gap-3 text-xs shadow-md">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                          <Sparkles size={16} className="text-[#7fa85f]" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[10px] uppercase font-bold text-stone-300">Próximo hueco libre</p>
+                          <p className="font-semibold text-white truncate">
+                            <span className="capitalize">{formatDatePretty(nextAvailableSlot.date)}</span> a las <span className="font-bold text-[#7fa85f]">{nextAvailableSlot.time}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => goToNextAvailable(nextAvailableSlot)}
+                        className="shrink-0 px-3 py-1.5 rounded-xl font-bold text-xs bg-[#6b8a5a] text-white hover:bg-[#5a774b] transition-all active:scale-95 cursor-pointer shadow-xs"
+                      >
+                        {selectedDate === nextAvailableSlot.date ? 'Ver hora' : 'Ir a fecha'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Calendario Airbnb */}
+                  {renderAirbnbCalendar()}
+
+                  {/* Horas disponibles */}
+                  {selectedDate && (
+                    <div id="funnel-slots-container" className="space-y-4 pt-3 border-t border-stone-100">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider">
+                          Horas disponibles para el {selectedDate.split('-').reverse().join('/')}
+                        </h4>
+                        {loadingSlots && <Loader2 size={14} className="animate-spin text-[#6b8a5a]" />}
+                      </div>
+
+                      {availableSlots.length > 0 ? (
+                        <div className="space-y-4">
+                          {morningSlots.length > 0 && (
+                            <div className="space-y-2">
+                              <span className="text-[11px] font-bold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
+                                <Sun size={13} className="text-amber-500" />
+                                <span>Turno de Mañana</span>
+                              </span>
+                              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                                {morningSlots.map(slot => (
+                                  <button
+                                    key={slot.time}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedTime(slot.time);
+                                      setSelectedSlotData(slot);
+                                    }}
+                                    className={`py-2 px-1 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                                      selectedTime === slot.time
+                                        ? 'bg-[#6b8a5a] text-white font-bold shadow-xs scale-102 ring-2 ring-[#6b8a5a]'
+                                        : 'bg-stone-100 hover:bg-[#f3f7ee] hover:text-[#6b8a5a] text-stone-800'
+                                    }`}
+                                  >
+                                    {slot.time}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
-                          ) : nextAvailable ? (
-                            <div className="p-4 sm:p-5 rounded-2xl border-2 shadow-sm text-left transition-all" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f3f7ee 100%)', borderColor: 'var(--blue-mid)' }}>
-                              <div className="flex items-center justify-between gap-2 mb-2">
-                                <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wide text-[#6b8a5a]">
-                                  <Sparkles className="w-4 h-4 text-[#d99ba1]" />
-                                  <span>Próxima cita disponible</span>
-                                </div>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                  Hueco libre
-                                </span>
-                              </div>
+                          )}
 
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-1 pt-2 border-t border-[#e0d8d5]/80">
-                                <div>
-                                  <p className="text-sm sm:text-base font-extrabold text-[#2e2826] capitalize">
-                                    {formatFriendlyDateLong(nextAvailable.date)}
+                          {afternoonSlots.length > 0 && (
+                            <div className="space-y-2 pt-1">
+                              <span className="text-[11px] font-bold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
+                                <Moon size={13} className="text-indigo-500" />
+                                <span>Turno de Tarde</span>
+                              </span>
+                              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                                {afternoonSlots.map(slot => (
+                                  <button
+                                    key={slot.time}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedTime(slot.time);
+                                      setSelectedSlotData(slot);
+                                    }}
+                                    className={`py-2 px-1 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                                      selectedTime === slot.time
+                                        ? 'bg-[#6b8a5a] text-white font-bold shadow-xs scale-102 ring-2 ring-[#6b8a5a]'
+                                        : 'bg-stone-100 hover:bg-[#f3f7ee] hover:text-[#6b8a5a] text-stone-800'
+                                    }`}
+                                  >
+                                    {slot.time}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : !loadingSlots ? (
+                        <div className="space-y-3 py-2">
+                          {isSearchingNext ? (
+                            <div className="flex items-center justify-center gap-2 py-4 text-xs text-stone-500">
+                              <Loader2 size={16} className="animate-spin text-[#6b8a5a]" />
+                              <span>Buscando próximo hueco disponible...</span>
+                            </div>
+                          ) : nextAvailableSlot ? (
+                            <div className="p-4 rounded-2xl bg-[#faf7f4] border border-stone-200 shadow-xs space-y-3 text-left">
+                              <div className="flex items-start gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-[#6b8a5a] text-white flex items-center justify-center shrink-0 mt-0.5">
+                                  <Calendar size={18} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#f3f7ee] text-[#6b8a5a] mb-1">
+                                    Próximo hueco disponible
+                                  </span>
+                                  <p className="text-sm font-bold text-stone-900 capitalize">
+                                    {formatDatePretty(nextAvailableSlot.date)} a las {nextAvailableSlot.time}
                                   </p>
-                                  <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-[#7a6b67]">
-                                    <span className="font-extrabold text-[#6b8a5a] bg-white px-2.5 py-1 rounded-lg border border-[#e0d8d5] shadow-xs">
-                                      🕒 {nextAvailable.time} h
-                                    </span>
-                                    <span>•</span>
-                                    <span>Con <strong>{nextAvailable.empName}</strong></span>
-                                    <span>•</span>
-                                    <span>{nextAvailable.totalDur} min</span>
-                                  </div>
+                                  <p className="text-xs text-stone-500 mt-0.5">
+                                    Sin huecos para {selectedDate.split('-').reverse().join('/')} · Próximo disponible encontrado
+                                  </p>
                                 </div>
-
-                                <button
-                                  type="button"
-                                  onClick={() => goToNextAvailable(nextAvailable)}
-                                  className="w-full sm:w-auto px-4 py-3 rounded-xl font-bold text-xs sm:text-sm text-white shadow-md hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
-                                  style={{ background: 'var(--blue-deep)' }}
-                                >
-                                  <span>Reservar este hueco</span>
-                                  <ArrowRight className="w-4 h-4" />
-                                </button>
                               </div>
+
+                              <button
+                                type="button"
+                                onClick={() => goToNextAvailable(nextAvailableSlot)}
+                                className="w-full py-2.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider bg-[#6b8a5a] hover:bg-[#5a774b] text-white transition-all shadow-xs active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+                              >
+                                <Sparkles size={14} />
+                                <span>Reservar este hueco ({formatDatePretty(nextAvailableSlot.date)} {nextAvailableSlot.time})</span>
+                                <ChevronRight size={14} />
+                              </button>
                             </div>
                           ) : (
-                            <p className="text-xs text-center text-slate-400 py-2">
-                              No se encontraron huecos disponibles en las próximas semanas para esta selección.
-                            </p>
+                            <p className="text-xs text-stone-400 italic">No quedan turnos disponibles para esta selección.</p>
                           )}
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              )}
 
-                          {/* Consejo Inteligente para Citas Múltiples (Combo) */}
-                          {selServices.length > 1 && (
-                            <div className="mt-3.5 p-3.5 rounded-xl text-xs bg-amber-50/90 border border-amber-200 text-amber-900 leading-relaxed shadow-xs">
-                              <div className="flex items-start gap-2.5">
-                                <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                                <div className="space-y-1">
-                                  <p className="font-bold text-amber-950">
-                                    💡 Consejo para citas de varios servicios ({selServices.reduce((sum, s) => sum + parseInt(s.duration || 0, 10), 0)} min):
-                                  </p>
-                                  <p className="text-[11px] text-amber-800">
-                                    Has seleccionado {selServices.length} servicios consecutivos, por lo que el sistema busca un bloque continuo amplio con la misma especialista.
-                                  </p>
-                                  {singleNextAvailable && (!nextAvailable || singleNextAvailable.date < nextAvailable.date) && (
-                                    <div className="mt-2 p-2.5 bg-emerald-50 rounded-lg border border-emerald-200 text-emerald-900 text-[11px]">
-                                      ✨ <strong>¿Necesitas cita antes?</strong> Para tu primer servicio (<strong>{selServices[0].name}</strong>) hay disponibilidad más pronto: el <strong>{formatFriendlyDateLong(singleNextAvailable.date)} a las {singleNextAvailable.time}h</strong> con {singleNextAvailable.empName}. Puedes reservar cada servicio por separado si prefieres acudir antes.
-                                    </div>
-                                  )}
-                                  {(!singleNextAvailable || (nextAvailable && singleNextAvailable.date >= nextAvailable.date)) && (
-                                    <p className="text-[11px] text-amber-800 mt-1">
-                                      Si necesitas una fecha más cercana, también puedes reservar los servicios en citas separadas en distintos días u horarios.
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          )}
+              {/* PASO 2: DATOS DEL CLIENTE Y CANJE DE BONO/CHEQUE REGALO */}
+              {bookingStep === 'customer' && (
+                <div className="space-y-4 animate-in fade-in">
+                  
+                  {/* Resumen de cita */}
+                  <div className="bg-[#f3f7ee] border border-[#7fa85f]/30 rounded-2xl p-4 text-xs space-y-1">
+                    <p className="font-bold text-[#6b8a5a] text-sm">{selectedService.name}</p>
+                    <p className="text-stone-700">
+                      Cita el <strong>{formatDatePretty(selectedDate)}</strong> a las <strong>{selectedTime}</strong>
+                      {selectedSlotData?.assign?.[0] ? ` con ${selectedSlotData.assign[0]}` : ''}.
+                    </p>
+                    <p className="text-stone-500 text-[11px]">
+                      Duración aproximada: {selectedService.duration || 30} min.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-700 mb-1">
+                        Nombre completo <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={customerData.name}
+                        onChange={(e) => setCustomerData({ ...customerData, name: e.target.value })}
+                        placeholder="Ej. Maria Belen"
+                        className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-2xl text-xs text-stone-900 outline-none focus:border-[#6b8a5a] transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-700 mb-1">
+                        Teléfono Móvil (WhatsApp) <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        value={customerData.phone}
+                        onChange={(e) => setCustomerData({ ...customerData, phone: e.target.value })}
+                        placeholder="Ej. 612 345 678"
+                        className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-2xl text-xs text-stone-900 outline-none focus:border-[#6b8a5a] transition-colors"
+                      />
+                      <span className="text-[10px] text-stone-400 block mt-0.5">
+                        Recibirás la confirmación y recordatorio automático por WhatsApp.
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-700 mb-1">
+                        Email de confirmación <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={customerData.email}
+                        onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
+                        placeholder="ejemplo@correo.com"
+                        className="w-full px-3.5 py-2.5 bg-white border border-stone-200 rounded-2xl text-xs text-stone-900 outline-none focus:border-[#6b8a5a] transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-stone-700 mb-1">
+                        Notas o preferencias (Opcional)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={customerData.notes}
+                        onChange={(e) => setCustomerData({ ...customerData, notes: e.target.value })}
+                        placeholder="Algún detalle sobre tu piel, alergias o preferencia..."
+                        className="w-full px-3.5 py-2 bg-white border border-stone-200 rounded-2xl text-xs text-stone-900 outline-none focus:border-[#6b8a5a] transition-colors resize-none"
+                      />
+                    </div>
+
+                    {/* VOUCHER / CHEQUE REGALO / BONO INPUT */}
+                    <div className="pt-2 border-t border-stone-100 space-y-2">
+                      <label className="block text-xs font-bold text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <Ticket size={14} className="text-[#6b8a5a]" />
+                        <span>¿Tienes un Cheque Regalo o Bono?</span>
+                      </label>
+
+                      {appliedVoucher ? (
+                        <div className="p-3 rounded-2xl bg-[#f3f7ee] border border-[#7fa85f]/40 flex items-center justify-between gap-3 text-xs">
+                          <div className="min-w-0">
+                            <span className="font-bold text-[#6b8a5a] block uppercase">{appliedVoucher.code}</span>
+                            <span className="text-stone-600 text-[11px]">
+                              {appliedVoucher.type === 'gift_card' 
+                                ? `Saldo disponible: ${appliedVoucher.remaining_balance} €` 
+                                : 'Bono de tratamiento validado con éxito'}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleRemoveVoucher}
+                            className="text-xs text-rose-600 font-semibold hover:underline cursor-pointer shrink-0"
+                          >
+                            Quitar
+                          </button>
                         </div>
                       ) : (
-                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                          {availableSlots.map(slot => (
-                            <button 
-                              key={slot.time} 
-                              disabled={!slot.free}
-                              onClick={() => handleTimeSelect(slot)}
-                              className={`time-slot ${slot.free ? (selTime === slot.time ? 'selected' : '') : 'occupied'}`}
-                            >
-                              {slot.time}
-                            </button>
-                          ))}
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={voucherCodeInput}
+                            onChange={(e) => setVoucherCodeInput(e.target.value.toUpperCase())}
+                            placeholder="Ej. REGALO-2026"
+                            className="flex-1 px-3.5 py-2 bg-white border border-stone-200 rounded-xl text-xs uppercase tracking-wider text-stone-900 outline-none focus:border-[#6b8a5a]"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleApplyVoucher}
+                            disabled={voucherLoading || !voucherCodeInput.trim()}
+                            className="py-2 px-3.5 bg-stone-900 hover:bg-black text-white text-xs font-semibold rounded-xl transition-all disabled:opacity-40 cursor-pointer flex items-center gap-1.5"
+                          >
+                            {voucherLoading && <Loader2 size={12} className="animate-spin" />}
+                            <span>Aplicar</span>
+                          </button>
                         </div>
                       )}
-                    </>
-                  )}
-                  {selServices.length > 0 && (
-                    <div className="mt-4 p-3 rounded-xl border" style={{borderColor:'var(--blue)',background:'linear-gradient(135deg,var(--cream),white)'}}>
-                      <p className="text-[10px] font-bold uppercase mb-2" style={{color:'var(--blue-deep)'}}>Especialistas disponibles</p>
-                      {selServices.map((s, i) => {
-                        const origSvc = data.services.find(ds => ds.name === s.name) || s;
-                        const eligibleEmps = getCandidatesForService(origSvc);
-                        const isMultiple = eligibleEmps.length > 1;
-                        return (
-                          <div key={i} className="flex items-center justify-between py-2 border-b last:border-0 text-xs" style={{borderColor:'var(--brown-light)'}}>
-                            <span style={{color:'var(--brown)'}}>{s.name}</span>
-                            {isMultiple ? (
-                              <select value={s.selectedSpecialist || ''} onChange={function(ev){
-                                var val = ev.target.value;
-                                var updated = selServices.map(function(sv, idx){ return idx === i ? {...sv, selectedSpecialist: val} : sv; });
-                                setSelServices(updated);
-                                if (selDate) { setTimeout(() => setSelTime(null), 0); fetchSlotsForDate(selDate, updated); }
-                              }} className="p-1.5 border rounded-lg text-[10px] font-bold outline-none" style={{background:'white',borderColor:'var(--blue-mid)',color:'var(--blue-deep)'}}>
-                                <option value="">Automático</option>
-                                {eligibleEmps.map(function(emp){ return <option key={emp.id} value={emp.name}>{emp.name}</option>; })}
-                              </select>
-                            ) : (
-                              <span className="font-bold" style={{color:'var(--blue-deep)'}}>{eligibleEmps[0] ? eligibleEmps[0].name : (s.selectedSpecialist || s.employee || 'Especialista')}</span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {selServices.length > 1 && (function(){
-                    const sumDur = selServices.reduce((sum, s) => sum + parseInt(s.duration || 0, 10), 0);
-                    if (selSlotData && selSlotData.assign) {
-                      const uniqueAssign = [...new Set(selSlotData.assign.filter(Boolean))];
-                      if (uniqueAssign.length <= 1) {
-                        const empName = uniqueAssign[0] || 'tu especialista';
-                        const endMin = t2m(selTime) + (selSlotData.totalDur || sumDur);
-                        return (
-                          <div className="mt-4 p-3.5 rounded-xl text-xs leading-relaxed border shadow-sm" style={{background:'#f0fdf4',borderColor:'#86efac',color:'#166534'}}>
-                            <div className="flex items-center gap-2 font-bold mb-1 text-sm">
-                              <Clock className="w-4 h-4 text-emerald-600 shrink-0" />
-                              <span>Cita consecutiva con {empName} ({selSlotData.totalDur || sumDur} min)</span>
-                            </div>
-                            <p className="text-[11px] text-emerald-800 leading-relaxed">
-                              Los {selServices.length} servicios se realizarán seguidos uno tras otro por <strong>{empName}</strong>, de <strong>{selTime}h</strong> a <strong>{m2t(endMin)}h</strong> ({selSlotData.totalDur || sumDur} min seguidos).
-                            </p>
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <div className="mt-4 p-3.5 rounded-xl text-xs leading-relaxed border shadow-sm" style={{background:'#f0fdf4',borderColor:'#86efac',color:'#166534'}}>
-                            <div className="flex items-center gap-2 font-bold mb-1 text-sm">
-                              <Clock className="w-4 h-4 text-emerald-600 shrink-0" />
-                              <span>Servicios simultáneos en paralelo ({selSlotData.totalDur} min)</span>
-                            </div>
-                            <p className="text-[11px] text-emerald-800 leading-relaxed">
-                              Tus servicios se realizarán al mismo tiempo por distintas profesionales (<strong>{uniqueAssign.join(', ')}</strong>) a partir de las <strong>{selTime}h</strong>.
-                            </p>
-                          </div>
-                        );
-                      }
-                    }
 
-                    return (
-                      <div className="mt-4 p-3.5 rounded-xl text-xs leading-relaxed border shadow-sm" style={{background:'#fffbeb',borderColor:'#fde68a',color:'#92400e'}}>
-                        <div className="flex items-center gap-2 font-bold mb-1">
-                          <Clock className="w-4 h-4 text-amber-600 shrink-0" />
-                          <span>Servicios combinados ({sumDur} min de atención total)</span>
-                        </div>
-                        <p className="text-[11px] text-amber-800 leading-relaxed">
-                          Tus servicios se realizarán de forma consecutiva por una misma especialista ({sumDur} min seguidos). Si hay varias profesionales disponibles a la misma hora, el sistema también te ofrecerá la opción en paralelo.
-                        </p>
-                      </div>
-                    );
-                  })()}
+                      {voucherError && (
+                        <p className="text-[11px] text-rose-600 font-semibold">{voucherError}</p>
+                      )}
+                    </div>
+
+                    {/* GDPR Consent */}
+                    <div className="pt-2">
+                      <label className="flex items-start gap-2.5 text-xs text-stone-600 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={customerData.gdpr}
+                          onChange={(e) => setCustomerData({ ...customerData, gdpr: e.target.checked })}
+                          className="mt-0.5 rounded border-stone-300 text-[#6b8a5a] focus:ring-[#6b8a5a]"
+                        />
+                        <span>
+                          Acepto el tratamiento de mis datos para la gestión y recordatorio de mi cita en Respira.
+                        </span>
+                      </label>
+                    </div>
+
+                  </div>
                 </div>
               )}
-            </div>
-            <button className="btn-back" onClick={() => setStep(1)}>
-              <ArrowLeft className="w-4 h-4" /> Atrás
-            </button>
-          </div>
-        )}
 
-        {step === 3 && (
-          <div className="step active">
-            <div className="card p-5 mb-4 bg-gradient-to-br from-[#faf7f4] to-[#f3f7ee] border-[#d99ba1]">
-              <p className="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2 text-[#6b8a5a]">
-                <ClipboardCheck className="w-4 h-4" /> Resumen de tu cita
-              </p>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between items-start">
-                  <span className="font-medium text-[#7a6b67] shrink-0 mr-2">Servicios</span>
-                  <div className="text-right space-y-1">
-                    {selServices.map((s, idx) => (
-                      <div key={idx} className="text-xs font-bold" style={{color:'var(--brown)'}}>
-                        {s.name} <span className="text-[10px] text-[#6b8a5a] font-normal">({slotAssign?.[idx] || s.employee || 'Especialista'})</span>
+              {/* PASO 3: CONFIRMACIÓN EXITOSA */}
+              {bookingStep === 'success' && (
+                <div className="text-center py-6 space-y-4 animate-in fade-in">
+                  <div className="w-16 h-16 bg-[#6b8a5a] text-white rounded-full flex items-center justify-center mx-auto shadow-lg">
+                    <CheckCircle2 size={36} />
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-bold text-stone-900">
+                      ¡Cita Confirmada con Éxito!
+                    </h3>
+                    <p className="text-xs text-stone-500">
+                      Hemos reservado tu momento de bienestar en Respira.
+                    </p>
+                  </div>
+
+                  {completedBooking && (
+                    <div className="p-4 bg-[#f3f7ee] border border-[#7fa85f]/30 rounded-2xl text-xs text-stone-800 space-y-2 text-left max-w-sm mx-auto">
+                      <div className="flex justify-between border-b border-stone-200/60 pb-1.5">
+                        <span className="text-stone-500">Tratamiento:</span>
+                        <span className="font-bold">{completedBooking.service}</span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-[#7a6b67]">Fecha y horario</span>
-                  <span className="font-bold text-xs" style={{color:'var(--blue-deep)'}}>{selDate?.split('-').reverse().join('/')} · {selTime}h - {m2t(t2m(selTime) + (selSlotData?.totalDur || getTotalDur(selServices)))}h</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-[#7a6b67]">Duración total</span>
-                  <span className="font-bold" style={{color:'var(--blue-deep)'}}>{selSlotData?.totalDur || getTotalDur(selServices)} min</span>
-                </div>
-                <div className="pt-2 border-t space-y-1.5" style={{borderColor:'var(--blue)'}}>
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium text-[#7a6b67]">Precio servicios</span>
-                    <span className="font-bold text-xs" style={{color:'var(--brown)'}}>{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</span>
-                  </div>
-                  {appliedVoucher && (
-                    <div className="flex justify-between items-center text-xs text-emerald-700 font-bold">
-                      <span>Bono ({appliedVoucher.code})</span>
-                      <span>-{Math.min(selServices.reduce((sum, s) => sum + (s.price || 0), 0), appliedVoucher.amount).toFixed(2)}€</span>
+                      <div className="flex justify-between border-b border-stone-200/60 pb-1.5">
+                        <span className="text-stone-500">Fecha y Hora:</span>
+                        <span className="font-bold">{formatDatePretty(completedBooking.date)} a las {completedBooking.time}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-stone-200/60 pb-1.5">
+                        <span className="text-stone-500">Especialista:</span>
+                        <span className="font-bold">{completedBooking.employee}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-stone-500">Total:</span>
+                        <span className="font-bold text-[#6b8a5a]">
+                          {completedBooking.finalPrice === 0 ? '0.00 € (Abonado con Cheque/Bono)' : `${Number(completedBooking.finalPrice || 0).toFixed(2)} €`}
+                        </span>
+                      </div>
                     </div>
                   )}
-                  <div className="flex justify-between items-center pt-1 border-t border-dashed border-[#e0d8d5]">
-                    <span className="font-bold text-[#2e2826]">Total a pagar</span>
-                    <span className="font-black text-base" style={{color:'var(--blue-deep)'}}>
-                      {Math.max(0, selServices.reduce((sum, s) => sum + (s.price || 0), 0) - (appliedVoucher ? Math.min(selServices.reduce((sum, s) => sum + (s.price || 0), 0), appliedVoucher.amount) : 0)).toFixed(2)}€
-                      {appliedVoucher && (selServices.reduce((sum, s) => sum + (s.price || 0), 0) <= appliedVoucher.amount) && (
-                        <span className="block text-[10px] font-bold text-emerald-700">Cubierto por bono</span>
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Módulo de Bono o Cheque Regalo */}
-            <div className="card p-4 sm:p-5 mb-4 bg-white border border-[#e0d8d5] shadow-sm">
-              <div className="flex items-center gap-2 mb-2.5">
-                <Ticket className="w-4 h-4 text-[#6b8a5a]" />
-                <h4 className="text-xs font-black uppercase tracking-wider text-[#2e2826]">¿Tienes un bono o cheque regalo?</h4>
-              </div>
-              {!appliedVoucher ? (
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={voucherCodeInput}
-                      onChange={e => setVoucherCodeInput(e.target.value.toUpperCase())}
-                      placeholder="Código (ej. BONO-AB12CD)"
-                      className="input-field flex-1 font-mono text-xs uppercase tracking-wider"
-                    />
+                  <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
+                    {googleCalendarUrl !== '#' && (
+                      <a
+                        href={googleCalendarUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-2.5 px-4 bg-stone-900 hover:bg-black text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Calendar size={14} />
+                        <span>Añadir a Google Calendar</span>
+                      </a>
+                    )}
+
+                    <a
+                      href={`https://wa.me/34688692295?text=Hola,%20acabo%20de%20reservar%20cita%20para%20${encodeURIComponent(completedBooking?.service || 'tratamiento')}%20el%20${completedBooking?.date}%20a%20las%20${completedBooking?.time}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-2.5 px-4 bg-[#6b8a5a] hover:bg-[#5a774b] text-white rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
+                    >
+                      <MessageCircle size={14} />
+                      <span>WhatsApp de Respira</span>
+                    </a>
+                  </div>
+
+                  <div className="pt-2">
                     <button
                       type="button"
-                      onClick={handleApplyVoucher}
-                      disabled={voucherLoading || !voucherCodeInput.trim()}
-                      className="btn-primary px-4 py-2.5 text-xs font-bold uppercase tracking-wider shrink-0 disabled:opacity-50"
-                      style={{background:'var(--blue-deep)'}}
+                      onClick={() => setIsBookingOpen(false)}
+                      className="text-xs text-stone-500 hover:text-stone-900 font-semibold underline cursor-pointer"
                     >
-                      {voucherLoading ? 'Validando...' : 'Aplicar'}
+                      Cerrar y volver al salón
                     </button>
                   </div>
-                  {voucherError && (
-                    <p className="text-xs font-semibold text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200">
-                      ⚠️ {voucherError}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-black text-emerald-900 font-mono tracking-wider">{appliedVoucher.code}</span>
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900">Aplicado</span>
-                    </div>
-                    <p className="text-[11px] text-emerald-700 font-medium">
-                      Descuento de {appliedVoucher.amount.toFixed(2)}€ aplicado a esta reserva
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleRemoveVoucher}
-                    className="text-xs font-bold text-red-600 hover:text-red-800 underline px-2 py-1"
-                  >
-                    Quitar
-                  </button>
                 </div>
               )}
+
             </div>
 
-            <form onSubmit={handleConfirmClick} className="card p-6 mb-4">
-              <h2 className="text-2xl font-semibold italic mb-1 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>Tus datos</h2>
-              <p className="text-sm font-medium mb-5 text-[#7a6b67]">Necesitamos tus datos para confirmar la cita</p>
-              
-              <div className="space-y-4">
+            {/* Sticky Bottom Actions Bar (Airbnb Style) */}
+            {bookingStep !== 'success' && (
+              <div className="p-4 sm:p-5 border-t border-stone-200 bg-white/95 backdrop-blur-md flex items-center justify-between gap-4 sticky bottom-0">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#7a6b67]">Nombre completo *</label>
-                  <input type="text" required value={formName} onChange={e=>setFormName(e.target.value)} className="input-field" placeholder="Tu nombre y apellidos" />
+                  <span className="text-[11px] text-stone-400 block font-normal">
+                    {appliedVoucher ? 'Total tras aplicar bono' : 'Total a abonar en el salón'}
+                  </span>
+                  <span className="text-lg font-bold font-sans text-stone-900">
+                    {finalPrice === 0 ? '0.00 € (Cubierto)' : `${Number(finalPrice).toFixed(2)} €`}
+                  </span>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#7a6b67]">Teléfono *</label>
-                  <input type="tel" required value={formPhone} onChange={e=>setFormPhone(e.target.value)} className="input-field" placeholder="600 000 000" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#7a6b67]">Email *</label>
-                  <input type="email" required value={formEmail} onChange={e=>setFormEmail(e.target.value)} className="input-field" placeholder="tu@email.com" />
-                  <p className="text-[10px] font-medium mt-1.5 leading-relaxed" style={{color:'var(--brown-mid)'}}>Necesario para enviarte el <strong>recordatorio</strong> de tu cita, cualquier <strong>modificación</strong> o el enlace para <strong>cancelar</strong> si lo necesitas. Sin email no podremos avisarte.</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider mb-2 text-[#7a6b67]">Notas o comentarios (opcional)</label>
-                  <textarea value={formNotes} onChange={e=>setFormNotes(e.target.value)} className="input-field resize-none" style={{height:'80px'}} placeholder="Alergias, peticiones especiales..."></textarea>
-                </div>
-                <div className="border border-[#e0d8d5] rounded-2xl overflow-hidden bg-white">
-                  <div onClick={()=>setShowTerms(!showTerms)} className="flex items-center justify-between p-4 cursor-pointer text-xs font-bold text-[#7a6b67] hover:text-[#2e2826] uppercase tracking-widest select-none">
-                    <span>Condiciones de Cita y Protección de Datos</span>
-                    <svg className={'w-4 h-4 transition-transform '+(showTerms?'rotate-180':'')} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
-                  </div>
-                  {showTerms && (
-                    <div className="px-4 pb-4 space-y-4 text-xs text-[#7a6b67] leading-relaxed max-h-52 overflow-y-auto border-t border-[#e0d8d5] pt-4">
-                      <div><h4 className="font-bold text-[#2e2826] text-xs uppercase tracking-widest mb-2">1. Condiciones de la Cita</h4><p>La cita se confirma una vez recibida y procesada por el sistema. Estética Respira se reserva el derecho de modificar o cancelar la cita en caso de incidencias técnicas o de agenda, informando al cliente por los medios facilitados. En caso de no presentarse sin aviso previo con al menos 3 horas de antelación, el estudio podrá requerir una confirmación previa para futuras reservas.</p></div>
-                      <div><h4 className="font-bold text-[#2e2826] text-xs uppercase tracking-widest mb-2">2. Responsabilidad del Cliente</h4><p>El cliente se compromete a facilitar datos veraces y actualizados. La información sobre alergias, sensibilidades cutáneas o condiciones médicas se facilita voluntariamente; el estudio hará lo posible por atenderlas pero no puede garantizar la ausencia total de reacciones en tratamientos de belleza.</p></div>
-                      <div><h4 className="font-bold text-[#2e2826] text-xs uppercase tracking-widest mb-2">3. Protección de Datos (RGPD)</h4><p><strong>Responsable:</strong> Estética Respira · C/ Santa Margalida 7, Artà (Illes Balears).</p><p><strong>Finalidad:</strong> Gestionar citas, enviar recordatorios, comunicar cambios o cancelaciones, enviar encuesta post-visita por email, y mantener histórico de visitas.</p><p><strong>Base legítima:</strong> Ejecución de un contrato (la cita) y consentimiento explícito.</p><p><strong>Destinatarios:</strong> No se cederán a terceros salvo obligación legal. Servicios cloud (Vercel, Google Cloud) acogidos al Privacy Framework UE-EEUU.</p><p><strong>Plazo:</strong> Durante la relación comercial y hasta 5 años después.</p><p><strong>Derechos:</strong> Acceso, rectificación, supresión, limitación, portabilidad y oposición escribiendo a <strong>reservas.esteticarespira@gmail.com</strong>. Reclamación ante la AEPD.</p><p><strong>Comunicaciones:</strong> Al facilitar email y teléfono, el cliente consiente recibir comunicaciones de su cita y un email post-visita de valoración, sin publicidad comercial.</p></div>
-                    </div>
-                  )}
-                  <div className="flex items-start gap-3 p-4 border-t border-[#e0d8d5] bg-[#faf7f4]">
-                    <input type="checkbox" id="terms-check" required checked={formGdpr} onChange={e=>setFormGdpr(e.target.checked)} className="mt-1 w-5 h-5 rounded cursor-pointer shrink-0" style={{accentColor:'var(--blue-deep)'}} />
-                    <label htmlFor="terms-check" className="text-xs font-medium cursor-pointer leading-relaxed text-[#7a6b67]">
-                      He leído y acepto las <strong className="text-[#2e2826]">condiciones de cita</strong> y la <strong className="text-[#2e2826]">política de privacidad</strong> según el RGPD.
-                    </label>
-                  </div>
-                </div>
-              </div>
 
-              {errorMsg && (
-                <div className="mt-4 text-sm font-semibold px-4 py-3 rounded-2xl border bg-[#fdf0f1] border-[#f3c6cb] text-[#c0464f]">
-                  {errorMsg}
-                </div>
-              )}
-
-              <div className="mt-8">
-                <button type="submit" disabled={submitting} className="btn-primary w-full justify-center text-base py-4 rounded-2xl shadow-2xl" style={{boxShadow:'0 8px 32px rgba(196,126,133,0.35)'}}>
-                  {submitting ? <div className="spinner"></div> : <Check className="w-5 h-5" />}
-                  <span>{submitting ? 'Reservando...' : 'Confirmar Cita'}</span>
-                </button>
-              </div>
-            </form>
-            <button className="btn-back" onClick={() => setStep(2)}>
-              <ArrowLeft className="w-4 h-4" /> Atrás
-            </button>
-          </div>
-        )}
-
-        {step === 4 && (
-          <div className="step active">
-            <div className="card p-10 text-center">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-gradient-to-br from-[#7fa85f] to-[#6b8a5a]" style={{boxShadow:'0 12px 32px rgba(107,138,90,.3)'}}>
-                <Check className="w-10 h-10 text-white" />
-              </div>
-              <h2 className="text-3xl font-semibold italic mb-2 text-[#2e2826]" style={{fontFamily:"'Cormorant Garamond',serif"}}>¡Cita confirmada!</h2>
-              <p className="font-medium mb-6 text-[#7a6b67]">Te esperamos en Estética Respira. Hasta pronto 🌸</p>
-
-              <div className="rounded-2xl p-5 text-left space-y-3 mb-8 border bg-[#faf7f4] border-[#e0d8d5]">
-                <div className="flex justify-between text-sm">
-                  <span className="font-medium text-[#7a6b67]">Servicios</span>
-                  <span className="font-bold text-right max-w-[65%]" style={{color:'var(--brown)'}}>{selServices.map(s => s.name).join(' + ')}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="font-medium text-[#7a6b67]">Duración total</span>
-                  <span className="font-bold" style={{color:'var(--blue-deep)'}}>{getTotalDur(selServices)} min</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="font-medium text-[#7a6b67]">Fecha y hora</span>
-                  <span className="font-bold" style={{color:'var(--blue-deep)'}}>{selDate?.split('-').reverse().join('/')} · {selTime}h</span>
-                </div>
-                {appliedVoucher && (
-                  <div className="flex justify-between text-xs pt-2 border-t border-dashed border-[#e0d8d5] text-emerald-800 font-bold">
-                    <span>Bono / Cheque aplicado</span>
-                    <span className="font-mono">{appliedVoucher.code} (-{Math.min(selServices.reduce((sum, s) => sum + (s.price || 0), 0), appliedVoucher.amount).toFixed(2)}€)</span>
+                {bookingStep === 'datetime' ? (
+                  <button
+                    type="button"
+                    disabled={!selectedDate || !selectedTime}
+                    onClick={() => setBookingStep('customer')}
+                    className="py-3 px-6 bg-[#6b8a5a] hover:bg-[#5a774b] text-white font-semibold rounded-2xl text-xs sm:text-sm transition-all shadow-md disabled:opacity-40 cursor-pointer active:scale-98"
+                  >
+                    Continuar a tus datos
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setBookingStep('datetime')}
+                      className="py-3 px-3.5 bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold rounded-2xl text-xs transition-colors cursor-pointer"
+                    >
+                      Atrás
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isSubmitting || !customerData.name.trim() || !customerData.phone.trim() || !customerData.email.trim() || !customerData.gdpr}
+                      onClick={handleConfirmBooking}
+                      className="py-3 px-6 bg-[#6b8a5a] hover:bg-[#5a774b] text-white font-semibold rounded-2xl text-xs sm:text-sm transition-all shadow-md disabled:opacity-40 cursor-pointer flex items-center gap-2"
+                    >
+                      {isSubmitting && <Loader2 size={14} className="animate-spin" />}
+                      <span>Confirmar Cita</span>
+                    </button>
                   </div>
                 )}
               </div>
+            )}
 
-              <p className="text-xs font-medium mb-6 text-[#7a6b67]">Para cancelar o modificar tu cita, utiliza el enlace que llegará a tu correo electrónico.</p>
-              <button onClick={resetBooking} className="btn-primary w-full justify-center">
-                <PlusCircle className="w-4 h-4" /> Hacer otra reserva
-              </button>
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Flotante para paso 1 y 2 */}
-      {step > 0 && step < 3 && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 p-3 pb-5 pointer-events-none" style={{background:'linear-gradient(to top,rgba(250,247,244,1) 70%,rgba(250,247,244,0))'}}>
-          <div className="max-w-2xl mx-auto pointer-events-auto">
-            {step === 1 && selServices.length > 0 && (
-              <div className="flex items-center justify-between mb-2 px-1">
-                <p className="text-xs font-medium truncate mr-3 text-[#7a6b67]">{selServices.map(s => s.name).join(' + ')} · {getTotalDur(selServices)} min</p>
-                <p className="text-sm font-bold whitespace-nowrap text-[#6b8a5a]">{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</p>
-              </div>
-            )}
-            {step === 2 && selServices.length > 0 && (
-              <div className="flex items-center justify-between mb-2 px-1">
-                <p className="text-xs font-medium truncate mr-3 text-[#7a6b67]">{selServices.map(s => s.name).join(' + ')} · {getTotalDur(selServices)} min</p>
-                <p className="text-sm font-bold whitespace-nowrap text-[#6b8a5a]">{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</p>
-              </div>
-            )}
-            {step === 1 && showSvcConfirm && (
-              <div className="flex gap-2">
-                <button onClick={function(){setShowSvcConfirm(false)}} className="flex-1 py-4 rounded-2xl font-bold text-sm shadow-lg active:scale-[0.98] transition-all bg-white border-2" style={{borderColor:'var(--blue-deep)',color:'var(--blue-deep)'}}>+ Añadir más</button>
-                <button onClick={function(){setShowSvcConfirm(false);setStep(2)}} className="flex-1 py-4 rounded-2xl font-bold text-sm text-white shadow-lg active:scale-[0.98] transition-all" style={{background:'var(--blue-deep)'}}>Elegir fecha</button>
-              </div>
-            )}
-            {(!showSvcConfirm || step === 2) && (
-            <button 
-              onClick={function(){if(step===1){setShowSvcConfirm(true)}else{setStep(3)}}}
-              disabled={step === 1 ? selServices.length === 0 : !(selDate && selTime)}
-              className="btn-primary w-full justify-center text-base py-4 rounded-2xl shadow-2xl" 
-              style={{boxShadow:'0 8px 32px rgba(196,126,133,0.35)'}}
-            >
-              <ArrowRight className="w-5 h-5" />
-              <span>{step === 1 ? 'Continuar' : (selDate && selTime ? 'Reservar' : 'Elige hora')}</span>
-            </button>
-            )}
           </div>
         </div>
       )}
 
-      {/* Modal de confirmación de reserva */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md max-h-[90vh] flex flex-col bg-[#faf7f4] rounded-3xl overflow-hidden border border-[#e0d8d5] shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            {/* Header */}
-            <div className="bg-gradient-to-br from-[#faf7f4] to-[#f3f7ee] border-b border-[#d99ba1] p-4 text-center shrink-0">
-              <div className="flex items-center justify-center gap-2 mb-0.5">
-                <AlertCircle className="w-5 h-5 text-[#6b8a5a]" />
-                <h3 className="text-lg font-bold text-[#2e2826] italic" style={{fontFamily:"'Cormorant Garamond',serif"}}>Confirmación de tu reserva</h3>
-              </div>
-              <p className="text-[11px] text-[#7a6b67] font-medium">Revisa tus servicios y el local antes de confirmar</p>
-            </div>
-
-            {/* Banner de Ubicación Destacado */}
-            <div className="bg-gradient-to-r from-[#2e2826] to-[#423b38] text-white py-2 px-4 text-center shadow-inner shrink-0">
-              <div className="flex items-center justify-center gap-1.5">
-                <span className="text-[10px] uppercase tracking-widest font-black text-[#c9a96e]">📍 LOCAL DE RESERVA:</span>
-                <span className="text-xs font-extrabold uppercase tracking-wider text-white">ESTETICA RESPIRA (ARTÀ)</span>
-              </div>
-              <a href="https://www.google.com/maps/search/?api=1&query=C%2F+Santa+Margalida+7+Arta+Illes+Balears" target="_blank" rel="noopener noreferrer" className="text-[11px] font-medium text-amber-200 hover:underline block leading-tight mt-0.5">
-                C/ Santa Margalida 7 · Artà, Illes Balears
-              </a>
-            </div>
-            
-            {/* Body con scroll independiente si hay varios servicios */}
-            <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-3">
-              <div className="bg-white rounded-2xl border border-[#e0d8d5] p-4 space-y-3 shadow-sm">
-                <div>
-                  <h4 className="text-[10px] font-black uppercase tracking-wider text-[#7a6b67] mb-1.5">Servicios contratados:</h4>
-                  <ul className="space-y-2">
-                    {selServices.map((s, idx) => (
-                      <li key={idx} className="flex justify-between items-start text-xs border-b border-dashed border-[#faf7f4] pb-1.5 last:border-0 last:pb-0">
-                        <div className="pr-3">
-                          <span className="font-bold text-[#2e2826] block">• {s.name}</span>
-                          <span className="text-[10px] text-[#6b8a5a] font-semibold block ml-2">
-                            con {slotAssign?.[idx] || s.employee || 'Especialista asignada'}
-                          </span>
-                        </div>
-                        <span className="font-semibold text-[#7a6b67] shrink-0">{s.price || 0}€ ({s.duration || 30} min)</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <div className="pt-2.5 border-t border-[#e0d8d5] space-y-1.5 text-xs">
-                  <div className="flex justify-between">
-                    <span className="font-medium text-[#7a6b67]">Fecha y horario:</span>
-                    <span className="font-bold text-[#2e2826]">{selDate?.split('-').reverse().join('/')} de {selTime}h a {m2t(t2m(selTime) + (selSlotData?.totalDur || getTotalDur(selServices)))}h</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium text-[#7a6b67]">Duración total:</span>
-                    <span className="font-bold text-[#6b8a5a]">{selSlotData?.totalDur || getTotalDur(selServices)} min</span>
-                  </div>
-                  <div className="flex justify-between text-xs pt-1 border-t border-dashed border-[#e0d8d5]">
-                    <span className="font-medium text-[#7a6b67]">Precio servicios:</span>
-                    <span className="font-bold text-[#2e2826]">{selServices.reduce((sum, s) => sum + (s.price || 0), 0)}€</span>
-                  </div>
-                  {appliedVoucher && (
-                    <div className="flex justify-between text-xs text-emerald-700 font-bold">
-                      <span>Bono ({appliedVoucher.code}):</span>
-                      <span>-{Math.min(selServices.reduce((sum, s) => sum + (s.price || 0), 0), appliedVoucher.amount).toFixed(2)}€</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm font-black pt-1 border-t border-[#e0d8d5]">
-                    <span className="text-[#2e2826]">Total a pagar:</span>
-                    <span className="text-[#6b8a5a] text-base">
-                      {Math.max(0, selServices.reduce((sum, s) => sum + (s.price || 0), 0) - (appliedVoucher ? Math.min(selServices.reduce((sum, s) => sum + (s.price || 0), 0), appliedVoucher.amount) : 0)).toFixed(2)}€
-                      {appliedVoucher && (selServices.reduce((sum, s) => sum + (s.price || 0), 0) <= appliedVoucher.amount) && (
-                        <span className="block text-[10px] text-emerald-700 font-bold">Totalmente pagado</span>
-                      )}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Footer Siempre Visible */}
-            <div className="bg-[#faf7f4] border-t border-[#e0d8d5] p-3.5 sm:p-4 flex gap-3 shrink-0">
-              <button 
+      {/* 7. LIGHTBOX GALERÍA DE FOTOS DE RESPIRA */}
+      {isGalleryOpen && (
+        <div className="fixed inset-0 z-50 bg-stone-950/90 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-4 border-b border-stone-200 flex items-center justify-between">
+              <h4 className="font-bold text-sm text-stone-900">Fotos de Centro de estética Respira</h4>
+              <button
                 type="button"
-                onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-[#7a6b67] border border-[#e0d8d5] bg-white hover:bg-neutral-50 transition-colors"
+                onClick={() => setIsGalleryOpen(false)}
+                className="p-1 rounded-full text-stone-500 hover:bg-stone-100 transition-colors cursor-pointer"
               >
-                Modificar
+                <X size={18} />
               </button>
-              <button 
-                type="button"
-                onClick={() => {
-                  submitBooking();
-                }}
-                disabled={submitting}
-                className="flex-1 py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-white shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-1.5"
-                style={{background:'var(--blue-deep)'}}
-              >
-                {submitting ? 'Confirmando...' : 'Confirmar Reserva'}
-              </button>
+            </div>
+            <div className="p-4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {RESPIRA_GALLERY.map((url, i) => (
+                <div key={i} className="aspect-video rounded-2xl overflow-hidden bg-stone-100 border border-stone-200">
+                  <img src={url} alt={`Tratamiento ${i + 1}`} className="w-full h-full object-cover" />
+                </div>
+              ))}
             </div>
           </div>
         </div>
       )}
-    </>
+
+    </div>
   );
 }
-
-
-
