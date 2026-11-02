@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { validateBookingSlot } from '@/lib/closures';
+import { sendWebpushrNotification } from '@/lib/webpushr';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';

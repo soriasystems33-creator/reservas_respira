@@ -1,5 +1,6 @@
 import { findVoucherByCode, validateVoucherRules, markVoucherUsed } from '@/lib/vouchers';
 import { validateBookingSlot } from '@/lib/closures';
+import { sendWebpushrNotification } from '@/lib/webpushr';
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
@@ -359,6 +360,12 @@ export async function POST(request) {
       client_phone: newApt.client_phone || newApt.clientPhone || sanitizedPhone,
       source: 'web_booking'
     });
+
+    sendWebpushrNotification({
+      title: '✨ Nueva Reserva: ' + (clientName || 'Cliente'),
+      message: date + ' a las ' + time + ' · ' + services.map(s => s.name).join(', '),
+      targetUrl: 'https://panel-respira.vercel.app'
+    }).catch(e => console.error('[webpushr] error:', e));
 
 
     return NextResponse.json({ success: true, id: newApt.id });
