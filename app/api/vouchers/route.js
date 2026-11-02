@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import { findVoucherByCode, validateVoucherRules } from '@/lib/vouchers';
 
 function formatVoucherPayload(v) {
-  const isBono = (v.type === 'bono') || (v.total_sessions !== undefined && Number(v.total_sessions) > 0);
-  const total = isBono ? Number(v.total_sessions || 1) : 1;
-  const rem = isBono ? (v.remaining_sessions !== undefined ? Number(v.remaining_sessions) : total) : (v.used ? 0 : 1);
+  const isBono = (v.type === 'bono') || (v.total_sessions !== undefined && Number(v.total_sessions) > 0) || (v.totalSessions !== undefined && Number(v.totalSessions) > 0);
+  const total = isBono ? Number(v.total_sessions || v.totalSessions || 1) : 1;
+  const rem = isBono ? ((v.remaining_sessions !== undefined) ? Number(v.remaining_sessions) : ((v.remainingSessions !== undefined) ? Number(v.remainingSessions) : total)) : (v.used ? 0 : 1);
 
   return {
     id: v.id,
@@ -12,7 +12,7 @@ function formatVoucherPayload(v) {
     type: isBono ? 'bono' : 'cheque',
     isBono: isBono,
     amount: parseFloat(v.amount) || 0,
-    chequeMode: v.cheque_mode || (v.service_name ? 'service' : 'amount'),
+    chequeMode: v.cheque_mode || v.chequeMode || ((v.service_name || v.serviceName) ? 'service' : 'amount'),
     totalSessions: total,
     remainingSessions: rem,
     clientName: v.client_name || v.clientName || '',
