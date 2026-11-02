@@ -76,7 +76,7 @@ export async function POST(request) {
       time: newTime,
       duration: oldData.duration || 15,
       services: (oldData.services && oldData.services.length > 0) ? oldData.services : [{ name: oldData.service, employee: oldData.employee, duration: oldData.duration || 15 }],
-      excludeAptId: id
+      excludeAptId: oldId
     });
     if (!slotValidation.valid) {
       return NextResponse.json({ success: false, error: slotValidation.error }, { status: 400 });
