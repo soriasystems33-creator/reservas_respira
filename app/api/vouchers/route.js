@@ -63,7 +63,8 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { code, services } = body;
+    const { code } = body;
+    const services = body.services || (body.serviceName ? [body.serviceName] : (body.service ? [body.service] : []));
 
     if (!code) {
       return NextResponse.json({ success: false, error: 'Introduce el código' }, { status: 400 });
