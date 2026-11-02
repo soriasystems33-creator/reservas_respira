@@ -178,7 +178,7 @@ function ModifyContent() {
     }
 
     const sd = ss?.specialDays || {};
-    if (sd[dateStr]?.global?.type === 'closed') return true;
+    if (sd[dateStr] && (sd[dateStr].closed === true || sd[dateStr].type === 'closed' || sd[dateStr].global?.closed === true || sd[dateStr].global?.type === 'closed')) return true;
     const d = new Date(dateStr + 'T12:00:00');
     const day = d.getDay();
     if (ss?.weekly && ss.weekly[day] && ss.weekly[day].closed) return true;
@@ -212,7 +212,7 @@ function ModifyContent() {
     }
 
     Promise.all([
-      fetch('/api/data').then(r => r.json()),
+      fetch('/api/data?_t=' + Date.now(), { cache: 'no-store' }).then(r => r.json()),
       fetch(`/api/reserva?id=${id}`).then(r => r.json())
     ]).then(([dataRes, aptRes]) => {
       if (dataRes.success) {
@@ -249,7 +249,7 @@ function ModifyContent() {
     setAvailableSlots([]);
     setSelTime(null);
     try {
-      const res = await fetch(`/api/availability?date=${ds}`);
+      const res = await fetch(`/api/availability?date=${ds}&_t=${Date.now()}`, { cache: 'no-store' });
       const rdata = await res.json();
       if (rdata.success) {
         calculateSlots(ds, rdata.appointments || [], rdata.blocks || []);

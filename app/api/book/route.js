@@ -1,4 +1,5 @@
 import { findVoucherByCode, validateVoucherRules, markVoucherUsed } from '@/lib/vouchers';
+import { validateBookingSlot } from '@/lib/closures';
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
@@ -66,8 +67,19 @@ export async function POST(request) {
 
     const supabase = getSupabaseAdmin();
 
-    // Validar que el día no esté cerrado
-    const { data: rawSettings } = await supabase.from('settings').select('*').limit(1).maybeSingle();
+    // Validar rigurosamente cierres globales, festivos, tramos horarios y disponibilidad
+    const slotValidation = await validateBookingSlot({
+      supabase,
+      date,
+      time,
+      duration,
+      services
+    });
+    if (!slotValidation.valid) {
+      return NextResponse.json({ success: false, error: slotValidation.error }, { status: 400 });
+    }
+
+    const { data: rawSettings } = await supabase.from('settings').select('*').eq('id', 'main').maybeSingle();
     const settingsData = {
       ...(rawSettings || {}),
       specialDays: rawSettings?.special_days || rawSettings?.specialDays || {},

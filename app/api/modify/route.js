@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { validateBookingSlot } from '@/lib/closures';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -68,8 +69,20 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'La cita original ya está cancelada' }, { status: 400 });
     }
 
-    // Validar que el nuevo día no esté cerrado
-    const { data: rawSettings } = await supabase.from('settings').select('*').limit(1).maybeSingle();
+    // Validar rigurosamente cierres globales, festivos, tramos horarios y disponibilidad
+    const slotValidation = await validateBookingSlot({
+      supabase,
+      date: newDate,
+      time: newTime,
+      duration: oldData.duration || 15,
+      services: (oldData.services && oldData.services.length > 0) ? oldData.services : [{ name: oldData.service, employee: oldData.employee, duration: oldData.duration || 15 }],
+      excludeAptId: id
+    });
+    if (!slotValidation.valid) {
+      return NextResponse.json({ success: false, error: slotValidation.error }, { status: 400 });
+    }
+
+    const { data: rawSettings } = await supabase.from('settings').select('*').eq('id', 'main').maybeSingle();
     const settingsData = {
       ...(rawSettings || {}),
       specialDays: rawSettings?.special_days || rawSettings?.specialDays || {},

@@ -35,7 +35,13 @@ export async function GET() {
     const categories = categoriesRes.data || [];
     const employees = employeesRes.data || [];
 
-    return NextResponse.json({ success: true, settings, services, categories, employees });
+    return NextResponse.json({ success: true, settings, services, categories, employees }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'CDN-Cache-Control': 'no-store',
+        'Vercel-CDN-Cache-Control': 'no-store'
+      }
+    });
   } catch (error) {
     console.error('Error fetching basic data:', error);
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });

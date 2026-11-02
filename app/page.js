@@ -99,7 +99,7 @@ function BookingFunnelContent() {
 
   // Cargar datos iniciales desde /api/data
   useEffect(() => {
-    fetch('/api/data')
+    fetch('/api/data?_t=' + Date.now(), { cache: 'no-store' })
       .then(res => res.json())
       .then(res => {
         if (res.success) {
@@ -474,7 +474,7 @@ function BookingFunnelContent() {
 
     setLoadingSlots(true);
     try {
-      const res = await fetch(`/api/availability?date=${dateStr}`);
+      const res = await fetch(`/api/availability?date=${dateStr}&_t=${Date.now()}`, { cache: 'no-store' });
       const rdata = await res.json();
       if (rdata.success) {
         const slots = computeSlots(
@@ -518,7 +518,7 @@ function BookingFunnelContent() {
       const fromStr = getLocalDateStr(startObj);
       const toStr = getLocalDateStr(endObj);
 
-      const res = await fetch(`/api/availability?from=${fromStr}&to=${toStr}`);
+      const res = await fetch(`/api/availability?from=${fromStr}&to=${toStr}&_t=${Date.now()}`, { cache: 'no-store' });
       const rdata = await res.json();
 
       if (rdata.success) {
