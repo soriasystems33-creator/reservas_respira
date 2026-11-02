@@ -297,7 +297,8 @@ export async function POST(request) {
       if (price === 0) {
         isPaid = true;
       }
-      const vCodeTag = `[Bono ${voucherInfo.voucher.code} (-${discount.toFixed(2)}€)]`;
+      const isBonoVoucher = voucherInfo.voucher.type === 'bono' || Number(voucherInfo.voucher.totalSessions || voucherInfo.voucher.total_sessions || 0) > 1;
+      const vCodeTag = `[${isBonoVoucher ? 'Bono' : 'Cheque'} ${voucherInfo.voucher.code} (-${discount.toFixed(2)}€)]`;
       finalNotes = finalNotes ? `${finalNotes} ${vCodeTag}` : vCodeTag;
     }
 

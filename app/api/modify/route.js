@@ -278,7 +278,7 @@ export async function POST(request) {
       date: newDate,
       time: newTime,
       status: 'confirmed',
-      isPaid: false,
+      isPaid: !!(oldData.isPaid ?? oldData.is_paid),
       source: 'cliente',
       type: 'web',
       modifiedFrom: oldId

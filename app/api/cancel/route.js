@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
+import { revertVoucherUsage } from '@/lib/vouchers';
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +79,13 @@ export async function POST(request) {
     }).eq('id', id);
 
     if (updateError) throw updateError;
+
+    // Revertir bono o cheque regalo si la cita cancelada usaba uno
+    try {
+      await revertVoucherUsage(data);
+    } catch (vRevErr) {
+      console.error('Error al revertir voucher en cancelacion:', vRevErr);
+    }
 
     // Notify n8n webhook about the cancellation
     await notifyWebhook('cancellation', {
