@@ -8,6 +8,8 @@ function MisCitasContent() {
   const searchParams = useSearchParams();
   const idParam = searchParams.get('id') || '';
   const tParam = searchParams.get('t') || '';
+  const cParam = searchParams.get('c') || '';
+  const tcParam = searchParams.get('tc') || '';
 
   const [loading, setLoading] = useState(true);
   const [clientName, setClientName] = useState('');
@@ -15,7 +17,7 @@ function MisCitasContent() {
   const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
-    if (!idParam) {
+    if (!idParam && !cParam) {
       setTimeout(() => setLoading(false), 0);
       return;
     }
@@ -24,7 +26,9 @@ function MisCitasContent() {
       setLoading(true);
       setErrorMsg('');
       try {
-        const res = await fetch(`/api/mis-citas?id=${encodeURIComponent(idParam)}${tParam ? `&t=${encodeURIComponent(tParam)}` : ''}`);
+        const res = await fetch(cParam
+          ? `/api/mis-citas?c=${encodeURIComponent(cParam)}&tc=${encodeURIComponent(tcParam)}`
+          : `/api/mis-citas?id=${encodeURIComponent(idParam)}${tParam ? `&t=${encodeURIComponent(tParam)}` : ''}`);
         const data = await res.json();
         if (data.success) {
           setAppointments(data.appointments || []);
@@ -42,9 +46,9 @@ function MisCitasContent() {
     };
 
     fetchCitas();
-  }, [idParam]);
+  }, [idParam, cParam]);
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(new Date());
 
   const upcomingApts = appointments.filter(a => {
     if (a.status === 'cancelled') return false;
@@ -74,7 +78,7 @@ function MisCitasContent() {
         </div>
 
         {/* Sin token / ID privado */}
-        {!idParam && !loading && (
+        {!idParam && !cParam && !loading && (
           <div className="card p-8 bg-white rounded-3xl border border-[#e0d8d5] text-center shadow-sm space-y-4">
             <div className="w-14 h-14 bg-[#faf7f4] rounded-full flex items-center justify-center mx-auto text-[#6b8a5a]">
               <Lock className="w-7 h-7" />
@@ -106,7 +110,7 @@ function MisCitasContent() {
         )}
 
         {/* Error State */}
-        {idParam && errorMsg && !loading && (
+        {(idParam || cParam) && errorMsg && !loading && (
           <div className="p-8 bg-[#fff5f5] rounded-3xl border border-[#fecaca] text-center space-y-3 shadow-sm mb-6">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-500">
               <AlertCircle className="w-6 h-6" />
@@ -119,7 +123,7 @@ function MisCitasContent() {
         )}
 
         {/* Lista de Citas */}
-        {idParam && !loading && !errorMsg && (
+        {(idParam || cParam) && !loading && !errorMsg && (
           <div className="space-y-6">
             {/* Próximas Citas */}
             <div>
