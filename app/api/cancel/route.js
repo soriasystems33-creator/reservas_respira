@@ -101,6 +101,13 @@ export async function POST(request) {
     });
 
 
+    // Send Webpushr push notification
+    sendWebpushrNotification({
+      title: '❌ Cita Cancelada: ' + (data.clientName || data.client_name || 'Cliente'),
+      message: (data.date || '') + ' a las ' + (data.time || '') + ' · ' + (data.service || 'Servicio'),
+      targetUrl: 'https://panel-respira.vercel.app'
+    }).catch(e => console.error('[webpushr] error:', e));
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error cancelling appointment:', error);

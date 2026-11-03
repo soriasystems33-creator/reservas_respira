@@ -330,6 +330,13 @@ export async function POST(request) {
     });
 
 
+    // Send Webpushr push notification
+    sendWebpushrNotification({
+      title: '✏️ Cita Modificada: ' + (newApt.clientName || newApt.client_name || oldData.clientName || 'Cliente'),
+      message: 'Nueva fecha: ' + (newApt.date || '') + ' a las ' + (newApt.time || '') + ' · ' + (newApt.service || 'Servicio'),
+      targetUrl: 'https://panel-respira.vercel.app'
+    }).catch(e => console.error('[webpushr] error:', e));
+
     console.log('[modify] 11. Success');
     return NextResponse.json({ success: true, newId: newApt.id });
   } catch (error) {
