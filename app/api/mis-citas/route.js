@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { checkLink, signLink } from '@/lib/linkToken';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,10 @@ export async function GET(request) {
         success: false, 
         error: 'Para proteger tu privacidad, el acceso a tus citas requiere el enlace seguro enviado por WhatsApp o correo electrónico.' 
       }, { status: 400 });
+    }
+
+    if (checkLink(id, searchParams.get('t'))) {
+      return NextResponse.json({ success: false, error: 'El enlace no es válido. Usa el enlace que te enviamos por WhatsApp o email.' }, { status: 403 });
     }
 
     const supabase = getSupabaseAdmin();
@@ -58,7 +63,7 @@ export async function GET(request) {
     return NextResponse.json({ 
       success: true, 
       clientName: baseApt.clientName || baseApt.client_name || 'Cliente',
-      appointments: filtered 
+      appointments: filtered.map(a => ({ ...a, token: signLink(a.id) }))
     });
   } catch (error) {
     console.error('Error in mis-citas API:', error);

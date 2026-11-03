@@ -15,6 +15,7 @@ export async function GET(request) {
     const date = searchParams.get('date');
     const fromDate = searchParams.get('from') || searchParams.get('startDate');
     const toDate = searchParams.get('to') || searchParams.get('endDate');
+    const excludeId = searchParams.get('exclude') || '';
 
     if (!date && !fromDate) {
       return NextResponse.json({ success: false, error: 'Missing date or from parameter' }, { status: 400, headers: NO_CACHE_HEADERS });
@@ -37,8 +38,8 @@ export async function GET(request) {
       supabase.from('settings').select('*').eq('id', 'main').maybeSingle()
     ]);
 
-    let appointments = (aptsRes.data || []).map(a => ({
-      id: a.id,
+    // No se devuelve el id de las citas (evita que terceros vean o cancelen citas ajenas)
+    let appointments = (aptsRes.data || []).filter(a => !excludeId || String(a.id) !== String(excludeId)).map(a => ({
       date: a.date,
       time: a.time,
       duration: a.duration,

@@ -1,5 +1,6 @@
 import { sendWebpushrNotification } from '@/lib/webpushr';
 import { NextResponse } from 'next/server';
+import { checkLink, signLink } from '@/lib/linkToken';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { revertVoucherUsage } from '@/lib/vouchers';
 
@@ -27,6 +28,9 @@ export async function GET(request) {
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing ID parameter' }, { status: 400 });
+    }
+    if (checkLink(id, searchParams.get('t'))) {
+      return NextResponse.json({ success: false, error: 'El enlace no es válido. Usa el enlace que te enviamos por WhatsApp o email.' }, { status: 403 });
     }
 
     const supabase = getSupabaseAdmin();
@@ -60,6 +64,9 @@ export async function POST(request) {
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing ID parameter' }, { status: 400 });
+    }
+    if (checkLink(id, body.t)) {
+      return NextResponse.json({ success: false, error: 'El enlace no es válido. Usa el enlace que te enviamos por WhatsApp o email.' }, { status: 403 });
     }
 
     const supabase = getSupabaseAdmin();
@@ -97,7 +104,8 @@ export async function POST(request) {
       client_email: data.client_email || data.clientEmail,
       clientName: data.clientName || data.client_name,
       client_name: data.client_name || data.clientName,
-      cancelledBy: 'client_link'
+      cancelledBy: 'client_link',
+      token: signLink(data.id)
     });
 
 
