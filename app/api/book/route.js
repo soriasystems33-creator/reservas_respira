@@ -2,7 +2,7 @@ import { findVoucherByCode, validateVoucherRules, markVoucherUsed } from '@/lib/
 import { validateBookingSlot } from '@/lib/closures';
 import { sendWebpushrNotification } from '@/lib/webpushr';
 import { NextResponse } from 'next/server';
-import { signLink } from '@/lib/linkToken';
+import { signLink, clientLink } from '@/lib/linkToken';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
 const WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://n8n.soriasystems.es/webhook/34df460c-8c00-4dfd-9359-4d3050fe9402';
@@ -360,7 +360,8 @@ export async function POST(request) {
       clientPhone: newApt.clientPhone || newApt.client_phone || sanitizedPhone,
       client_phone: newApt.client_phone || newApt.clientPhone || sanitizedPhone,
       source: 'web_booking',
-      token: signLink(newApt.id)
+      token: signLink(newApt.id),
+      clientLink: clientLink(newApt.clientPhone || newApt.client_phone || sanitizedPhone)
     });
 
     sendWebpushrNotification({

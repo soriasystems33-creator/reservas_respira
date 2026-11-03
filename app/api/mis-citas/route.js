@@ -1,6 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
-import { checkLink, signLink } from '@/lib/linkToken';
+import { checkLink, signLink, verifyClient, normPhone } from '@/lib/linkToken';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +8,25 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id') || '';
+    const c = searchParams.get('c') || '';
+
+    // Enlace personal de la clienta: ?c=<código>&tc=<firma>
+    if (c) {
+      const phone = verifyClient(c, searchParams.get('tc'));
+      if (!phone) {
+        return NextResponse.json({ success: false, error: 'El enlace no es válido. Usa el enlace que te enviamos por WhatsApp o email.' }, { status: 403 });
+      }
+      const sb = getSupabaseAdmin();
+      const { data: all, error: e1 } = await sb.from('appointments').select('*');
+      if (e1) return NextResponse.json({ success: false, error: 'Error al consultar la base de datos' }, { status: 500 });
+      const mine = (all || []).filter(a => normPhone(a.clientPhone || a.client_phone) === phone)
+        .sort((a, b) => `${b.date || ''} ${b.time || ''}`.localeCompare(`${a.date || ''} ${a.time || ''}`));
+      return NextResponse.json({
+        success: true,
+        clientName: (mine[0] && (mine[0].clientName || mine[0].client_name)) || 'Cliente',
+        appointments: mine.map(a => ({ id: a.id, date: a.date, time: a.time, duration: a.duration, service: a.service, services: a.services, employee: a.employee, price: a.price, status: a.status, token: signLink(a.id) }))
+      });
+    }
 
     if (!id) {
       return NextResponse.json({ 
