@@ -2,6 +2,7 @@ import { findVoucherByCode, validateVoucherRules, markVoucherUsed } from '@/lib/
 import { validateBookingSlot } from '@/lib/closures';
 import { sendWebpushrNotification } from '@/lib/webpushr';
 import { NextResponse } from 'next/server';
+import { signLink } from '@/lib/linkToken';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
 const WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://n8n.soriasystems.es/webhook/34df460c-8c00-4dfd-9359-4d3050fe9402';
@@ -358,7 +359,8 @@ export async function POST(request) {
       client_name: newApt.client_name || newApt.clientName || clientName,
       clientPhone: newApt.clientPhone || newApt.client_phone || sanitizedPhone,
       client_phone: newApt.client_phone || newApt.clientPhone || sanitizedPhone,
-      source: 'web_booking'
+      source: 'web_booking',
+      token: signLink(newApt.id)
     });
 
     sendWebpushrNotification({
@@ -368,7 +370,7 @@ export async function POST(request) {
     }).catch(e => console.error('[webpushr] error:', e));
 
 
-    return NextResponse.json({ success: true, id: newApt.id });
+    return NextResponse.json({ success: true, id: newApt.id, token: signLink(newApt.id) });
   } catch (error) {
     console.error('Error in booking API:', error);
     return NextResponse.json({ success: false, error: error.message || JSON.stringify(error) }, { status: 500 });

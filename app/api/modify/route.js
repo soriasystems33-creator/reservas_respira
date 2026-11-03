@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { checkLink, signLink } from '@/lib/linkToken';
 import { validateBookingSlot } from '@/lib/closures';
 import { sendWebpushrNotification } from '@/lib/webpushr';
 import { getSupabaseAdmin } from '@/lib/supabase';
@@ -53,6 +54,9 @@ export async function POST(request) {
 
     if (!oldId || !newDate || !newTime) {
       return NextResponse.json({ success: false, error: 'Faltan datos obligatorios' }, { status: 400 });
+    }
+    if (checkLink(oldId, body.t)) {
+      return NextResponse.json({ success: false, error: 'El enlace no es válido. Usa el enlace que te enviamos por WhatsApp o email.' }, { status: 403 });
     }
 
     console.log('[modify] 3. Getting supabase admin');
@@ -326,7 +330,8 @@ export async function POST(request) {
       oldAppointment: oldData,
       clientName: newApt.clientName || newApt.client_name || oldData.clientName,
       client_name: newApt.client_name || newApt.clientName || oldData.clientName,
-      modifiedBy: 'client_link'
+      modifiedBy: 'client_link',
+      token: signLink(newApt.id)
     });
 
 
@@ -338,7 +343,7 @@ export async function POST(request) {
     }).catch(e => console.error('[webpushr] error:', e));
 
     console.log('[modify] 11. Success');
-    return NextResponse.json({ success: true, newId: newApt.id });
+    return NextResponse.json({ success: true, newId: newApt.id, newToken: signLink(newApt.id) });
   } catch (error) {
     console.error('[modify] ERROR', { message: error.message, code: error.code, stack: error.stack });
     return NextResponse.json({ success: false, error: 'Error interno del servidor' }, { status: 500 });

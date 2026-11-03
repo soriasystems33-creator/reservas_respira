@@ -869,7 +869,7 @@ function BookingFunnelContent() {
           <p className="text-xs text-stone-500">¿Deseas gestionar o anular tu cita en Respira?</p>
           <div className="pt-2 flex flex-col gap-2">
             <Link
-              href={`/cancelar?id=${cancelId}`}
+              href={`/cancelar?id=${cancelId}${searchParams.get('t') ? `&t=${encodeURIComponent(searchParams.get('t'))}` : ''}`}
               className="py-3 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-xs font-bold transition-all shadow-md"
             >
               Ir a la pantalla de cancelación

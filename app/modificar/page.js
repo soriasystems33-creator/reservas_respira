@@ -7,6 +7,8 @@ import Link from 'next/link';
 function ModifyContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
+  const t = searchParams.get('t') || '';
+  const tq = t ? `&t=${encodeURIComponent(t)}` : '';
 
   const [loading, setLoading] = useState(true);
   const [apt, setApt] = useState(null);
@@ -213,7 +215,7 @@ function ModifyContent() {
 
     Promise.all([
       fetch('/api/data?_t=' + Date.now(), { cache: 'no-store' }).then(r => r.json()),
-      fetch(`/api/reserva?id=${id}`).then(r => r.json())
+      fetch(`/api/reserva?id=${id}${tq}`).then(r => r.json())
     ]).then(([dataRes, aptRes]) => {
       if (dataRes.success) {
         setData({ services: dataRes.services, categories: dataRes.categories, employees: dataRes.employees, settings: dataRes.settings });
@@ -249,7 +251,7 @@ function ModifyContent() {
     setAvailableSlots([]);
     setSelTime(null);
     try {
-      const res = await fetch(`/api/availability?date=${ds}&_t=${Date.now()}`, { cache: 'no-store' });
+      const res = await fetch(`/api/availability?date=${ds}&exclude=${encodeURIComponent(id || '')}&_t=${Date.now()}`, { cache: 'no-store' });
       const rdata = await res.json();
       if (rdata.success) {
         calculateSlots(ds, rdata.appointments || [], rdata.blocks || []);
@@ -373,6 +375,7 @@ function ModifyContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           oldId: id,
+          t,
           newDate: selDate,
           newTime: selTime
         })
@@ -429,7 +432,7 @@ function ModifyContent() {
               </div>
               <p className="font-bold text-[#c0464f]">Esta cita ya fue cancelada y no puede modificarse.</p>
               <div className="space-y-2 mt-4">
-                <Link href={`/mis-citas${id ? `?id=${id}` : ''}`} className="block bg-[#6b8a5a] text-white px-6 py-3 rounded-2xl font-bold text-sm text-center shadow-sm">
+                <Link href={`/mis-citas${id ? `?id=${id}${tq}` : ''}`} className="block bg-[#6b8a5a] text-white px-6 py-3 rounded-2xl font-bold text-sm text-center shadow-sm">
                   Ver todas mis citas
                 </Link>
                 <Link href="/" className="block border border-[#e0d8d5] text-[#7a6b67] bg-white px-6 py-3 rounded-2xl font-bold text-sm text-center">
@@ -446,7 +449,7 @@ function ModifyContent() {
               </div>
               <p className="font-bold text-[#c0464f]">{errorMsg}</p>
               <div className="space-y-2 mt-4">
-                <Link href={`/mis-citas${id ? `?id=${id}` : ''}`} className="block bg-[#6b8a5a] text-white px-6 py-3 rounded-2xl font-bold text-sm text-center shadow-sm">
+                <Link href={`/mis-citas${id ? `?id=${id}${tq}` : ''}`} className="block bg-[#6b8a5a] text-white px-6 py-3 rounded-2xl font-bold text-sm text-center shadow-sm">
                   Ver mis citas
                 </Link>
                 <Link href="/" className="block border border-[#e0d8d5] text-[#7a6b67] bg-white px-6 py-3 rounded-2xl font-bold text-sm text-center">
@@ -557,7 +560,7 @@ function ModifyContent() {
                   {submitting ? <div className="spinner !border-white/30 !border-t-white"></div> : <CalendarSync className="w-5 h-5" />}
                   {submitting ? 'Modificando...' : 'Confirmar cambio de fecha'}
                 </button>
-                <Link href={`/cancelar?id=${id}`} className="block text-center text-xs font-bold underline text-[#7a6b67] hover:text-[#c0464f] transition-colors">
+                <Link href={`/cancelar?id=${id}${tq}`} className="block text-center text-xs font-bold underline text-[#7a6b67] hover:text-[#c0464f] transition-colors">
                   Prefiero cancelar la cita
                 </Link>
               </div>

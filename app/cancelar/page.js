@@ -7,6 +7,8 @@ import Link from 'next/link';
 function CancelContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
+  const t = searchParams.get('t') || '';
+  const tq = t ? `&t=${encodeURIComponent(t)}` : '';
 
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
@@ -22,7 +24,7 @@ function CancelContent() {
       return;
     }
 
-    fetch(`/api/cancel?id=${id}`)
+    fetch(`/api/cancel?id=${id}${tq}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -51,7 +53,7 @@ function CancelContent() {
       const res = await fetch('/api/cancel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
+        body: JSON.stringify({ id, t })
       });
       const data = await res.json();
       
@@ -128,7 +130,7 @@ function CancelContent() {
                     'Sí, anular cita'
                   )}
                 </button>
-                <Link href={`/modificar?id=${id}`} className="block text-center text-xs font-bold mt-4 underline transition-colors text-[#6b8a5a] hover:text-[#2e2826]">
+                <Link href={`/modificar?id=${id}${tq}`} className="block text-center text-xs font-bold mt-4 underline transition-colors text-[#6b8a5a] hover:text-[#2e2826]">
                   Quiero cambiar la fecha/hora
                 </Link>
                 <Link href="/" className="block text-center text-xs font-bold mt-4 underline transition-colors text-[#7a6b67]">

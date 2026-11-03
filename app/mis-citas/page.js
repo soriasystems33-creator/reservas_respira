@@ -7,6 +7,7 @@ import { Calendar, Clock, User, Scissors, AlertCircle, ArrowLeft, PlusCircle, Ch
 function MisCitasContent() {
   const searchParams = useSearchParams();
   const idParam = searchParams.get('id') || '';
+  const tParam = searchParams.get('t') || '';
 
   const [loading, setLoading] = useState(true);
   const [clientName, setClientName] = useState('');
@@ -23,7 +24,7 @@ function MisCitasContent() {
       setLoading(true);
       setErrorMsg('');
       try {
-        const res = await fetch(`/api/mis-citas?id=${encodeURIComponent(idParam)}`);
+        const res = await fetch(`/api/mis-citas?id=${encodeURIComponent(idParam)}${tParam ? `&t=${encodeURIComponent(tParam)}` : ''}`);
         const data = await res.json();
         if (data.success) {
           setAppointments(data.appointments || []);
@@ -201,14 +202,14 @@ function MisCitasContent() {
                       {/* Acciones */}
                       <div className="flex gap-2 pt-2 border-t border-[#f0ebe6]">
                         <Link
-                          href={`/modificar?id=${apt.id}`}
+                          href={`/modificar?id=${apt.id}${apt.token ? `&t=${apt.token}` : ''}`}
                           className="flex-1 py-2 px-3 rounded-xl font-bold text-[11px] text-center uppercase tracking-wider text-white shadow-sm transition-transform active:scale-[0.98]"
                           style={{ background: 'var(--blue-deep)' }}
                         >
                           Modificar
                         </Link>
                         <Link
-                          href={`/cancelar?id=${apt.id}&cancel=1`}
+                          href={`/cancelar?id=${apt.id}&cancel=1${apt.token ? `&t=${apt.token}` : ''}`}
                           className="py-2 px-4 rounded-xl font-bold text-[11px] text-center uppercase tracking-wider text-red-600 border border-red-200 bg-red-50/50 hover:bg-red-50 transition-colors"
                         >
                           Cancelar

@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { checkLink } from '@/lib/linkToken';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,10 @@ export async function GET(request) {
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'Falta el ID de la reserva' }, { status: 400 });
+    }
+
+    if (checkLink(id, searchParams.get('t'))) {
+      return NextResponse.json({ success: false, error: 'El enlace no es válido. Usa el enlace que te enviamos por WhatsApp o email.' }, { status: 403 });
     }
 
     const supabase = getSupabaseAdmin();
