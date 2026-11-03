@@ -4,7 +4,7 @@ import { sendWebpushrNotification } from '@/lib/webpushr';
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 
-const WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || ''; // vacío = sin webhook
+const WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || 'https://n8n.soriasystems.es/webhook/34df460c-8c00-4dfd-9359-4d3050fe9402';
 
 async function notifyWebhook(event, data) {
   if (!WEBHOOK_URL) return;
