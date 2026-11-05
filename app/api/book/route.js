@@ -464,6 +464,46 @@ export async function POST(request) {
 
     if (insertError) throw insertError;
 
+    // POST-INSERT ATOMIC RACE-CONDITION VERIFICATION:
+    // If two concurrent requests inserted overlapping appointments at the exact same millisecond,
+    // deterministic conflict resolution guarantees that only the earliest insertion survives.
+    const { data: postCheckApts } = await supabase
+      .from('appointments')
+      .select('id, time, duration, employee, status, createdAt, created_at')
+      .eq('date', date)
+      .neq('status', 'cancelled');
+
+    const competingApts = (postCheckApts || []).filter(ca => {
+      if (ca.id === newApt.id) return false;
+      const caEmpNames = empNamesInApt(ca);
+      const caS = t2m(ca.time);
+      const caE = caS + (ca.duration || 15);
+      if (tStart < caE && tEnd > caS) {
+        const hasGeneric = [...caEmpNames].some(n => isGeneric(n));
+        return hasGeneric || uniqueEmps.some(en => caEmpNames.has(en.toLowerCase()));
+      }
+      return false;
+    });
+
+    if (competingApts.length > 0) {
+      const myCreated = new Date(newApt.createdAt || newApt.created_at || Date.now()).getTime();
+      const hasPriorWinner = competingApts.some(other => {
+        const otherCreated = new Date(other.createdAt || other.created_at || Date.now()).getTime();
+        if (otherCreated < myCreated) return true;
+        if (otherCreated === myCreated) return String(other.id) < String(newApt.id);
+        return false;
+      });
+
+      if (hasPriorWinner) {
+        // Rollback this appointment immediately
+        await supabase.from('appointments').delete().eq('id', newApt.id);
+        return NextResponse.json({
+          success: false,
+          error: 'Lo sentimos, este hueco acaba de ser reservado por otro cliente en este mismo instante. Por favor, selecciona otro horario.'
+        }, { status: 409 });
+      }
+    }
+
     if (voucherInfo && newApt) {
       try {
         await markVoucherUsed(voucherInfo, newApt.id);
