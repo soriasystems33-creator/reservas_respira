@@ -698,7 +698,7 @@ function BookingFunnelContent() {
     setIsSubmitting(true);
     setErrorMsg('');
 
-    const empName = selectedSlotData?.assign?.[0] || selectedEmployee?.name || 'Todas';
+    const empName = selectedEmployee ? selectedEmployee.name : (selectedSlotData?.assign?.[0] || 'Cualquiera');
     const dur = selectedService.duration || 30;
 
     const payload = {
@@ -730,8 +730,11 @@ function BookingFunnelContent() {
       const resData = await res.json();
 
       if (resData.success) {
+        const finalEmployee = resData.appointment?.employee || resData.appointment?.services?.[0]?.employee || payload.employee;
         setCompletedBooking({
           ...payload,
+          employee: finalEmployee,
+          services: payload.services.map(s => ({ ...s, employee: finalEmployee })),
           id: resData.appointment?.id || 'CITA-' + Date.now().toString().slice(-6),
           finalPrice: finalPrice
         });

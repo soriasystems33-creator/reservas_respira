@@ -164,8 +164,13 @@ export async function POST(request) {
       const empObj = (employeesData || []).find(e => e.name.toLowerCase() === empLower);
       const empId = empObj ? empObj.id : null;
       const sd = settingsData?.specialDays?.[date] || {};
-      const empOverride = (empId && sd[empId]) || sd[empName];
-      if (empOverride && empOverride.type === 'closed') return false;
+
+      let empOverride = (empId && sd[empId]) || sd[empName];
+      if (!empOverride) {
+        const foundK = Object.keys(sd).find(k => k.toLowerCase() === empLower);
+        if (foundK) empOverride = sd[foundK];
+      }
+      if (empOverride && (empOverride.type === 'closed' || empOverride.closed === true)) return false;
 
       // Verificar horario semanal de la empleada
       const dObj = new Date(date + 'T12:00:00');
@@ -174,7 +179,30 @@ export async function POST(request) {
       const salonStart = gWeekly?.start || settingsData.start || '10:00';
       const salonEnd = (gWeekly?.type === 'split' ? gWeekly?.end2 : gWeekly?.end) || settingsData.end || (dayOfWeek === 6 ? '14:00' : '20:00');
       
-      const empWeekly = settingsData['weekly_' + empName] || settingsData.weekly?.['weekly_' + empName];
+      let empWeekly = settingsData['weekly_' + empName] || settingsData.weekly?.['weekly_' + empName];
+      if (!empWeekly && settingsData) {
+        const tKey = ('weekly_' + empName).toLowerCase();
+        for (const k in settingsData) {
+          if (k.toLowerCase() === tKey) { empWeekly = settingsData[k]; break; }
+        }
+        if (!empWeekly && settingsData.weekly && typeof settingsData.weekly === 'object') {
+          for (const k in settingsData.weekly) {
+            if (k.toLowerCase() === tKey) { empWeekly = settingsData.weekly[k]; break; }
+          }
+        }
+      }
+      if (!empWeekly && empLower === 'magdalena') {
+        empWeekly = {
+          1: { start: '09:00', end: '15:00', closed: false },
+          2: { start: '09:00', end: '20:00', closed: false },
+          3: { start: '09:00', end: '15:00', closed: false },
+          4: { start: '09:00', end: '20:00', closed: false },
+          5: { start: '09:00', end: '20:00', closed: false },
+          6: { start: '09:00', end: '20:00', closed: false },
+          0: { start: '09:00', end: '20:00', closed: true }
+        };
+      }
+
       if (empWeekly && empWeekly[dayOfWeek]) {
         const ew = empWeekly[dayOfWeek];
         if (ew.closed) return false;
@@ -190,6 +218,22 @@ export async function POST(request) {
           const s = t2m(ew.start) > t2m(salonStart) ? t2m(ew.start) : t2m(salonStart);
           const e = t2m(ew.end) < t2m(salonEnd) ? t2m(ew.end) : t2m(salonEnd);
           if (start < s || end > e) return false;
+        }
+      } else {
+        // Horario general si no tiene específico
+        if (gWeekly?.closed) return false;
+        const genStart = t2m(salonStart);
+        const genEnd = t2m(salonEnd);
+        if (gWeekly?.type === 'split') {
+          const s1 = t2m(gWeekly.start || '09:00');
+          const e1 = t2m(gWeekly.end || '14:00');
+          const s2 = t2m(gWeekly.start2 || '16:00');
+          const e2 = t2m(gWeekly.end2 || '20:00');
+          const inS1 = (start >= s1 && end <= e1);
+          const inS2 = (start >= s2 && end <= e2);
+          if (!inS1 && !inS2) return false;
+        } else {
+          if (start < genStart || end > genEnd) return false;
         }
       }
 
@@ -222,7 +266,7 @@ export async function POST(request) {
     const { data: dbServices } = await supabase.from('services').select('*');
     const allDbServices = dbServices || [];
 
-    services.forEach(s => {
+    for (const s of services) {
       const dbSvc = allDbServices.find(ds => ds.name.toLowerCase() === (s.name || '').toLowerCase());
       const catalogEmpStr = dbSvc ? (dbSvc.employee || '').trim() : '';
       const reqEmpStr = (s.employee || '').trim();
@@ -240,9 +284,45 @@ export async function POST(request) {
 
       if (candidates.length === 0) candidates = realEmps;
 
-      const freeCandidate = candidates.find(c => isEmpFreeAt(c, tStart, tStart + (s.duration || 15)));
-      s.employee = freeCandidate || candidates[0] || firstEmp;
-    });
+      // FILTRAR ESTRICTAMENTE LAS ESPECIALISTAS QUE ESTÁN REALMENTE LIBRES Y TRABAJANDO
+      const availableCandidates = candidates.filter(c => isEmpFreeAt(c, tStart, tStart + (s.duration || 15)));
+
+      // SI NINGUNA ESTÁ DISPONIBLE, BLOQUEAR DE FORMA ABSOLUTA
+      if (availableCandidates.length === 0) {
+        return NextResponse.json({
+          success: false,
+          error: `No hay ninguna especialista disponible para el servicio "${s.name}" en ese horario. Por favor, selecciona otra hora o especialista.`
+        }, { status: 409 });
+      }
+
+      // SI HAY VARIAS DISPONIBLES EN EL MODO ALEATORIO/AUTOMÁTICO:
+      // Repartir entre LAS DISPONIBLES (la que menos citas tenga hoy, desempatando equitativamente)
+      // ¡BAJO NINGUNA CIRCUNSTANCIA SE ELIGE A UNA EMPLEADA QUE NO TENGA DISPONIBILIDAD!
+      if (availableCandidates.length === 1) {
+        s.employee = availableCandidates[0];
+      } else {
+        const aptCountByEmp = {};
+        availableCandidates.forEach(c => { aptCountByEmp[c] = 0; });
+        (existingApts || []).forEach(a => {
+          if (a && a.status !== 'cancelled') {
+            const aEmps = empNamesInApt(a);
+            availableCandidates.forEach(c => {
+              if (aEmps.has(c.toLowerCase())) {
+                aptCountByEmp[c] = (aptCountByEmp[c] || 0) + 1;
+              }
+            });
+          }
+        });
+
+        // Ordenar por menor carga de citas hoy; si empatan, orden aleatorio entre las disponibles
+        const sorted = [...availableCandidates].sort((a, b) => {
+          const diff = (aptCountByEmp[a] || 0) - (aptCountByEmp[b] || 0);
+          return diff !== 0 ? diff : (Math.random() - 0.5);
+        });
+
+        s.employee = sorted[0];
+      }
+    }
 
     const uniqueEmps = [...new Set(services.map(s => s.employee).filter(Boolean))];
     const employee = uniqueEmps.join(', ');
