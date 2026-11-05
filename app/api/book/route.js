@@ -155,8 +155,9 @@ export async function POST(request) {
       return false;
     }).map(b => ({
       ...b,
-      startTime: b.startTime || b.start_time,
-      endTime: b.endTime || b.end_time
+      startTime: b.startTime || b.start_time || '00:00',
+      endTime: b.endTime || b.end_time || '23:59',
+      fullDay: !!(b.fullDay || b.full_day || (!b.startTime && !b.start_time) || (b.start_time === '00:00' && b.end_time === '23:59'))
     }));
 
     const isEmpFreeAt = (empName, start, end) => {
@@ -493,7 +494,7 @@ export async function POST(request) {
     }).catch(e => console.error('[webpushr] error:', e));
 
 
-    return NextResponse.json({ success: true, id: newApt.id, token: signLink(newApt.id) });
+    return NextResponse.json({ success: true, id: newApt.id, token: signLink(newApt.id), appointment: newApt });
   } catch (error) {
     console.error('Error in booking API:', error);
     return NextResponse.json({ success: false, error: error.message || JSON.stringify(error) }, { status: 500 });
