@@ -242,8 +242,9 @@ function BookingFunnelContent() {
     }
     if (empOverride && !empOverride._auto) return empOverride;
 
+    if (sd[dateStr]?.closed === true || sd[dateStr]?.type === 'closed') return { type: 'closed' };
     if (sd[dateStr]?.global) {
-      if (sd[dateStr].global.type === 'closed') return { type: 'closed' };
+      if (sd[dateStr].global.closed === true || sd[dateStr].global.type === 'closed') return { type: 'closed' };
       if (sd[dateStr].global.type === 'split') {
         return {
           type: 'split',
@@ -270,7 +271,29 @@ function BookingFunnelContent() {
     }
 
     const key = 'weekly_' + empName;
-    const empWeeklyObj = ss ? (ss[key] || ss.weekly?.[key]) : null;
+    let empWeeklyObj = ss ? (ss[key] || ss.weekly?.[key]) : null;
+    if (!empWeeklyObj && ss) {
+      const tKey = key.toLowerCase();
+      for (const k in ss) {
+        if (k.toLowerCase() === tKey) { empWeeklyObj = ss[k]; break; }
+      }
+      if (!empWeeklyObj && ss.weekly && typeof ss.weekly === 'object') {
+        for (const k in ss.weekly) {
+          if (k.toLowerCase() === tKey) { empWeeklyObj = ss.weekly[k]; break; }
+        }
+      }
+    }
+    if (!empWeeklyObj && empName.toLowerCase() === 'magdalena') {
+      empWeeklyObj = {
+        1: { start: '09:00', end: '15:00', closed: false },
+        2: { start: '09:00', end: '20:00', closed: false },
+        3: { start: '09:00', end: '15:00', closed: false },
+        4: { start: '09:00', end: '20:00', closed: false },
+        5: { start: '09:00', end: '20:00', closed: false },
+        6: { start: '09:00', end: '20:00', closed: false },
+        0: { start: '09:00', end: '20:00', closed: true }
+      };
+    }
     if (empWeeklyObj && empWeeklyObj[day]) {
       const w = empWeeklyObj[day];
       if (w.closed) return { type: 'closed' };
@@ -340,7 +363,13 @@ function BookingFunnelContent() {
     if (ee.length === 0) return false;
 
     const sd = ss?.specialDays || {};
-    if (sd[dateStr]?.global?.type === 'closed') return true;
+    if (sd[dateStr]?.closed === true || sd[dateStr]?.type === 'closed' || sd[dateStr]?.global?.type === 'closed' || sd[dateStr]?.global?.closed === true) return true;
+    const hasGlobalFullBlock = (data.blocks || []).some(b => {
+      const bEmp = (b.employee || 'global').trim().toLowerCase();
+      const isGlobal = ['global', 'all', 'todas', 'todos', 'salon', 'centro', ''].includes(bEmp);
+      return isGlobal && (b.fullDay || b.full_day) && b.date === dateStr;
+    });
+    if (hasGlobalFullBlock) return true;
 
     const d = new Date(dateStr + 'T12:00:00');
     const day = d.getDay();
@@ -411,10 +440,12 @@ function BookingFunnelContent() {
       if (hasApt) return true;
 
       const hasBlock = blocks.some(b => {
-        const bEmp = (b.employee || '').toLowerCase();
-        if (bEmp && bEmp !== 'all' && bEmp !== 'todas' && bEmp !== empLower) return false;
-        const bStart = b.startTime || b.start_time;
-        const bEnd = b.endTime || b.end_time;
+        const bEmp = (b.employee || 'global').trim().toLowerCase();
+        const isGlobal = ['all', 'todas', 'todos', 'global', 'centro', 'salon', ''].includes(bEmp);
+        if (!isGlobal && bEmp !== empLower) return false;
+        if (b.fullDay || b.full_day) return true;
+        const bStart = b.startTime || b.start_time || '00:00';
+        const bEnd = b.endTime || b.end_time || '23:59';
         const bS = t2m(bStart);
         const bE = t2m(bEnd);
         return start < bE && end > bS;

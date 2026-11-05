@@ -204,8 +204,10 @@ export async function POST(request) {
       if (conflictApt) return false;
 
       const conflictBlock = activeBlocks.some(b => {
-        const bEmp = (b.employee || '').toLowerCase();
-        if (bEmp && bEmp !== 'all' && bEmp !== 'todas' && bEmp !== empLower) return false;
+        const bEmp = (b.employee || 'global').trim().toLowerCase();
+        const isGlobal = ['all', 'todas', 'todos', 'global', 'centro', 'salon', ''].includes(bEmp);
+        if (!isGlobal && bEmp !== empLower) return false;
+        if (b.fullDay || b.full_day) return true;
         const bS = t2m(b.startTime);
         const bE = t2m(b.endTime);
         return start < bE && end > bS;
@@ -283,8 +285,15 @@ export async function POST(request) {
 
     // Verificar colisiones con bloqueos
     for (const b of activeBlocks) {
-      const bEmp = (b.employee || '').toLowerCase();
-      if (bEmp && bEmp !== 'all' && bEmp !== 'todas' && !uniqueEmps.some(en => en.toLowerCase() === bEmp)) continue;
+      const bEmp = (b.employee || 'global').trim().toLowerCase();
+      const isGlobal = ['all', 'todas', 'todos', 'global', 'centro', 'salon', ''].includes(bEmp);
+      if (!isGlobal && !uniqueEmps.some(en => en.toLowerCase() === bEmp)) continue;
+      if (b.fullDay || b.full_day) {
+        return NextResponse.json({
+          success: false,
+          error: `El centro o especialista está bloqueado todo el día (${b.reason || 'Cerrado'}). Por favor, elige otra fecha.`
+        }, { status: 409 });
+      }
       const bS = t2m(b.startTime);
       const bE = t2m(b.endTime);
       if (tStart < bE && tEnd > bS) {
@@ -333,6 +342,29 @@ export async function POST(request) {
       source: 'cliente',
       type: 'web'
     };
+
+    // Atomic re-check against live appointments right before inserting to prevent race-condition solapamientos
+    const { data: freshApts } = await supabase
+      .from('appointments')
+      .select('id, time, duration, employee, status')
+      .eq('date', date)
+      .neq('status', 'cancelled');
+
+    for (const fa of (freshApts || [])) {
+      const faEmpNames = empNamesInApt(fa);
+      const faS = t2m(fa.time);
+      const faE = faS + (fa.duration || 15);
+      if (tStart < faE && tEnd > faS) {
+        const hasGeneric = [...faEmpNames].some(n => isGeneric(n));
+        const clash = hasGeneric || uniqueEmps.some(en => faEmpNames.has(en.toLowerCase()));
+        if (clash) {
+          return NextResponse.json({
+            success: false,
+            error: 'Lo sentimos, este hueco acaba de ser reservado por otro cliente. Por favor, selecciona otro horario o especialista.'
+          }, { status: 409 });
+        }
+      }
+    }
 
     const { data: newApt, error: insertError } = await supabase.from('appointments')
       .insert(data)
