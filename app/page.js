@@ -411,9 +411,16 @@ function BookingFunnelContent() {
 
     const isSlotClosedForEmp = (slotStart, slotEnd, empName, dc) => {
       if (dc && dc.closedHours && Array.isArray(dc.closedHours)) {
-        return dc.closedHours.some(timeStr => {
-          const chMin = t2m(timeStr);
-          return slotStart < (chMin + 15) && slotEnd > chMin;
+        return dc.closedHours.some(item => {
+          let chS = 0, chE = 1440;
+          if (typeof item === 'object' && item !== null) {
+            chS = t2m(item.start || item.startTime || '00:00');
+            chE = t2m(item.end || item.endTime || '23:59');
+          } else {
+            chS = t2m(item);
+            chE = chS + 15;
+          }
+          return slotStart < chE && slotEnd > chS;
         });
       }
       return false;

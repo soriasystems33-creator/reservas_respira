@@ -342,6 +342,16 @@ export async function POST(request) {
 
     const tEnd = tStart + duration;
 
+    // VERIFICACIÓN ESTRICTA: La duración total [tStart, tEnd] NO debe superar el horario de la especialista ni sus descansos
+    for (const en of uniqueEmps) {
+      if (!isEmpFreeAt(en, tStart, tEnd)) {
+        return NextResponse.json({
+          success: false,
+          error: `La duración del servicio (${duration} min) supera el tiempo disponible de ${en} antes de su fin de turno, descanso o siguiente cita. Por favor, selecciona una hora más temprana.`
+        }, { status: 409 });
+      }
+    }
+
     // Verificar colisiones con citas existentes
     for (const a of (existingApts || [])) {
       if (!a || a.status === 'cancelled') continue;
