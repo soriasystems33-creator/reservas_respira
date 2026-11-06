@@ -1,0 +1,27 @@
+{
+  "name": "Estética Respira | Reservas",
+  "short_name": "Respira Citas",
+  "description": "Reserva tu cita online en Estética Respira",
+  "start_url": "/",
+  "scope": "/",
+  "id": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#faf7f4",
+  "theme_color": "#2A3B28",
+  "icons": [
+    {
+      "src": "/logo-icono.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-icono.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "lang": "es"
+}
